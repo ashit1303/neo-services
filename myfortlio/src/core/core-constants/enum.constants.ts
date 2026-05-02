@@ -1,0 +1,5 @@
+export enum APP_ENVIRONMENTS {
+    DEVELOPMENT = 'DEV',
+    PRODUCTION = 'PROD',
+    LOCAL = 'LOCAL',
+}

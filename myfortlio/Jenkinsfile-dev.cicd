@@ -1,0 +1,203 @@
+pipeline {
+    agent {
+        label getExecutionAgentLabel()
+    }
+
+    parameters {
+        string(name: 'GIT_BRANCH', defaultValue: 'dev', description: 'Git branch to build')
+        booleanParam(name: 'USE_CLOUD_AGENT', defaultValue: false, description: 'Set to true to run on cloud agent (used by meta-pipeline)')
+    }
+
+    environment {
+        AWS_REGION            = credentials('aws-region')
+        AWS_ACCOUNT_ID        = credentials('aws-acc-id')
+        AWS_ACCESS_KEY_ID     = credentials('aws-access-id')
+        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-key')
+        ECR_REPO_NAME         = credentials('ecr-repo-dev')
+        SONARQUBE_URL         = credentials('sonar-url')
+        SONARQUBE_TOKEN       = credentials('sonar-token')
+        SSH_CREDENTIAL        = 'ec2-key'
+        EC2_IP                = credentials('ec2-ip-dev')
+        LOKI_URL              = credentials('loki-url-dev')
+        CONTAINER_NAME        = "${JOB_BASE_NAME.replaceFirst(/^myfortlio-/, '').replaceFirst(/-cicd-dev$/, '')}"
+        DOCKER_REGISTRY       = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+    }
+
+    stages {
+        stage('Prepare Workspace') {
+            steps {
+                cleanWs()
+            }
+        }
+
+        stage('Checkout Code') {
+            steps {
+                script {
+                    def SERVICE_MAP = [
+                        'myfortlio-activity-log-cicd-dev'       : [folder: 'activity-log-management',   port: 4010],
+                    ]
+                    def serviceFolder = SERVICE_MAP[env.JOB_BASE_NAME]
+                    if (!serviceFolder) {
+                        error "No folder mapping found for pipeline '${env.JOB_BASE_NAME}'"
+                    }
+                    SERVICE_FOLDER = serviceFolder.folder
+                    env.SERVICE_FOLDER = SERVICE_FOLDER
+                    env.PORT = serviceFolder.port.toString()
+                }
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: "${params.GIT_BRANCH}"]],
+                    userRemoteConfigs: [[
+                        url: 'https://github.com/oben-tech/neo-services.git',
+                        credentialsId: 'git'
+                    ]],
+                    extensions: [[$class: 'SparseCheckoutPaths', sparseCheckoutPaths: [
+                        [path: "${SERVICE_FOLDER}/"],
+                        [path: 'myfortlio-package/']
+                    ]]]
+                ])
+            }
+        }
+
+        stage('Copy .env File') {
+            steps {
+                sh 'cp ./${SERVICE_FOLDER}/.env.dev ./${SERVICE_FOLDER}/.env'
+            }
+        }
+
+        stage('Build Docker Image') {
+            environment {
+                TIME_STAMP = "${new Date().format('yyyyMMddHHmmss')}"
+                IMAGE_TAG  = "${TIME_STAMP}-${CONTAINER_NAME}"
+            }
+            steps {
+                script {
+                    env.FULL_IMAGE = "${DOCKER_REGISTRY}/${ECR_REPO_NAME}:${IMAGE_TAG}"
+                }
+                sh """
+                    docker build -f ${SERVICE_FOLDER}/Dockerfile \
+                      -t "$FULL_IMAGE" .
+                """
+            }
+        }
+
+        stage('Login to AWS ECR') {
+            steps {
+                sh """
+                    aws ecr get-login-password --region "$AWS_REGION" | \
+                    docker login --username AWS --password-stdin "$DOCKER_REGISTRY"
+                """
+            }
+        }
+
+        stage('Push Docker Image to ECR') {
+            steps {
+                sh 'docker push "$FULL_IMAGE"'
+            }
+        }
+
+        stage('Deploy to EC2') {
+            steps {
+                timeout(time: 5, unit: 'MINUTES') {
+                    lock(resource: "deploy-${EC2_IP}") {
+                        catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                            script {
+                                writeFile file: 'deploy.sh', text: """
+                                    #!/bin/bash
+                                    set -e
+
+                                    aws ecr get-login-password --region ${AWS_REGION} | \
+                                      docker login --username AWS --password-stdin ${DOCKER_REGISTRY}
+
+                                    docker pull "${FULL_IMAGE}"
+
+                                    echo "[DEBUG] Stopping container gracefully"
+                                    # Sends SIGTERM and waits 30 seconds for a graceful shutdown
+                                    docker stop -t 30 "${CONTAINER_NAME}" || true
+
+                                    echo "[DEBUG] Removing container"
+                                    docker rm "${CONTAINER_NAME}" || true
+
+                                    docker run -d \
+                                      --name "${CONTAINER_NAME}" \
+                                      --log-driver=loki \
+                                      --log-opt loki-url="${LOKI_URL}" \
+                                      --log-opt loki-external-labels="d_container_name=${CONTAINER_NAME}" \
+                                      --restart unless-stopped \
+                                      -p ${PORT}:${PORT} \
+                                      "${FULL_IMAGE}"
+                                """
+
+                                sshagent([SSH_CREDENTIAL]) {
+                                    sh "ssh-keyscan -H ${EC2_IP} >> ~/.ssh/known_hosts"
+                                    sh "scp -o StrictHostKeyChecking=no deploy.sh ubuntu@${EC2_IP}:/home/ubuntu/deploy.sh"
+                                    sh "ssh -o StrictHostKeyChecking=no ubuntu@${EC2_IP} 'chmod +x /home/ubuntu/deploy.sh && /home/ubuntu/deploy.sh'"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            sh 'docker system prune -f'
+        }
+
+        success {
+            wrap([$class: 'BuildUser']) {
+                script {
+                    def gitCommit = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
+                    def committers = sh(script: "git log -n 10 --pretty=format:'%an' | sort | uniq | paste -sd ', ' -", returnStdout: true).trim()
+                    def buildUser = env.BUILD_USER ?: 'unknown'
+                    def buildUrl = env.BUILD_URL
+
+                    withCredentials([string(credentialsId: 'ms-teams-webhook', variable: 'TEAMS_WEBHOOK')]) {
+                        office365ConnectorSend message: """
+                            *Build Succeeded* for *${env.JOB_NAME}* #${env.BUILD_NUMBER}
+                            ---
+                            *Status:* Build Success  
+                            *Remarks:* Started by user ${buildUser}  
+                            *Commit:* ${gitCommit}  
+                            *Committers:* ${committers}  
+                            [View Build](${buildUrl})
+                        """.stripIndent().trim(), webhookUrl: "${TEAMS_WEBHOOK}"
+                    }
+                }
+            }
+        }
+
+        failure {
+            wrap([$class: 'BuildUser']) {
+                script {
+                    def gitCommit = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
+                    def committers = sh(script: "git log -n 10 --pretty=format:'%an' | sort | uniq | paste -sd ', ' -", returnStdout: true).trim()
+                    def buildUser = env.BUILD_USER ?: 'unknown'
+                    def buildUrl = env.BUILD_URL
+
+                    withCredentials([string(credentialsId: 'ms-teams-webhook', variable: 'TEAMS_WEBHOOK')]) {
+                        office365ConnectorSend message: """
+                            *Build Failed* for *${env.JOB_NAME}* #${env.BUILD_NUMBER}
+                            ---
+                            *Status:* Build Failed  
+                            *Remarks:* Started by user ${buildUser}  
+                            *Commit:* ${gitCommit}  
+                            *Committers:* ${committers}  
+                            [View Build](${buildUrl})
+                        """.stripIndent().trim(), webhookUrl: "${TEAMS_WEBHOOK}"
+                    }
+                }
+            }
+        }
+    }
+}
+
+String getExecutionAgentLabel() {
+    if (params.USE_CLOUD_AGENT) {
+        return 'ec2-fleet-agent'  // Must match your EC2 Fleet label
+    } else {
+        return 'built-in'
+    }
+}
