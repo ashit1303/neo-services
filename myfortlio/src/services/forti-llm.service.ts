@@ -1,9 +1,7 @@
-import { StatusCodes } from 'http-status-codes';
 import { BedrockAgentRuntimeClient, RetrieveAndGenerateCommand } from '@aws-sdk/client-bedrock-agent-runtime';
 import { config } from '../../config';
 import { secretManger } from '../clients';
-import { ERR_MSGS } from '../constants/authn-err-msg.constants';
-import { formatErrorMessage } from '../core/core-utils';
+import { fmtErr } from '../core/core-utils/err-util';
 
 class FortiLLMService {
 
@@ -32,7 +30,7 @@ class FortiLLMService {
 
       return { command, client };
     } catch (error) {
-      throw formatErrorMessage(error, StatusCodes.INTERNAL_SERVER_ERROR, ERR_MSGS.FAILED_TO_INITIATE_LLM);
+      throw fmtErr(error, { msg: 'Failed to get answer from knowledge base', apiName: 'getAnswerFromKnowledgeBase' });
     }
   }
 }

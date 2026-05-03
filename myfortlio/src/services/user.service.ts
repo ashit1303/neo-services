@@ -1,10 +1,11 @@
-import { StatusCodes } from 'http-status-codes';
+
 import { getDataByFilter } from '../core/core-helper';
 import User from '../models/user.model';
 import mongoose from 'mongoose';
-import { formatErrorMessage } from '../core/core-utils';
 import { IUserCreate, IUserUpdate } from '../interface/user-interface';
 import { IFilter } from '../interface/common.interface';
+import { fmtErr } from '../core/core-utils/err-util';
+import { USER_MSGS } from '../constants';
 
 export class UserService {
   async getUsers(filterQuery: IFilter) {
@@ -18,7 +19,7 @@ export class UserService {
 
       return await getDataByFilter(filterQuery, pipeline, searchFields, User);
     } catch (error) {
-      throw formatErrorMessage(error, StatusCodes.FAILED_DEPENDENCY, DB_CONSTANTS.FAILED_TO_FETCH_USERS);
+      throw fmtErr(error, { msg: USER_MSGS.ERR.FAILED_TO_FETCH_USERS, apiName: 'getUsers' });
     }
   }
   async getUserByUserId(userId: string) {
@@ -38,7 +39,7 @@ export class UserService {
 
       return result[0];
     } catch (error) {
-      throw formatErrorMessage(error, StatusCodes.FAILED_DEPENDENCY, DB_CONSTANTS.FAILED_TO_FETCH_USER_BY_ID);
+      throw fmtErr(error, { msg: USER_MSGS.ERR.FAILED_TO_FETCH_USER_BY_USER_ID, apiName: 'getUserByUserId', debugValues: { userId } });
     }
   }
   async getUserByEmail(email: string) {
@@ -47,7 +48,7 @@ export class UserService {
       return user;
     }
     catch (error) {
-      throw formatErrorMessage(error, StatusCodes.FAILED_DEPENDENCY, DB_CONSTANTS.FAILED_TO_FETCH_USER_BY_EMAIL);
+      throw fmtErr(error, { msg: USER_MSGS.ERR.FAILED_TO_FETCH_USER_BY_EMAIL, apiName: 'getUserByEmail', debugValues: { email } });
     }
   }
   async createUser(userDetails: IUserCreate) {
@@ -57,7 +58,7 @@ export class UserService {
       await user.save();
       return user;
     } catch (error) {
-      throw formatErrorMessage(error, StatusCodes.FAILED_DEPENDENCY, DB_CONSTANTS.FAILED_TO_CREATE_USER);
+      throw fmtErr(error, { msg: USER_MSGS.ERR.FAILED_TO_CREATE_USER, apiName: 'createUser', debugValues: { userDetails } });
     }
   }
 
@@ -65,7 +66,7 @@ export class UserService {
     try {
       return await User.findByIdAndUpdate(userDetails.userId, { ...userDetails }, { new: true }).populate('roleId');
     } catch (error) {
-      throw formatErrorMessage(error, StatusCodes.FAILED_DEPENDENCY, DB_CONSTANTS.FAILED_TO_UPDATE_USER);
+      throw fmtErr(error, { msg: USER_MSGS.ERR.FAILED_TO_UPDATE_USER, apiName: 'updateUser', debugValues: { userDetails } });
     }
   }
 
@@ -73,7 +74,7 @@ export class UserService {
     try {
       return await User.findByIdAndUpdate(userId, { status }, { new: true }).populate('roleId');
     } catch (error) {
-      throw formatErrorMessage(error, StatusCodes.FAILED_DEPENDENCY, DB_CONSTANTS.FAILED_TO_UPDATE_USER);
+      throw fmtErr(error, { msg: USER_MSGS.ERR.FAILED_TO_UPDATE_USER, apiName: 'updateUserByUserId', debugValues: { userId, status } });
     }
   }
 
@@ -81,7 +82,7 @@ export class UserService {
     try {
       return await User.findByIdAndDelete(userId);
     } catch (error) {
-      throw formatErrorMessage(error, StatusCodes.FAILED_DEPENDENCY, DB_CONSTANTS.FAILED_TO_DELETE_USER);
+      throw fmtErr(error, { msg: USER_MSGS.ERR.FAILED_TO_DELETE_USER, apiName: 'deleteUserById', debugValues: { userId } });
     }
   }
 }

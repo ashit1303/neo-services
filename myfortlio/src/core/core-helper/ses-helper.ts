@@ -1,10 +1,9 @@
-import { StatusCodes } from 'http-status-codes';
 import { CreateTemplateCommand, CreateTemplateCommandInput, UpdateTemplateCommand, UpdateTemplateCommandInput, GetTemplateCommand, GetTemplateCommandInput, GetTemplateResponse, SendEmailCommand, SendEmailCommandInput, SendEmailResponse, SendRawEmailCommand, SESClient } from '@aws-sdk/client-ses';
-import { formatErrorMessage } from '../core-utils';
-import { Config } from '../../interface';
 import nodemailer from 'nodemailer';
 import { SESClientUtil } from '../core-clients/aws-ses.client';
-import { ERR_MSGS } from '../../constants/authn-err-msg.constants';
+import { AWS_MSGS } from '../../constants';
+import { Config } from '../../interface/common.interface';
+import { fmtErr } from '../core-utils/err-util';
 export class SESHelper {
   private sesClientUtil: SESClientUtil;
 
@@ -15,24 +14,15 @@ export class SESHelper {
   async createSESTemplate(templateName: string, templateMessage: string) {
     try {
       const templateId = templateName.toLowerCase().replace(/ /g, '_');
-
       const templateDetails: CreateTemplateCommandInput = {
-        Template: {
-          TemplateName: templateId,
-          SubjectPart: templateName,
-          TextPart: templateMessage,
-        },
+        Template: { TemplateName: templateId, SubjectPart: templateName, TextPart: templateMessage },
       };
-
       const createTemplate = new CreateTemplateCommand(templateDetails);
-
       const sesClient = await this.sesClientUtil.getSESClient();
-
       await sesClient.send(createTemplate);
-
       return templateId;
     } catch (error) {
-      throw formatErrorMessage(error, StatusCodes.FAILED_DEPENDENCY, ERR_MSGS.FAILED_TO_CREATE_SES_TEMPLATE);
+      throw fmtErr(error, { msg: AWS_MSGS.ERR.FAILED_TO_CREATE_SES_TEMPLATE, apiName: 'createSESTemplate' });
     }
   }
 
@@ -56,25 +46,21 @@ export class SESHelper {
 
       return templateId;
     } catch (error) {
-      throw formatErrorMessage(error, StatusCodes.FAILED_DEPENDENCY, ERR_MSGS.FAILED_TO_UPDATE_SES_TEMPLATE);
+      throw fmtErr(error, { msg: AWS_MSGS.ERR.FAILED_TO_UPDATE_SES_TEMPLATE, apiName: 'updateSESTemplate' });
     }
   }
 
   async getSESTemplate(templateId: string): Promise<GetTemplateResponse> {
     try {
       const sesClient = await this.sesClientUtil.getSESClient();
-
       const templateDetails: GetTemplateCommandInput = {
         TemplateName: templateId,
       };
-
       const getTemplate = new GetTemplateCommand(templateDetails);
-
       const template = await sesClient.send(getTemplate);
-
       return template;
     } catch (error) {
-      throw formatErrorMessage(error, StatusCodes.FAILED_DEPENDENCY, ERR_MSGS.FAILED_TO_GET_SES_TEMPLATE);
+      fmtErr(error, { msg: AWS_MSGS.ERR.FAILED_TO_GET_SES_TEMPLATE, apiName: 'getSESTemplate' });
     }
   }
 
@@ -103,14 +89,11 @@ export class SESHelper {
       };
 
       const sendEmailCommand = new SendEmailCommand(emailDetails);
-
       const sesClient = await this.sesClientUtil.getSESClient();
-
       const response: SendEmailResponse = await sesClient.send(sendEmailCommand);
-
       return response;
     } catch (error) {
-      throw formatErrorMessage(error, StatusCodes.FAILED_DEPENDENCY, ERR_MSGS.FAILED_TO_SEND_EMAIL_USING_SES);
+      throw fmtErr(error, { msg: AWS_MSGS.ERR.FAILED_TO_SEND_EMAIL, apiName: 'sendEmail' });
     }
   }
 
@@ -147,8 +130,7 @@ export class SESHelper {
 
       console.info('Email sent successfully');
     } catch (error) {
-      console.error('Error sending email:', error);
-      throw error;
+      throw fmtErr(error, { msg: AWS_MSGS.ERR.FAILED_TO_SEND_EMAIL, apiName: 'sendSesEmail' });
     }
   }
 }

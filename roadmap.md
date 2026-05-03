@@ -5,3 +5,7 @@ Showcase knowledge ->
 /services/ -> leetcode 
 /services/ -> link-shortner
 / 
+
+👉 Rule:
+
+Only call fmtPrntErr once at the top (controller)

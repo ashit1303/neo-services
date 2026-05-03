@@ -3,9 +3,11 @@ import DsaQuestions from '../models/dsa-quests.model';
 import DsaAnswer from '../models/dsa-answers.model';
 import { ICodeLang } from '../interface/leetcode.interface';
 import { SecretManager } from '../core/core-clients/secret-manager.client';
-import { Config } from '../interface';
 import { OllamaClient } from '../core/core-clients/ollama.client';
 import { cleanHTML } from '../core/core-utils';
+import { Config } from '../interface/common.interface';
+import { fmtErr } from '../core/core-utils/err-util';
+import { LEETCODE_MSGS } from '../constants';
 
 export class LeetCodeService {
 
@@ -20,10 +22,10 @@ export class LeetCodeService {
     return url.split('problems/')[1].split('/')[0];
   }
 
-  async handleExtraSlugs(slugsList: string[]): Promise<void> {
+  async handleExtraSlugs(slugsList: string[]): Promise<boolean> {
     if (!slugsList || slugsList.length === 0) {
       console.info('No extra slugs to store');
-      return; // Handle empty input gracefully
+      return true; // Handle empty input gracefully
     }
     try {
       const relatedQuests: any[] = [];
@@ -34,15 +36,10 @@ export class LeetCodeService {
         await DsaQuestions.create({ titleSlug: slug });
         //query(`INSERT IGNORE INTO quests (title_slug) VALUES ('${slug}');`);
       }
-      return Promise.resolve();
+      return true;
     } catch (error) {
-
-      if (error instanceof Error) {
-        console.error(error.message);
-      } else {
-        console.error('Unknown error', error);
-      }
-      return Promise.resolve();
+      fmtErr(error, { msg: LEETCODE_MSGS.ERR.FAILED_TO_STORE_EXTRA_SLUGS, apiName: 'handleExtraSlugs' });
+      return false;
     }
   }
 
@@ -56,67 +53,79 @@ export class LeetCodeService {
       });
       return dsaAnswer;;
     } catch (error) {
-      console.error('Error While Storing Quests Answer', error.message, { questionId, codelang });
-      return Promise.resolve();
+      fmtErr(error, { msg: LEETCODE_MSGS.ERR.FAILED_TO_STORE_QUEST_ANSWER, apiName: 'storeQuestsAnswer' });
+      return false;
     }
   }
 
-  async storeQuestion(data: any) {
-    this.handleExtraSlugs([...data.similarQuestionList, ...data.nextChallenges]);
+  async storeQuestion(data: any): Promise<boolean> {
+    try {
+      this.handleExtraSlugs([...data.similarQuestionList, ...data.nextChallenges]);
 
-    const cleanedContent = cleanHTML(data.content);
-    await DsaQuestions.updateOne(
-      { titleSlug: data.titleSlug }, // match condition (unique key)
-      {
-        $set: {
-          questionId: data.questionId || null,
-          difficulty: data.difficulty ? data.difficulty.toLowerCase() : null,
-          questionTitle: data.questionTitle || null,
-          content: data.content || null,
-          cleanedContent: cleanedContent || null,
-          categoryTitle: data.categoryTitle || null,
+      const cleanedContent = cleanHTML(data.content);
+      await DsaQuestions.updateOne(
+        { titleSlug: data.titleSlug }, // match condition (unique key)
+        {
+          $set: {
+            questionId: data.questionId || null,
+            difficulty: data.difficulty ? data.difficulty.toLowerCase() : null,
+            questionTitle: data.questionTitle || null,
+            content: data.content || null,
+            cleanedContent: cleanedContent || null,
+            categoryTitle: data.categoryTitle || null,
+          },
         },
-      },
-      {
-        upsert: true,
-      },
-    );
-
+        {
+          upsert: true,
+        },
+      );
+      return true;
+    } catch (error) {
+      fmtErr(error, { msg: LEETCODE_MSGS.ERR.FAILED_TO_STORE_QUEST, apiName: 'storeQuestion' });
+      return false;
+    }
   }
 
   async getQuestFromDB(slug: string): Promise<any> {
-    // return this.typeorm.getRepository(Quests).findOne({ where: { titleSlug: url } });
-    // return await this.typeorm.getRepository(Quests).findOne({ where: { titleSlug: slug, questionId: null } });
-    return DsaQuestions.findOne({ titleSlug: slug }).lean();
+    try {
+      return DsaQuestions.findOne({ titleSlug: slug }).lean();
+    } catch (error) {
+      throw fmtErr(error, { msg: LEETCODE_MSGS.ERR.FAILED_TO_FETCH_QUEST_FROM_DB, apiName: 'getQuestFromDB' });
+    }
+
   }
   async getQuestAnsFromDB(slug: string, codeLang: ICodeLang): Promise<any> {
-    const [quesiton] = await DsaQuestions.aggregate([
-      { $match: { titleSlug: slug } },
-      {
-        $lookup: {
-          from: 'questsanswers',
-          let: { qId: '$questionId' },
-          pipeline: [
-            { $match: { $expr: { $and: [{ $eq: ['$questionId', '$$qId'] }, { $eq: ['$codeLang', codeLang] }] } } },
-          ],
-          as: 'answers',
+    try {
+      const [quesiton] = await DsaQuestions.aggregate([
+        { $match: { titleSlug: slug } },
+        {
+          $lookup: {
+            from: 'questsanswers',
+            let: { qId: '$questionId' },
+            pipeline: [
+              { $match: { $expr: { $and: [{ $eq: ['$questionId', '$$qId'] }, { $eq: ['$codeLang', codeLang] }] } } },
+            ],
+            as: 'answers',
+          },
         },
-      },
-      { $unwind: { path: '$answers', preserveNullAndEmptyArrays: true } },
-      {
-        $project: {
-          questionId: '$questionId',
-          titleSlug: '$titleSlug',
-          content: '$content',
-          codeLang: '$answers.codeLang',
-          llmRes: '$answers.llmRes',
-          difficulty: '$difficulty',
-          questionTitle: '$questionTitle',
+        { $unwind: { path: '$answers', preserveNullAndEmptyArrays: true } },
+        {
+          $project: {
+            questionId: '$questionId',
+            titleSlug: '$titleSlug',
+            content: '$content',
+            codeLang: '$answers.codeLang',
+            llmRes: '$answers.llmRes',
+            difficulty: '$difficulty',
+            questionTitle: '$questionTitle',
+          },
         },
-      },
-      { $limit: 1 },
-    ]);
-    return quesiton;
+        { $limit: 1 },
+      ]);
+      return quesiton;
+    } catch (error) {
+      throw fmtErr(error, { msg: LEETCODE_MSGS.ERR.FAILED_TO_FETCH_QUEST_ANS_FROM_DB, apiName: 'getQuestAnsFromDB' });
+    }
   }
   // https://leetcode.com/problems/longest-substring-without-repeating-characters/
 
@@ -177,16 +186,19 @@ export class LeetCodeService {
       await this.storeQuestion(problemDetails);
       return problemDetails;
     } catch (error) {
-      this.logger.error('Error fetching problem:', error.message);
-      return Promise.resolve();
+      throw fmtErr(error, { msg: LEETCODE_MSGS.ERR.FAILED_TO_FETCH_QUEST_FROM_LEETCODE, apiName: 'fetchQuestionDetailsFromLeetCode' });
     }
   }
 
   async getExplanation(codeLang: ICodeLang, questionDescription: string, questionId: string) {
-    const explainPromt = `Give only optimed code, explanation, time and space complexity in ${codeLang}`;
-    const llmRes = await this.ollama.generateResponse(explainPromt + ' ' + questionDescription);
-    this.storeQuestsAnswer(llmRes, codeLang, questionId);
-    return llmRes;
+    try {
+      const explainPromt = `Give only optimed code, explanation, time and space complexity in ${codeLang}`;
+      const llmRes = await this.ollama.generateResponse(explainPromt + ' ' + questionDescription);
+      this.storeQuestsAnswer(llmRes, codeLang, questionId);
+      return llmRes;
+    } catch (error) {
+      throw fmtErr(error, { msg: LEETCODE_MSGS.ERR.FAILED_TO_GET_EXPLANATION, apiName: 'getExplanation' });
+    }
   }
 
   async sloveSlugInGivenLang(slug: string, codeLang: ICodeLang) {
@@ -198,17 +210,25 @@ export class LeetCodeService {
       dbQuestion = JSON.stringify(dbQuestion);
       return this.getExplanation(codeLang, dbQuestion, questionId);
     } catch (error) {
-      console.error('Error While Solving Question in Given Lang', error, { slug, codeLang });
-      return Promise.resolve();
+      fmtErr(error, { msg: LEETCODE_MSGS.ERR.FAILED_TO_SOLVE_QUEST_IN_GIVEN_LANG, apiName: 'sloveSlugInGivenLang' });
+      return false;
     }
   }
 
   async getUnsolvedQuests() {
-    return DsaQuestions.findOne({ questionId: null });
+    try {
+      return DsaQuestions.findOne({ questionId: null });
+    } catch (error) {
+      throw fmtErr(error, { msg: LEETCODE_MSGS.ERR.FAILED_TO_FETCH_UNSOLVED_QUESTS, apiName: 'getUnsolvedQuests' });
+    }
   }
 
   async getQuestByIds(ids: string[]) {
-    return DsaQuestions.aggregate([{ $match: { questionId: { $in: ids } } }]);
+    try {
+      return DsaQuestions.aggregate([{ $match: { questionId: { $in: ids } } }]);
+    } catch (error) {
+      throw fmtErr(error, { msg: LEETCODE_MSGS.ERR.FAILED_TO_FETCH_QUEST_BY_IDS, apiName: 'getQuestByIds' });
+    }
   }
 
   async fetchQuestionLists(skip: string) {
@@ -248,30 +268,5 @@ export class LeetCodeService {
       console.error('Error fetching problem:', error);
     }
   }
-  // async updateSonicSearchForQuestions(){
-  //   const questions = await this.typeorm.getRepository(Quests).find( {select: ['id', 'questionTitle']} );
-  //   for (const question of questions) {
-  //     this.smoothSearch.push(this.configService.get('DOMAIN'),'leetcode',JSON.stringify(question), question.questionTitle);
-  //   }
-  // }
-
-  // async indexEntityColumn(entityId: number, columnName: string, columnValue: string): Promise<string> {
-  //   const bucket = 'your_bucket'; // Define your Sonic bucket
-  //   const collection = 'your_collection'; // Define your Sonic collection
-  //   try {
-  //     // Sanitize the text. Sonic best practices.
-  //     const sanitizedText = columnValue.replace(/[^a-zA-Z0-9\s]/g, '');
-
-  //     // Ingest the data into Sonic.
-  //     await this.sonicChannel.ingest(bucket, collection, entityId.toString(), columnName, {
-  //       lang: 'en', // Specify language if needed
-  //     });
-
-  //     return entityId.toString(); // Return the entity ID (used as object ID in sonic)
-  //   } catch (error) {
-  //     console.error('Error indexing entity column in Sonic:', error);
-  //     throw error; // Rethrow the error for handling elsewhere
-  //   }
-  // }
 
 }

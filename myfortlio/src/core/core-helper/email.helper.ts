@@ -1,12 +1,11 @@
 
-import { config } from '../config';
-import { StatusCodes } from 'http-status-codes';
-import { ERR_MSGS } from '../core-constants/error-messages';
 import dayjs from 'dayjs';
-import { formatErrorMessage } from '../core-utils';
 import { SecretManager } from '../core-clients/secret-manager.client';
 import { SESHelper } from './ses-helper';
 import { UserService } from '../../services/user.service';
+import { fmtErr } from '../core-utils/err-util';
+import { config } from '../../../config';
+import { AWS_MSGS, USER_MSGS } from '../../constants';
 const userService = new UserService();
 
 export const sendLogsMail = async (url: string, collectionName: string, userId: string, fromDate: string, toDate: string) => {
@@ -18,7 +17,7 @@ export const sendLogsMail = async (url: string, collectionName: string, userId: 
     const user = await userService.getUserByUserId(userId);
 
     if (!user) {
-      throw formatErrorMessage(null, StatusCodes.NOT_FOUND, ERR_MSGS.USER_NOT_FOUND);
+      throw fmtErr(null, { msg: USER_MSGS.ERR.USER_NOT_FOUND, apiName: 'sendLogsMail.getUserByUserId', debugValues: { userId } });
     }
 
     const email = user.email;
@@ -54,6 +53,6 @@ export const sendLogsMail = async (url: string, collectionName: string, userId: 
 
     return `Email sent successfully to ${email}`;
   } catch (error) {
-    throw formatErrorMessage(error, StatusCodes.INTERNAL_SERVER_ERROR, ERR_MSGS.FAILED_PACKET_LOGS_MAIL);
+    throw fmtErr(error, { msg: AWS_MSGS.ERR.FAILED_TO_SEND_EMAIL, apiName: 'sendLogsMail', debugValues: { url, collectionName, userId, fromDate, toDate } });
   }
 };

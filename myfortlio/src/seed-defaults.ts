@@ -4,6 +4,7 @@ import { customerDefaultAccess, privilegesAllDefault } from './core/core-helper/
 import User from './models/user.model';
 import Privilege from './models/privilege.model';
 import { DB_CONSTANTS } from './core/core-constants/mongodb.constants';
+import { fmtPrntErr } from './core/core-utils/err-util';
 
 function checkPrivilegesDuplicates() {
   const privilegesCodes = privilegesAllDefault.map(a => a.code);
@@ -53,7 +54,7 @@ export async function initializeDefaultRoles() {
     }
 
   } catch (error) {
-    throw error;
+    throw fmtPrntErr(error, 111111, { apiName: 'initializeDefaultRoles' });
   }
 }
 
@@ -65,6 +66,6 @@ export async function initializeDefaultUsers() {
 
     await User.findOneAndUpdate(filter, update, options);
   } catch (error) {
-    throw error;
+    throw fmtPrntErr(error, 111112, { apiName: 'initializeDefaultUsers' });
   }
 }

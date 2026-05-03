@@ -1,12 +1,12 @@
 import { Request, Response } from 'express';
-import { StatusCodes } from 'http-status-codes';
-import { USER_ERR_MSGS } from '../constants';
 import { UserService } from '../services/user.service';
 import { FilterQueryValidation } from '../validations/common-validation';
-import { formatErrorMessage } from '../core/core-utils';
 import { UserCreateValidation, UserIdValidation, UserUpdateValidation } from '../validations/user-validation';
 import { IRoleDoc, IUserCreate, IUserDoc, IUserUpdate } from '../interface/user-interface';
 import { RoleService } from '../services/role.service';
+import { fmtRes } from '../core/core-utils/res-util';
+import { fmtErr, fmtPrntErr } from '../core/core-utils/err-util';
+import { USER_MSGS } from '../constants';
 
 class UserController {
   userService: UserService;
@@ -25,15 +25,9 @@ class UserController {
 
       const users = await this.userService.getUsers(filterQuery as any);
 
-      return res.status(200).send(users);
+      return fmtRes(res, users);
     } catch (error: any) {
-      return res.status(500).send(
-        formatErrorMessage(
-          error,
-          StatusCodes.INTERNAL_SERVER_ERROR,
-          USER_ERR_MSGS.FAILED_TO_FETCH_ALL_USER,
-        ),
-      );
+      throw fmtPrntErr(error, 400, { msg: USER_MSGS.ERR.FAILED_TO_FETCH_USERS, apiName: 'getUsers' });
     }
   }
   async getUserById(req: Request, res: Response) {
@@ -46,19 +40,13 @@ class UserController {
 
       if (!user) {
         return res.status(404).send({
-          message: USER_ERR_MSGS.USER_NOT_FOUND,
+          message: USER_MSGS.ERR.USER_NOT_FOUND,
         });
       }
 
-      return res.status(200).send(user);
+      return fmtRes(res, user);
     } catch (error: any) {
-      return res.status(500).send(
-        formatErrorMessage(
-          error,
-          StatusCodes.INTERNAL_SERVER_ERROR,
-          USER_ERR_MSGS.FAILED_TO_FETCH_USER,
-        ),
-      );
+      throw fmtPrntErr(error, 400, { msg: USER_MSGS.ERR.FAILED_TO_FETCH_USER, apiName: 'getUserById' });
     }
   }
 
@@ -73,7 +61,7 @@ class UserController {
 
       if (existingEmail) {
         return res.status(409).send({
-          message: USER_ERR_MSGS.EMAIL_ALREADY_EXISTS,
+          message: USER_MSGS.ERR.EMAIL_ALREADY_EXISTS,
         });
       }
 
@@ -81,7 +69,7 @@ class UserController {
 
       if (!role) {
         return res.status(404).send({
-          message: USER_ERR_MSGS.ROLE_NOT_FOUND,
+          message: USER_MSGS.ERR.ROLE_NOT_FOUND,
         });
       }
 
@@ -99,13 +87,7 @@ class UserController {
         },
       });
     } catch (error: any) {
-      return res.status(500).send(
-        formatErrorMessage(
-          error,
-          StatusCodes.INTERNAL_SERVER_ERROR,
-          USER_ERR_MSGS.FAILED_TO_CREATE_USER,
-        ),
-      );
+      throw fmtPrntErr(error, 400, { msg: USER_MSGS.ERR.FAILED_TO_CREATE_USER, apiName: 'createUser' });
     }
   }
   async updateUserById(req: Request, res: Response) {
@@ -117,9 +99,7 @@ class UserController {
       const user = await this.userService.getUserByUserId(input.userId);
 
       if (!user) {
-        return res.status(404).send({
-          message: USER_ERR_MSGS.USER_NOT_FOUND,
-        });
+        fmtErr(null, { msg: USER_MSGS.ERR.USER_NOT_FOUND, apiName: 'updateUserById' });
       }
 
       // email must be unique
@@ -127,9 +107,7 @@ class UserController {
         const existingEmail = await this.userService.getUserByEmail(input.email);
 
         if (existingEmail) {
-          return res.status(409).send({
-            message: USER_ERR_MSGS.EMAIL_ALREADY_EXISTS,
-          });
+          fmtErr(null, { msg: USER_MSGS.ERR.EMAIL_ALREADY_EXISTS, apiName: 'updateUserById' });
         }
       }
 
@@ -137,9 +115,7 @@ class UserController {
         const role = await this.roleService.getRoleById(input.roleId);
 
         if (!role) {
-          return res.status(404).send({
-            message: USER_ERR_MSGS.ROLE_NOT_FOUND,
-          });
+          fmtErr(null, { msg: USER_MSGS.ERR.ROLE_NOT_FOUND, apiName: 'updateUserById' });
         }
       }
 
@@ -150,7 +126,7 @@ class UserController {
 
       const { _id: roleId, ...roleDetails } = updatedRole as IRoleDoc;
 
-      return res.status(200).send({
+      return fmtRes(res, {
         userId,
         ...userDetails,
         role: {
@@ -159,13 +135,7 @@ class UserController {
         },
       });
     } catch (error: any) {
-      return res.status(500).send(
-        formatErrorMessage(
-          error,
-          StatusCodes.INTERNAL_SERVER_ERROR,
-          USER_ERR_MSGS.FAILED_TO_UPDATE_USER,
-        ),
-      );
+      throw fmtPrntErr(error, 400, { msg: USER_MSGS.ERR.FAILED_TO_UPDATE_USER, apiName: 'updateUserById' });
     }
   }
   async deleteUserById(req: Request, res: Response) {
@@ -178,7 +148,7 @@ class UserController {
 
       if (!user) {
         return res.status(404).send({
-          message: USER_ERR_MSGS.USER_NOT_FOUND,
+          message: USER_MSGS.ERR.USER_NOT_FOUND,
         });
       }
 
@@ -188,17 +158,11 @@ class UserController {
 
       console.info(response);
 
-      return res.status(200).send({
+      return fmtRes(res, {
         message: response,
       });
     } catch (error: any) {
-      return res.status(500).send(
-        formatErrorMessage(
-          error,
-          StatusCodes.INTERNAL_SERVER_ERROR,
-          USER_ERR_MSGS.FAILED_TO_DELETE_USER,
-        ),
-      );
+      throw fmtPrntErr(error, 400, { msg: USER_MSGS.ERR.FAILED_TO_DELETE_USER, apiName: 'deleteUserById' });
     }
   }
 }

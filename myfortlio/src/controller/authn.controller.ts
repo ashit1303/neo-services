@@ -1,15 +1,15 @@
-// import { decodeToken, generateAccessToken, verifyToken } from '../../../helper/authentication-helper';
-import { StatusCodes } from 'http-status-codes';
 import mongoose from 'mongoose';
 import { AuthnService } from '../services/authn.services';
 import SessionManager from '../core/core-clients/session-manager.client';
-import { formatErrorMessage, generateUUID } from '../core/core-utils';
+import { generateUUID } from '../core/core-utils';
 import { Request, Response } from 'express';
 import { EmailValidation } from '../validations/common-validation';
 import { IUserAccesstokenDetails } from '../interface/user-interface';
-import { AUTH_ERR_MSGS } from '../constants';
-import { RES_MSGS } from '../constants/res-msg.constants';
 import { TokenValidation, VerifyOtpValidation } from '../validations/authentication-validation';
+import { fmtErr, fmtPrntErr } from '../core/core-utils/err-util';
+import { AUTHN_MSGS } from '../constants';
+import { BYPASS_USERS } from '../core/core-constants/common.constants';
+import { fmtRes } from '../core/core-utils/res-util';
 
 const sessionManager = SessionManager.getInstance();
 const internalEmailUsers = [
@@ -25,41 +25,44 @@ class AuthnController {
   }
 
   async sendOtp(req: Request, res: Response) {
+    const email = req.query.email as string;
+
     try {
-      const email = req.query.email as string;
       EmailValidation.parse({ email });
       const internalUser = internalEmailUsers.find((user) => user.email === email);
       if (internalUser) {
         const userId = internalUser.userId;
-        return { message: RES_MSGS.OTP_SENT_SUCCESSFULLY, userId };
+        return { message: AUTHN_MSGS.RES.OTP_SENT_SUCCESSFULLY, userId };
       }
 
       await this.authnService.sendOtp(email);
-      return res.status(StatusCodes.OK).send({ success: true, message: RES_MSGS.OTP_SENT_SUCCESSFULLY });
+      return fmtRes(res, { success: true, message: AUTHN_MSGS.RES.OTP_SENT_SUCCESSFULLY });
     } catch (error) {
-      throw formatErrorMessage(error, StatusCodes.INTERNAL_SERVER_ERROR, { message: AUTH_ERR_MSGS.FAILED_TO_SEND_OTP });
+      throw fmtPrntErr(error, 400, { msg: AUTHN_MSGS.ERR.FAILED_TO_SEND_OTP, apiName: 'sendOtp', debugValues: { email } });
     }
   };
 
   async resendOtp(req: Request, res: Response) {
+    const email = req.query.email as string;
+
     try {
-      const email = req.query.email as string;
       EmailValidation.parse({ email });
       await this.authnService.resendOtp(email);
-      return res.status(StatusCodes.OK).send({ success: true, message: RES_MSGS.OTP_RESENT_SUCCESSFULLY });
+      return fmtRes(res, { success: true, message: AUTHN_MSGS.RES.OTP_RESENT_SUCCESSFULLY });
     } catch (error) {
-      throw formatErrorMessage(error, StatusCodes.INTERNAL_SERVER_ERROR, AUTH_ERR_MSGS.FAILED_TO_RESEND_OTP);
+      throw fmtPrntErr(error, 400, { msg: AUTHN_MSGS.ERR.FAILED_TO_RESEND_OTP, apiName: 'resendOtp', debugValues: { email } });
     }
   };
 
   async verifyOtp(req: Request, res: Response) {
+    const { email, otp } = req.body;
     try {
       VerifyOtpValidation.parse({ email, otp });
 
-      const user = await getUserByEmail(mongoose, email) as unknown as IUserByEmail;
+      const user = await getUserByEmail(mongoose, email);
 
       if (!user) {
-        throw formatErrorMessage(null, StatusCodes.NOT_FOUND, AUTH_ERR_MSGS.USER_NOT_FOUND);
+        throw fmtErr(null, { msg: AUTHN_MSGS.ERR.USER_NOT_FOUND, apiName: 'verifyOtp.getUserByEmail', debugValues: { email } });
       }
 
       const userDetails: IUserAccesstokenDetails = {
@@ -72,9 +75,9 @@ class AuthnController {
 
       if (internalUser) {
         if (process.env.APP_ENV === 'PROD' && otp !== internalUser.otpProd) {
-          throw formatErrorMessage(null, StatusCodes.UNAUTHORIZED, AUTH_ERR_MSGS.INVALID_OTP);
+          throw fmtErr(null, { msg: AUTHN_MSGS.ERR.INVALID_OTP, apiName: 'verifyOtp.internalUser.PROD', debugValues: { email, otp } });
         } else if (process.env.APP_ENV !== 'PROD' && otp !== internalUser.otpDev) {
-          throw formatErrorMessage(null, StatusCodes.UNAUTHORIZED, AUTH_ERR_MSGS.INVALID_OTP);
+          throw fmtErr(null, { msg: AUTHN_MSGS.ERR.INVALID_OTP, apiName: 'verifyOtp.internalUser.DEV', debugValues: { email, otp } });
         }
       } else {
         await this.authnService.verifyOtp(email, otp);
@@ -88,26 +91,25 @@ class AuthnController {
       // Store session in Redis
       await sessionManager.set(userDetails.userId, sessionId);
 
-      return {
-        accessToken,
-      };
+      return fmtRes(res, { accessToken });
     } catch (error) {
-      throw formatErrorMessage(error, StatusCodes.INTERNAL_SERVER_ERROR, AUTH_ERR_MSGS.FAILED_TO_VERIFY_OTP);
+      throw fmtPrntErr(error, 400, { msg: AUTHN_MSGS.ERR.FAILED_TO_VERIFY_OTP, apiName: 'verifyOtp', debugValues: { email, otp } });
     }
   };
 
   async authenticate(req: Request, res: Response) {
+    const token = req.headers.authorization as string;
     try {
       TokenValidation.parse({ token });
 
       if (!token) {
-        throw formatErrorMessage(null, StatusCodes.UNAUTHORIZED, AUTH_ERR_MSGS.TOKEN_MISSING);
+        throw fmtErr(null, { msg: AUTHN_MSGS.ERR.TOKEN_MISSING, apiName: 'authenticate', debugValues: { token } });
       }
 
       const decodedToken = await this.authnService.decodeToken(token);
       if (decodedToken.userId && BYPASS_USERS.includes(decodedToken.userId)) {
         return {
-          message: RES_MSGS.TOKEN_VERIFIED,
+          message: AUTHN_MSGS.RES.TOKEN_VERIFIED,
           userId: decodedToken?.userId,
           name: decodedToken?.name,
           role: decodedToken?.role,
@@ -117,7 +119,7 @@ class AuthnController {
       // Verify JWT access token
       const payload = await this.authnService.verifyToken(token);
       if (!payload) {
-        throw formatErrorMessage(null, StatusCodes.UNAUTHORIZED, AUTH_ERR_MSGS.INVALID_TOKEN);
+        throw fmtErr(null, { msg: AUTHN_MSGS.ERR.INVALID_TOKEN, apiName: 'authenticate', debugValues: { token } });
       }
 
       const { userId, sessionId, name, role } = payload;
@@ -126,79 +128,62 @@ class AuthnController {
       if (!['local', 'test'].includes(process.env.BUN_ENV as string)) {
         const storedSessionIds = await sessionManager.get(userId as string);
         if (!storedSessionIds || !storedSessionIds.includes(sessionId as string)) {
-          throw formatErrorMessage(null, StatusCodes.UNAUTHORIZED, AUTH_ERR_MSGS.INVALID_SESSION);
+          throw fmtErr(null, { msg: AUTHN_MSGS.ERR.INVALID_SESSION, apiName: 'authenticate', debugValues: { userId, sessionId } });
         }
       }
 
-      return {
-        message: RES_MSGS.TOKEN_VERIFIED,
-        userId,
-        name,
-        role,
-      };
+      return fmtRes(res, { message: AUTHN_MSGS.RES.TOKEN_VERIFIED, userId, name, role });
     } catch (error: any) {
-      throw formatErrorMessage(error, StatusCodes.INTERNAL_SERVER_ERROR, AUTH_ERR_MSGS.FAILED_TO_AUTHENTICATE_USER);
+      throw fmtPrntErr(error, 400, { msg: AUTHN_MSGS.ERR.FAILED_TO_AUTHENTICATE_USER, apiName: 'authenticate', debugValues: { token } });
     }
   };
 
   async refreshToken(req: Request, res: Response) {
+    const { refreshToken } = req.body;
     try {
       TokenValidation.parse({ token: refreshToken });
-
       if (!refreshToken) {
-        throw formatErrorMessage(null, StatusCodes.UNAUTHORIZED, AUTH_ERR_MSGS.REFRESH_TOKEN_MISSING);
+        throw fmtErr(null, { msg: AUTHN_MSGS.ERR.TOKEN_MISSING, apiName: 'refreshToken', debugValues: { refreshToken } });
       }
-
-      // Verify the refresh token
       const { userId, name, role, sessionId } = await this.authnService.decodeToken(refreshToken); // Verify Refresh Token
 
       if (!userId || !name || !role || !sessionId) {
-        throw formatErrorMessage(null, StatusCodes.UNAUTHORIZED, AUTH_ERR_MSGS.INVALID_REFRESH_TOKEN);
+        throw fmtErr(null, { msg: AUTHN_MSGS.ERR.USER_ID_AND_SESSION_ID_REQUIRED, apiName: 'refreshToken', debugValues: { userId, sessionId } });
       }
-
-      const userDetails: IUserAccesstokenDetails = {
-        userId: userId,
-        name: name,
-        role: role,
-      };
+      const userDetails: IUserAccesstokenDetails = { userId: userId, name: name, role: role };
 
       await sessionManager.delete(userId, sessionId);
-
-      const newSessionId = generateUUID(); // create a new session Id because old one expired after 15min
-
-      await sessionManager.set(userDetails.userId, newSessionId); // set the session id in redis session
-
-      // Generate new access and refresh tokens
+      const newSessionId = generateUUID();
+      await sessionManager.set(userDetails.userId, newSessionId);
       const newAccessToken = await this.authnService.generateAccessToken(userDetails, newSessionId);
 
-      return {
-        accessToken: newAccessToken,
-      };
+      return fmtRes(res, { accessToken: newAccessToken });
     } catch (error) {
-      throw formatErrorMessage(error, StatusCodes.INTERNAL_SERVER_ERROR, AUTH_ERR_MSGS.FAILED_TO_REFRESH_TOKEN);
+      throw fmtPrntErr(error, 400, { msg: AUTHN_MSGS.ERR.FAILED_TO_REFRESH_TOKEN, apiName: 'refreshToken', debugValues: { refreshToken } });
     }
   };
 
   async logout(req: Request, res: Response) {
+    const { userId, sessionId } = req.query as { userId: string, sessionId: string };
+
     try {
-      const { userId, sessionId } = req.query as { userId: string, sessionId: string };
       if (!userId || !sessionId) {
-        throw formatErrorMessage(null, StatusCodes.UNAUTHORIZED, AUTH_ERR_MSGS.TOKEN_MISSING);
+        throw fmtErr(null, { msg: AUTHN_MSGS.ERR.USER_ID_AND_SESSION_ID_REQUIRED, apiName: 'logout', debugValues: { userId, sessionId } });
       }
 
       // Validate session before deletion
       const storedSession = await sessionManager.get(userId);
 
       if (!storedSession?.length || !storedSession.includes(sessionId)) {
-        throw formatErrorMessage(null, StatusCodes.UNAUTHORIZED, AUTH_ERR_MSGS.INVALID_SESSION);
+        throw fmtErr(null, { msg: AUTHN_MSGS.ERR.INVALID_SESSION, apiName: 'logout', debugValues: { userId, sessionId } });
       }
 
       // Destroy session in Redis
       await sessionManager.delete(userId, sessionId);
 
-      return { message: RES_MSGS.LOGOUT_SUCCESS };
+      return fmtRes(res, { message: AUTHN_MSGS.RES.LOGOUT_SUCCESS });
     } catch (error) {
-      throw formatErrorMessage(error, StatusCodes.INTERNAL_SERVER_ERROR, AUTH_ERR_MSGS.FAILED_TO_LOGOUT_USER);
+      throw fmtPrntErr(error, 400, { msg: AUTHN_MSGS.ERR.FAILED_TO_LOGOUT_USER, apiName: 'logout', debugValues: { userId, sessionId } });
     }
   };
 }

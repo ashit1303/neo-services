@@ -12,7 +12,7 @@ const questsSchema = new mongoose.Schema(
   },
   { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } },
 );
-questsSchema.index({ titleSlug: 1 }, { unique: true });
+// questsSchema.index({ titleSlug: 1 }, { unique: true });
 
 const DsaQuestions = mongoose.model('dsa-questions', questsSchema);
 export default DsaQuestions;

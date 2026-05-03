@@ -4,6 +4,7 @@ import express from 'express';
 import router from './src/router/index.route';
 import { mongoDbClient, mongooseClient } from './src/clients';
 import { corsOptionsDelegate } from './src/core/core-utils/cors.util';
+import { AppError } from './src/core/core-utils/err-util';
 
 const app = express();
 
@@ -19,6 +20,22 @@ app.use(helmet.frameguard({ action: 'deny' }));
 
 app.use(cors(corsOptionsDelegate));
 app.options('*', cors(corsOptionsDelegate));
+
+app.use((err, req, res, next) => {
+  if (err instanceof AppError) {
+    return res.status(err.code).json({
+      success: false,
+      message: err.message,
+      stackPath: err.stackPath, // optional (hide in prod)
+    });
+  }
+
+  return res.status(500).json({
+    success: false,
+    message: 'Internal Server Error',
+    stackPath: err,
+  });
+});
 
 // Routes initialization
 app.use('/service', router);

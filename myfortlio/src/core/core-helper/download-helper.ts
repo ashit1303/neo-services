@@ -2,19 +2,18 @@ import { Document, ObjectId } from 'mongodb';
 import * as fs from 'fs';
 import * as path from 'path';
 import { PipelineStage } from 'mongoose';
-import { StatusCodes } from 'http-status-codes';
 import { downloadCSVExportFileToS3CHSQL } from '../../queries/download.queries';
-import { formatErrorMessage } from '../core-utils';
 import { GetObjectCommand, GetObjectCommandInput, PutObjectCommand, PutObjectCommandInput, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { SESHelper } from './ses-helper';
 import { MongoDBClient } from '../core-clients/mongodb.client';
-import { ClickHouseClient } from '@clickhouse/client';
 import { SecretManager } from '../core-clients/secret-manager.client';
 import { S3ClientClass } from '../core-clients/aws-s3.client';
 import dayjs from 'dayjs';
-import { ERR_MSGS } from '../../constants/authn-err-msg.constants';
 import { Config } from '../../interface/common.interface';
+import { fmtErr } from '../core-utils/err-util';
+import { AWS_MSGS, USER_MSGS } from '../../constants';
+import { ClickHouseClient } from '../core-clients/clickhouse.client';
 
 export class DownloadHelper {
   private dbType: 'mongodb' | 'clickhouse';
@@ -42,7 +41,7 @@ export class DownloadHelper {
       // console.info('userInfo', userInfo);    
       return userInfo[0];
     } catch (error) {
-      throw formatErrorMessage(error, StatusCodes.INTERNAL_SERVER_ERROR, { message: ERR_MSGS.FAILED_TO_FETCH_USER_BY_ID });
+      throw fmtErr(error, { msg: USER_MSGS.ERR.FAILED_TO_FETCH_USER_BY_ID, apiName: 'getUserInfo', debugValues: { userId } });
     }
   }
 
@@ -60,7 +59,7 @@ export class DownloadHelper {
       return;
     }
     catch (error) {
-      throw formatErrorMessage(error, StatusCodes.INTERNAL_SERVER_ERROR, ERR_MSGS.FAILED_TO_UPLOAD_FILE_TO_S3);
+      throw fmtErr(error, { msg: AWS_MSGS.ERR.FAILED_TO_UPLOAD_FILE, apiName: 'uploadFile', debugValues: { fileName, bucketName, expiresIn } });
 
     }
   };
@@ -76,7 +75,7 @@ export class DownloadHelper {
       return signedUrl;
     }
     catch (error) {
-      throw formatErrorMessage(error, StatusCodes.INTERNAL_SERVER_ERROR, ERR_MSGS.FAILED_TO_GET_SINGED_URL_FOR_FILE);
+      throw fmtErr(error, { msg: AWS_MSGS.ERR.FAILED_TO_GET_SIGNED_URL, apiName: 'getSignedUrlForFile', debugValues: { fileName, bucketName } });
     }
   }
   public static createCSVFile(rows: Document[], fileName: string) {
@@ -148,11 +147,7 @@ export class DownloadHelper {
       fs.mkdirSync(path.dirname(fileName), { recursive: true });
       fs.writeFileSync(fileName, csvContent, 'utf8');
     } catch (error) {
-      throw formatErrorMessage(
-        error,
-        StatusCodes.INTERNAL_SERVER_ERROR,
-        { message: ERR_MSGS.FAILED_DOWNLOAD_LOGS_MAIL },
-      );
+      throw fmtErr(error, { msg: AWS_MSGS.ERR.FAILED_TO_CREATE_CSV_FILE, apiName: 'createCSVFile', debugValues: { rows, fileName } });
     }
   }
   public async exportMongoDBQueryToCSV(collectionName: string, pipeline: PipelineStage[], fileName: string, batchSize = 1000): Promise<string> {
@@ -161,14 +156,6 @@ export class DownloadHelper {
       const rows: Document[] = [];
 
       const collection = db?.collection(collectionName);
-
-      if (!collection) {
-        throw formatErrorMessage(
-          null,
-          StatusCodes.BAD_REQUEST,
-          { message: `Invalid collection: ${collectionName}` },
-        );
-      }
 
       const cursor = collection
         .aggregate(pipeline, { readPreference: 'secondaryPreferred' })
@@ -196,8 +183,8 @@ export class DownloadHelper {
 
       return url;
     } catch (error) {
-      console.error(error);
-      throw error;
+      throw fmtErr(error, { msg: AWS_MSGS.ERR.FAILED_TO_EXPORT_MONGODB_QUERY_TO_CSV, apiName: 'exportMongoDBQueryToCSV', debugValues: { collectionName, pipeline, fileName, batchSize } });
+
     }
   }
 
@@ -229,7 +216,7 @@ export class DownloadHelper {
       const user = await this.getUserInfo(userId);
 
       if (!user) {
-        throw formatErrorMessage(null, StatusCodes.NOT_FOUND, { message: ERR_MSGS.USER_NOT_FOUND });
+        throw fmtErr(null, { msg: USER_MSGS.ERR.USER_NOT_FOUND, apiName: 'sendLogsMail.getUserByUserId', debugValues: { userId } });
       }
 
       const email = user.email;
@@ -265,7 +252,7 @@ export class DownloadHelper {
 
       return `Email sent successfully to ${email}`;
     } catch (error) {
-      throw formatErrorMessage(error, StatusCodes.INTERNAL_SERVER_ERROR, { message: ERR_MSGS.FAILED_DOWNLOAD_LOGS_MAIL });
+      throw fmtErr(error, { msg: AWS_MSGS.ERR.FAILED_TO_SEND_EMAIL, apiName: 'sendLogsMail', debugValues: { url, collectionName, userId, fromDate, toDate } });
     }
   };
 

@@ -1,9 +1,11 @@
-import { StatusCodes } from 'http-status-codes';
 import { FilterQueryValidation } from '../validations/common-validation';
-import { formatErrorMessage } from '../core/core-utils';
 import { RoleService } from '../services/role.service';
 import { Request, Response } from 'express';
-import { ROLE_ERR_MSGS } from '../constants';
+import { fmtRes } from '../core/core-utils/res-util';
+import { fmtErr, fmtPrntErr } from '../core/core-utils/err-util';
+import { RoleCreateValidation, RoleIdValidation, RoleUpdateValidation } from '../validations/role-validation';
+import { IRole } from '../interface/user-interface';
+import { ROLE_MSGS } from '../constants';
 
 export class RoleController {
   roleService: RoleService;
@@ -11,27 +13,25 @@ export class RoleController {
     this.roleService = new RoleService();
   }
 
-  async getRoles(req: Request, res: Response) {
+  async getRoles(_req: Request, res: Response) {
     try {
       const fetchedRoles = await this.roleService.getRoles();
-
       const roles = fetchedRoles.map((role) => {
         const { _id: roleId, ...roleDetails } = role.toObject();
         return { roleId, ...roleDetails };
       });
 
-      return res.status(200).send(roles);
+      return fmtRes(res, roles);
     } catch (error: any) {
-      return res.status(204).send(
-        formatErrorMessage(error, StatusCodes.NO_CONTENT, ROLE_ERR_MSGS.FAILED_TO_FETCH_ALL_ROLES),
-      );
+      throw fmtPrntErr(error, 400, { msg: ROLE_MSGS.ERR.FAILED_TO_FETCH_ALL_ROLES, apiName: 'getRoles' });
+      ;
     }
   }
 
   async getRolesWithPrivileges(req: Request, res: Response) {
-    try {
-      const filterQuery = req.query;
+    const filterQuery = req.query;
 
+    try {
       FilterQueryValidation.parse(filterQuery);
 
       (filterQuery as any).page = 1;
@@ -39,11 +39,9 @@ export class RoleController {
 
       const roles = await this.roleService.getRolesWithPrivileges(filterQuery);
 
-      return res.status(200).send(roles);
+      return fmtRes(res, roles);
     } catch (error: any) {
-      return res.status(204).send(
-        formatErrorMessage(error, StatusCodes.NO_CONTENT, ROLE_ERR_MSGS.FAILED_TO_FETCH_ALL_ROLES),
-      );
+      throw fmtPrntErr(error, 400, { msg: ROLE_MSGS.ERR.FAILED_TO_FETCH_ALL_ROLES, apiName: 'getRolesWithPrivileges' });
     }
   }
   async getPrivileges(req: Request, res: Response) {
@@ -57,45 +55,34 @@ export class RoleController {
 
       const privileges = await this.roleService.getPrivileges(filterQuery);
 
-      return res.status(200).send(privileges);
+      return fmtRes(res, privileges);
     } catch (error: any) {
-      return res.status(204).send(
-        formatErrorMessage(error, StatusCodes.NO_CONTENT, ROLE_ERR_MSGS.FAILED_TO_FETCH_ALL_PRIVILEGES),
-      );
+      throw fmtPrntErr(error, 400, { msg: ROLE_MSGS.ERR.FAILED_TO_FETCH_ALL_PRIVILEGES, apiName: 'getPrivileges' });
     }
   }
   async getRoleById(req: Request, res: Response) {
+    const { roleId } = req.params;
     try {
-      const { roleId } = req.params;
 
       RoleIdValidation.parse(roleId);
 
       const role = await this.roleService.getRoleById(roleId);
 
       if (!role) {
-        return res.status(404).send({
-          message: ROLE_ERR_MSGS.ROLE_NOT_FOUND,
-        });
+        throw fmtErr(null, { msg: ROLE_MSGS.ERR.ROLE_NOT_FOUND, apiName: 'getRoleById', debugValues: { roleId } });
       }
 
-      return res.status(200).send({
-        roleId,
-        ...role.toObject(),
-      });
+      return fmtRes(res, { roleId, ...role.toObject() });
     } catch (error: any) {
-      return res.status(204).send(
-        formatErrorMessage(error, StatusCodes.NO_CONTENT, ROLE_ERR_MSGS.FAILED_TO_FETCH_ROLE),
-      );
+      throw fmtPrntErr(error, 400, { msg: ROLE_MSGS.ERR.FAILED_TO_FETCH_ROLE, apiName: 'getRoleById' });
     }
   }
 
   async createRole(req: Request, res: Response) {
+    const input: IRole = req.body;
+    const userId = (req as any).user?.userId;
     try {
-      const input: IRole = req.body;
-      const userId = (req as any).user?.userId;
-
       RoleCreateValidation.parse(input);
-
       const role = await this.roleService.createRole(
         input.roleName,
         input.description,
@@ -104,24 +91,17 @@ export class RoleController {
       );
 
       const { _id: roleId, ...roleDetails } = role.toObject();
-
-      return res.status(201).send({
-        roleId,
-        ...roleDetails,
-      });
+      return res.status(201).send({ roleId, ...roleDetails });
     } catch (error: any) {
-      return res.status(StatusCodes.BAD_REQUEST).send(
-        formatErrorMessage(error, StatusCodes.BAD_REQUEST, ROLE_ERR_MSGS.ERROR_CREATING_ROLE),
-      );
+      throw fmtPrntErr(error, 400, { msg: ROLE_MSGS.ERR.FAILED_TO_CREATE_ROLE, apiName: 'createRole', debugValues: { roleName: input.roleName } });
     }
   }
   async updateRole(req: Request, res: Response) {
+
+    const input: IRole = req.body;
+    const userId = (req as any).user?.userId;
     try {
-      const input: IRole = req.body;
-      const userId = (req as any).user?.userId;
-
       RoleUpdateValidation.parse(input);
-
       const role = await this.roleService.updateRole(
         input.roleId,
         input.roleName,
@@ -129,45 +109,28 @@ export class RoleController {
         input.rolePrivileges,
         userId,
       );
-
       if (!role) {
-        return res.status(404).send({
-          message: ROLE_ERR_MSGS.ROLE_NOT_FOUND,
-        });
+        throw fmtErr(null, { msg: ROLE_MSGS.ERR.ROLE_NOT_FOUND, apiName: 'updateRole', debugValues: { roleId: input.roleId } });
       }
 
       const { _id: roleId, ...roleDetails } = role.toObject();
 
-      return res.status(200).send({
-        roleId,
-        ...roleDetails,
-      });
+      return fmtRes(res, { roleId, ...roleDetails });
     } catch (error: any) {
-      return res.status(400).send(
-        formatErrorMessage(error, StatusCodes.BAD_REQUEST, ROLE_ERR_MSGS.FAILED_TO_UPDATE_ROLE),
-      );
+      throw fmtPrntErr(error, 400, { msg: ROLE_MSGS.ERR.FAILED_TO_UPDATE_ROLE, apiName: 'updateRole' });
     }
   }
   async deleteRole(req: Request, res: Response) {
+    const { roleId } = req.params;
     try {
-      const { roleId } = req.params;
-
       RoleIdValidation.parse(roleId);
-
       const role = await this.roleService.deleteRoleById(roleId);
-
       if (!role) {
-        return res.status(StatusCodes.NOT_FOUND).send({ message: ROLE_ERR_MSGS.ROLE_NOT_FOUND });
+        throw fmtErr(null, { msg: ROLE_MSGS.ERR.ROLE_NOT_FOUND, apiName: 'deleteRole', debugValues: { roleId } });
       }
-
-      return res.status(200).send({
-        roleId,
-        ...role.toObject(),
-      });
+      return fmtRes(res, { roleId, ...role.toObject() });
     } catch (error: any) {
-      return res.status(400).send(
-        formatErrorMessage(error, StatusCodes.BAD_REQUEST, ROLE_ERR_MSGS.FAILED_TO_DELETE_USER_ROLE),
-      );
+      throw fmtPrntErr(error, 400, { msg: ROLE_MSGS.ERR.FAILED_TO_DELETE_ROLE, apiName: 'deleteRole' });
     }
   }
 

@@ -1,5 +1,5 @@
 import { APP_ENVIRONMENTS } from '../src/core/core-constants/enum.constants';
-import { Config } from '../src/interface';
+import { Config } from '../src/interface/common.interface';
 
 const ALLOWED_ENVS = ['dev', 'prod', 'local'] as const;
 

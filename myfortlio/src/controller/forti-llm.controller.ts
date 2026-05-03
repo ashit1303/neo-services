@@ -3,7 +3,6 @@ import { Request, Response } from 'express';
 import { buildObenPrompts } from '../service-helper/forti-llm.service-helper';
 import { FortiLLMRequest } from '../interface/forti-llm.interface';
 import FortiLLMService from '../services/forti-llm.service';
-import { ERR_MSGS } from '../constants/authn-err-msg.constants';
 
 class FortiLLMController {
   private obiLLMService;
@@ -45,7 +44,7 @@ class FortiLLMController {
       res.end();
     } catch (error) {
       console.error(error);
-      res.write(`data: ${JSON.stringify(ERR_MSGS.FAILED_TO_INITIATE_LLM)}\n\n`);
+      res.write(`data: ${JSON.stringify('FAILED_TO_INITIATE_LLM')}\n\n`);
       res.write(`data: ${JSON.stringify({ d: true })}\n\n`);
       res.end();
     }

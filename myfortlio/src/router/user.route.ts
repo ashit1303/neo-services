@@ -17,10 +17,11 @@ export class UserRoutes {
   }
 
   private initializeUserRoutes() {
-    this.router.get('/getUsers', checkAccess('getUsers'), (req, res, next) => this.cacheMiddleware.cacheReqRes(req, res, next, 60 * 60), this.userController.getUsers); // ROUTE CODE : 1100
-    this.router.get('/getUserById', checkAccess('getUserById'), this.userController.getUserById); // ROUTE CODE : 1200
+    this.router.get('/getUsers', checkAccess('getUsers'), (req, res, next) => this.cacheMiddleware.cacheReqRes(req, res, next, 60 * 60), this.userController.getUsers);
+    this.router.get('/getUserById', checkAccess('getUserById'), this.userController.getUserById);
 
   }
 
 }
 
+export const userRoutes = new UserRoutes().router;

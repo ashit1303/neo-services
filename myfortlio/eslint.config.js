@@ -41,23 +41,22 @@ export default [
     rules: {
       'no-console': ['error', { allow: ['warn', 'error', 'info'] }],
       'no-unused-vars': 'off',
-      // Error Prevention
       'no-var': 'error',
       'prefer-const': 'error',
+      'no-const-assign': 'error',
       'no-duplicate-imports': 'error',
-
-      // Best Practices
       'eqeqeq': ['error', 'always'],
       'no-eval': 'error',
       'no-implied-eval': 'error',
       'no-return-await': 'error',
       'no-param-reassign': 'error',
-      // "indent": ["error", 2],
+      "indent": ["error", 2],
       'max-classes-per-file': ['error', 1],
       "space-infix-ops": ["error", { "int32Hint": false }],
       "key-spacing": ["error", {
         "afterColon": true
       }],
+      
 
       // TypeScript Specific
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '_' }],
@@ -74,6 +73,9 @@ export default [
       'no-multiple-empty-lines': ['warn', { 'max': 1 }],
       'quotes': ['warn', 'single', { 'avoidEscape': true }],
       'semi': ['warn', 'always'],
+      // 'object-curly-newline': ['error', { ObjectExpression: 'never' }],
+      'object-property-newline': ['error', { allowAllPropertiesOnSameLine: true }],
+      'object-curly-spacing': ['error', 'always'],
     },
   }
 ];

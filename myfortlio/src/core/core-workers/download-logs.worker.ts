@@ -1,7 +1,7 @@
 import { parentPort, workerData } from 'worker_threads';
 import { WorkerDataConfig, WorkerResponse } from '../../interface/worker-interface';
 import { DownloadHelper } from '../core-helper/download-helper';
-import { ERR_MSGS } from '../../constants/authn-err-msg.constants';
+import { ERR_MSGS } from '../../constants/role-msg.constants';
 
 const downloadLogsFileWorker = async () => {
   const { dbType, collectionName, pipeline, query, params, userId, fileName, config } = workerData as WorkerDataConfig;

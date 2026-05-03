@@ -40,6 +40,17 @@ export interface IRoleDoc extends Document {
   rolePrivileges: [string];
 }
 
+export interface IRole {
+  roleId: string;
+  roleName: string;
+  description: string;
+  createdBy: string;
+  modifiedBy: string;
+  createdAt: Date;
+  updatedAt: Date;
+  rolePrivileges: [string];
+}
+
 export interface IUserDoc extends Document {
   userId?: ObjectId;
   _id: ObjectId;

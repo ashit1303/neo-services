@@ -1,6 +1,6 @@
 import { Server, WebSocket } from 'ws';
-import { StatusCodes } from 'http-status-codes';
-import { formatErrorMessage, generateUUID } from '../core-utils';
+import { generateUUID } from '../core-utils';
+import { fmtErr } from '../core-utils/err-util';
 
 export class WebSocketHandler<T extends { action: string; topic?: string }> {
   private wss: Server;
@@ -42,7 +42,8 @@ export class WebSocketHandler<T extends { action: string; topic?: string }> {
 
           if (parsedMessage.action === 'subscribe') {
             if (!parsedMessage.topic) {
-              throw formatErrorMessage(null, StatusCodes.BAD_REQUEST, { message: 'Topic is required for subscribe action' });
+              ws.send(JSON.stringify({ status: 'error', message: 'Topic is required for subscription' }));
+              return;
             }
 
             const topics = this.subscriptions.get(clientId) || new Set();
@@ -73,7 +74,7 @@ export class WebSocketHandler<T extends { action: string; topic?: string }> {
               await handler(socket, parsedMessage);
             }
           } else {
-            throw formatErrorMessage(null, StatusCodes.BAD_REQUEST, { message: `Unknown action: ${parsedMessage.action}` });
+            ws.send(JSON.stringify({ status: 'error', message: `Unknown action: ${parsedMessage.action}` }));
           }
         } catch (error) {
           this.handleError(ws, error);
@@ -100,11 +101,11 @@ export class WebSocketHandler<T extends { action: string; topic?: string }> {
     try {
       const parsedMessage = JSON.parse(message);
       if (!parsedMessage.action) {
-        throw formatErrorMessage(null, StatusCodes.BAD_REQUEST, { message: 'Action field is required' });
+        throw fmtErr(null, { msg: 'Action is required in the message', apiName: 'validateMessage', debugValues: { message } });
       }
       return parsedMessage;
     } catch (error) {
-      throw formatErrorMessage(error, StatusCodes.BAD_REQUEST, { message: 'Invalid JSON format' });
+      throw fmtErr(error, { msg: 'Invalid message format', apiName: 'validateMessage', debugValues: { message } });
     }
   }
 

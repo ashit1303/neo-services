@@ -1,8 +1,9 @@
-import { StatusCodes } from 'http-status-codes';
 import Privilege from '../models/privilege.model';
-import { formatErrorMessage } from '../core/core-utils';
 import { getDataByFilter } from '../core/core-helper/mongo.helper';
 import Role from '../models/role.model';
+import { fmtErr } from '../core/core-utils/err-util';
+import { ROLE_MSGS } from '../constants';
+import { redisClient } from '../clients';
 
 export async function createRole(name: string, description: string, rolePrivileges: [string], createdBy: string) {
   try {
@@ -10,7 +11,7 @@ export async function createRole(name: string, description: string, rolePrivileg
     await newRole.save();
     return newRole;
   } catch (error) {
-    throw formatErrorMessage(error, StatusCodes.BAD_REQUEST, DB_CONSTANTS.FAILED_TO_CREATE_ROLE);
+    throw fmtErr(error, { msg: ROLE_MSGS.ERR.FAILED_TO_CREATE_ROLE, apiName: 'createRole', debugValues: { name, description, rolePrivileges, createdBy } });
   }
 }
 
@@ -18,7 +19,7 @@ export async function getRoles() {
   try {
     return await Role.find();
   } catch (error) {
-    throw formatErrorMessage(error, StatusCodes.BAD_REQUEST, DB_CONSTANTS.FAILED_TO_FETCH_ROLES);
+    throw fmtErr(error, { msg: ROLE_MSGS.ERR.FAILED_TO_FETCH_ROLES, apiName: 'getRoles' });
   }
 }
 export async function getRolesWithPrivileges(filterQuery: any) {
@@ -30,7 +31,7 @@ export async function getRolesWithPrivileges(filterQuery: any) {
     ];
     return await getDataByFilter(filterQuery, basePipeline, ['tags', 'name'], Role);
   } catch (error) {
-    throw formatErrorMessage(error, StatusCodes.BAD_REQUEST, DB_CONSTANTS.FAILED_TO_FETCH_ROLES);
+    throw fmtErr(error, { msg: ROLE_MSGS.ERR.FAILED_TO_FETCH_ROLES, apiName: 'getRolesWithPrivileges' });
   }
 }
 
@@ -40,7 +41,7 @@ export async function getPrivileges(filterQuery: any) {
     const result = await getDataByFilter(filterQuery, basePipeline, ['tags', 'name'], Privilege);
     return result;
   } catch (error) {
-    throw formatErrorMessage(error, StatusCodes.BAD_REQUEST, DB_CONSTANTS.FAILED_TO_FETCH_ROLES);
+    throw fmtErr(error, { msg: ROLE_MSGS.ERR.FAILED_TO_FETCH_PRIVILEGES, apiName: 'getPrivileges' });
   }
 }
 
@@ -48,7 +49,7 @@ export async function getRoleById(id: string) {
   try {
     return await Role.findById(id);
   } catch (error) {
-    throw formatErrorMessage(error, StatusCodes.BAD_REQUEST, DB_CONSTANTS.FAILED_TO_FETCH_ROLE_BY_ID);
+    throw fmtErr(error, { msg: ROLE_MSGS.ERR.FAILED_TO_FETCH_ROLE, apiName: 'getRoleById', debugValues: { id } });
   }
 }
 
@@ -56,7 +57,7 @@ export async function getRoleByName(name: string) {
   try {
     return await Role.findOne({ roleName: name });
   } catch (error) {
-    throw formatErrorMessage(error, StatusCodes.BAD_REQUEST, DB_CONSTANTS.FAILED_TO_FETCH_ROLE_BY_NAME);
+    throw fmtErr(error, { msg: ROLE_MSGS.ERR.FAILED_TO_FETCH_ROLE, apiName: 'getRoleByName', debugValues: { name } });
   }
 }
 
@@ -67,7 +68,7 @@ export async function updateRole(id: string, name: string, description: string, 
     await redisClient.delete(`${roleDetails?.roleName}_permissions`);
     return await Role.findByIdAndUpdate(id, { rolePrivileges, roleName: name, description, modifiedBy }, { new: true });
   } catch (error) {
-    throw formatErrorMessage(error, StatusCodes.BAD_REQUEST, DB_CONSTANTS.FAILED_TO_UPDATE_ROLE);
+    throw fmtErr(error, { msg: ROLE_MSGS.ERR.FAILED_TO_UPDATE_ROLE, apiName: 'updateRole', debugValues: { id, name, description, rolePrivileges, modifiedBy } });
   }
 }
 
@@ -75,6 +76,6 @@ export async function deleteRoleById(id: string) {
   try {
     return await Role.findByIdAndDelete(id);
   } catch (error) {
-    throw formatErrorMessage(error, StatusCodes.BAD_REQUEST, DB_CONSTANTS.FAILED_TO_DELETE_ROLE);
+    throw fmtErr(error, { msg: ROLE_MSGS.ERR.FAILED_TO_DELETE_ROLE, apiName: 'deleteRoleById', debugValues: { id } });
   }
 }

@@ -3,10 +3,10 @@ import SessionManager from '../core/core-clients/session-manager.client';
 import { ACCESSTOKEN_EXPIRY } from '../core/core-constants/common.constants';
 import { SecretManager } from '../core/core-clients/secret-manager.client';
 import { config } from '../../config';
-import { ERR_MSGS } from '../constants/authn-err-msg.constants';
 import { IUserAccesstokenDetails } from '../interface/user-interface';
 import { AuthRequest } from '../interface/authn.interface';
-import { error } from 'console';
+import { fmtErr } from '../core/core-utils/err-util';
+import { AUTHN_MSGS } from '../constants';
 export class AuthnService {
 
   private secretManager;
@@ -29,9 +29,9 @@ export class AuthnService {
       return jwt.verify(token, JWT_SECRET) as AuthRequest;
     } catch (error) {
       if (error instanceof jwt.TokenExpiredError) {
-        throw new Error(ERR_MSGS.TOKEN_EXPIRED.msg);
+        throw fmtErr(error, { msg: AUTHN_MSGS.ERR.TOKEN_EXPIRED, apiName: 'verifyToken' });
       }
-      throw new Error(ERR_MSGS.INVALID_TOKEN.msg);
+      throw fmtErr(error, { msg: AUTHN_MSGS.ERR.INVALID_TOKEN, apiName: 'verifyToken' });
     }
   };
 
@@ -41,7 +41,7 @@ export class AuthnService {
 
       return response?.payload as AuthRequest;
     } catch (error) {
-      throw new Error(error?.message || ERR_MSGS.INVALID_TOKEN.msg);
+      throw fmtErr(error, { msg: AUTHN_MSGS.ERR.INVALID_TOKEN, apiName: 'decodeToken' });
     }
   };
 
@@ -49,25 +49,21 @@ export class AuthnService {
     try {
       const token = accesstoken?.split(' ')[1]; // Extract token from Authorization header
       if (!token) {
-        throw new Error(error.message || ERR_MSGS.TOKEN_MISSING);
+        throw fmtErr(null, { msg: AUTHN_MSGS.ERR.TOKEN_MISSING, apiName: 'authenticate.no_accesstoken', debugValues: { token } });
       }
-
       const payload = await this.verifyToken(token); // Verify JWT token
       if (!payload) {
-        throw new Error(error.message || ERR_MSGS.INVALID_TOKEN);
+        throw fmtErr(null, { msg: AUTHN_MSGS.ERR.INVALID_TOKEN, apiName: 'authenticate.invalid_token', debugValues: { token } });
       }
-
       const { userId, sessionId, name, role } = payload;
-
       // Check Redis for the session IDs associated with the userId
       const storedSessionIds = await this.sessionManager.get(userId as string);
       if (!storedSessionIds || !storedSessionIds.includes(sessionId as string)) {
-        throw new Error(error.message || ERR_MSGS.INVALID_SESSION);
       }
 
       return { userId, sessionId, name, role };
     } catch (error) {
-      throw error;
+      throw fmtErr(error, { msg: AUTHN_MSGS.ERR.FAILED_TO_AUTHENTICATE_USER, apiName: 'authenticate', debugValues: { error } });
     }
   };
 }

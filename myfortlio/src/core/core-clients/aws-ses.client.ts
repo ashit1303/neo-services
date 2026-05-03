@@ -1,9 +1,6 @@
 import { SESClient } from '@aws-sdk/client-ses';
-// import { StatusCodes } from 'http-status-codes';
-// import { ERR_MSGS } from '../../constants/messages';
-import { Config } from '../../interface';
 import { SecretManager } from './secret-manager.client';
-// import { formatErrorMessage } from '../../utils/error-util';
+import { Config } from '../../interface/common.interface';
 
 export class SESClientUtil {
   private static sesClient: SESClient | null = null;

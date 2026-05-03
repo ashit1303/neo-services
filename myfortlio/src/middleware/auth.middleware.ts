@@ -1,5 +1,5 @@
 import { NextFunction } from 'express';
-import { RestAuthMiddleware } from '../core/core-clients/rest-auth.middleware';
+import { RestAuthMiddleware } from '../middleware/rest-auth.middleware';
 import { config } from '../../config';
 import { mongoDbClient } from '../clients';
 

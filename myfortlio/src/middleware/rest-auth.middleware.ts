@@ -1,13 +1,11 @@
-
-import { StatusCodes } from 'http-status-codes';
 import { NextFunction, Request, Response } from 'express';
-import { formatErrorMessage } from '../core/core-utils';
 import { Config } from '../interface/common.interface';
 import { PipelineStage } from 'mongoose';
 import { MongoDBClient } from '../core/core-clients/mongodb.client';
 import { RedisService } from '../core/core-clients/redis-service.client';
 import { AuthnService } from '../services/authn.services';
-import { ERR_MSGS } from '../constants/authn-err-msg.constants';
+import { fmtPrntErr } from '../core/core-utils/err-util';
+import { AUTHN_MSGS } from '../constants';
 
 export class RestAuthMiddleware {
   private redisCache: RedisService;
@@ -30,7 +28,7 @@ export class RestAuthMiddleware {
       const accesstoken = req.headers.authorization as string;
 
       if (!accesstoken) {
-        throw formatErrorMessage(null, ERR_MSGS.TOKEN_MISSING);
+        throw fmtPrntErr(null, 401, { msg: AUTHN_MSGS.ERR.FAILED_TO_AUTHENTICATE_USER, apiName: 'authn', debugValues: {} });
       }
 
       const userDetails = await new AuthnService().verifyToken(accesstoken);
@@ -84,7 +82,7 @@ export class RestAuthMiddleware {
 
       const allPrivileges = [...roleAccesses, ...userAccesses];
       if (!RestAuthMiddleware.checkRoleAccess(allPrivileges, apiName)) {
-        throw formatErrorMessage(null, ERR_MSGS.UNAUTHORIZED_ACCESS);
+        throw fmtPrntErr(null, 401, { msg: AUTHN_MSGS.ERR.FAILED_TO_AUTHENTICATE_USER, apiName: 'authz', debugValues: {} });
       }
 
     } catch (error) {
@@ -92,7 +90,7 @@ export class RestAuthMiddleware {
     }
   }
 
-  async main(req: Request, res: Response, next: NextFunction, apiName: string) {
+  async main(req: Request, _res: Response, next: NextFunction, apiName: string) {
     try {
       // fetch and store permissions in redis 
 
@@ -102,7 +100,7 @@ export class RestAuthMiddleware {
       next();
     } catch (error: any) {
       console.error(`Error in RestAuthenticateAndAuthorizeMiddleware: ${error.message}`);
-      res.status(StatusCodes.UNAUTHORIZED).send(formatErrorMessage(error, error?.extensions?.errorOrigin?.message || ERR_MSGS.FAILED_TO_AUTHENTICATE_USER));
+      throw fmtPrntErr(error, 401, { msg: AUTHN_MSGS.ERR.FAILED_TO_AUTHENTICATE_USER, apiName: 'main', debugValues: {} });
     }
   }
 };
