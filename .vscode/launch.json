@@ -1,0 +1,46 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    // {
+    //   "name": "Debug Bun",
+    //   "type": "bun",
+    //   "request": "launch",
+    //   "runtimeExecutable": "bun",
+    //   "watchMode": false,
+    //   "stopOnEntry": false,
+    //   "runtime": "bun",
+    //   "runtimeArgs": [
+    //     "run",
+    //     "server.ts"
+    //   ],
+    //   "cwd": "${workspaceFolder}/myfortlio",
+    //   "console": "integratedTerminal"
+    // },
+    // {
+    //   "type": "bun",
+    //   "request": "attach",
+    //   "name": "Attach to Bun",
+    //   // The URL of the WebSocket inspector to attach to.
+    //   // This value can be retrieved by using `bun --inspect`.
+    //   "url": "ws://localhost:6499/",
+    //   // Optional path mapping for remote debugging
+    //   "localRoot": "${workspaceFolder}",
+    //   "remoteRoot": "/app",
+    // },
+    {
+      "type": "bun",
+      "request": "launch",
+      "name": "Myfortlio Bun (Launch server.ts)",
+      "program": "${workspaceFolder}/myfortlio/server.ts",
+      "cwd": "${workspaceFolder}/myfortlio",
+      "runtime": "bun",
+      "runtimeArgs": [
+        "run"
+      ],
+      "args": [],
+      "watchMode": false,
+      "stopOnEntry": true,
+      "noDebug": false
+    }
+  ]
+}
