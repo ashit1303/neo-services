@@ -1,6 +1,6 @@
 import { MongoClient, Db, ClientSession } from 'mongodb';
-import { Config } from '../../interface';
 import { DatabaseConfigManager } from './all-db-config';
+import { Config } from '../../interface/common.interface';
 
 export class MongoDBClient {
   private commonClient?: MongoClient;

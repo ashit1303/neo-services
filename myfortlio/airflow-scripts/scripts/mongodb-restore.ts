@@ -30,15 +30,16 @@ interface Secrets {
 
 // Get secrets from AWS Secrets Manager
 const getSecrets = async (): Promise<Secrets> => {
-  const secrets = await secretManger.fetchAll();
+  const awsConfig = await secretManger.get('AWS_CONFIG').then((res) => JSON.parse(res));
+  const mongoConfig = await secretManger.get('MONGO_BASE_CONFIG').then((res) => JSON.parse(res));
   const dbAndS3Config: any = {
-    DB_USERNAME: secrets['DB_USERNAME'],
-    DB_PASSWORD: secrets['DB_PASSWORD'],
-    DB_CLUSTER: secrets['DB_CLUSTER'],
-    DB_NAME: secrets['DB_NAME'],
-    AWS_ACCESS_KEY_ID: secrets['AWS_ACCESS_KEY_ID'],
-    AWS_SECRET_ACCESS_KEY: secrets['AWS_SECRET_ACCESS_KEY'],
-    AWS_BACKUP_BUCKET: secrets['AWS_BACKUP_BUCKET'],
+    DB_USERNAME: mongoConfig['USERNAME'],
+    DB_PASSWORD: mongoConfig['PASSWORD'],
+    DB_CLUSTER: mongoConfig['CLUSTER'],
+    DB_NAME: mongoConfig['NAME'],
+    AWS_ACCESS_KEY_ID: awsConfig['AWS_ACCESS_KEY_ID'],
+    AWS_SECRET_ACCESS_KEY: awsConfig['AWS_SECRET_ACCESS_KEY'],
+    AWS_BACKUP_BUCKET: awsConfig['AWS_BACKUP_BUCKET'],
 
   };
 

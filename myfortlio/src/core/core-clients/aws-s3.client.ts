@@ -1,17 +1,17 @@
 import { S3Client } from '@aws-sdk/client-s3';
-import { Config } from '../../interface';
 import { SecretManager } from './secret-manager.client';
+import { Config } from '../../interface/common.interface';
 export class S3ClientClass {
   private readonly credentials: {
     accessKeyId: string;
     secretAccessKey: string;
   };
-  private secretManger: SecretManager;
+  private secretManager: SecretManager;
   private static s3Client: S3Client | null = null;
   private readonly region: string;
 
   constructor(config: Config) {
-    this.secretManger = new SecretManager(config);
+    this.secretManager = new SecretManager(config);
     this.region = config.awsRegion;
     this.credentials = {
       accessKeyId: '',
@@ -20,8 +20,10 @@ export class S3ClientClass {
   }
 
   private async initCredentials() {
-    this.credentials.accessKeyId = await this.secretManger.get('AWS_ACCESS_KEY_ID');
-    this.credentials.secretAccessKey = await this.secretManger.get('AWS_SECRET_ACCESS_KEY');
+
+    const awsConfig = await this.secretManager.get('AWS_CONFIG').then((res) => JSON.parse(res));
+    this.credentials.accessKeyId = awsConfig.AWS_ACCESS_KEY_ID;
+    this.credentials.secretAccessKey = awsConfig.AWS_SECRET_ACCESS_KEY;
   }
 
   public async getS3Client(): Promise<S3Client> {

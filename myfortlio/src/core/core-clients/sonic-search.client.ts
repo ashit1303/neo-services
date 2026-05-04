@@ -18,9 +18,9 @@ export class SonicClient {
 
   private async initClient(): Promise<void> {
     const secrets = await this.secretManager.get('SONIC_CONFIG').then((res) => JSON.parse(res));
-    this.sonicConfig.host = secrets.host;
-    this.sonicConfig.port = secrets.port;
-    this.sonicConfig.auth = secrets.auth;
+    this.sonicConfig.host = secrets.HOST;
+    this.sonicConfig.port = secrets.PORT;
+    this.sonicConfig.auth = secrets.AUTH;
 
     this.sonicSearch = new SonicChannel.Search(this.sonicConfig).connect({
       connected: () => console.info('Sonic Channel connected (search).'),

@@ -21,7 +21,7 @@ app.use(helmet.frameguard({ action: 'deny' }));
 app.use(cors(corsOptionsDelegate));
 app.options('*', cors(corsOptionsDelegate));
 
-app.use((err, req, res, next) => {
+app.use((err, _req, res, _next) => {
   if (err instanceof AppError) {
     return res.status(err.code).json({
       success: false,
@@ -41,7 +41,7 @@ app.use((err, req, res, next) => {
 app.use('/service', router);
 
 // Start the server and listen on the specified port
-const PORT = process.env.PORT || 4160;
+const PORT = process.env.PORT || 4020;
 app.listen(PORT, async () => {
   try {
     await mongoDbClient.connect();

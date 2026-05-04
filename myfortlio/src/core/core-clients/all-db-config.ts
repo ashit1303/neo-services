@@ -9,13 +9,13 @@ export class DatabaseConfigManager {
   }
 
   async fetchDbConfig(): Promise<DatabaseConfig> {
-    const secrets = await this.secretManager.fetchAll();
+    const secrets = await this.secretManager.get('MONGO_BASE_CONFIG').then((res) => JSON.parse(res));
 
     const dbConfig: DatabaseConfig = {
-      cluster: secrets['DB_CLUSTER'],
-      password: secrets['DB_PASSWORD'],
-      username: secrets['DB_USERNAME'],
-      dbName: secrets['DB_NAME'],
+      cluster: secrets['CLUSTER'],
+      password: secrets['PASSWORD'],
+      username: secrets['USERNAME'],
+      dbName: secrets['NAME'],
     };
 
     return dbConfig;
@@ -24,10 +24,10 @@ export class DatabaseConfigManager {
   async getClickHouseConfig(): Promise<DatabaseConfig> {
     const secrets = await this.secretManager.get('CLICKHOUSE_CONFIG').then((res) => JSON.parse(res));
     const dbConfig: DatabaseConfig = {
-      cluster: secrets['CH_LOGS_DB_CLUSTER'],
-      password: secrets['CH_LOGS_DB_PASSWORD'],
-      username: secrets['CH_LOGS_DB_USERNAME'],
-      dbName: secrets['CH_LOGS_DB_NAME'],
+      cluster: secrets['CLUSTER'],
+      password: secrets['PASSWORD'],
+      username: secrets['USERNAME'],
+      dbName: secrets['NAME'],
     };
 
     return dbConfig;

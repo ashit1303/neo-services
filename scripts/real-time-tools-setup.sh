@@ -9,8 +9,8 @@ FLINK_VERSION="1.20.0"
 FLINK_DIR="flink-$FLINK_VERSION"
 KAFKA_VERSION="3.9.1"
 KAFKA_DIR="kafka-$KAFKA_VERSION"
-QUESTDB_VERSION="9.0.1"
-QUESTDB_DIR="questdb-$QUESTDB_VERSION"
+CLICKHOUSE_VERSION="24.3.2.23"
+CLICKHOUSE_DIR="clickhouse-$CLICKHOUSE_VERSION"
 
 # Create log directory
 sudo mkdir -p /var/log/real-time-tools
@@ -100,27 +100,37 @@ setup_component() {
   echo "$NAME installed successfully."
 }
 
-# Check if MongoDB is already installed
-if ! command -v mongod &> /dev/null; then
-    echo "Installing MongoDB..."
-    curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | sudo gpg -o /usr/share/keyrings/mongodb-server-7.0.gpg --dearmor
-    echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list
-    sudo apt update
-    sudo apt-get install -y mongodb-org
 
-    # Start and enable MongoDB service
-    sudo systemctl start mongod
-    sudo systemctl enable mongod
-    echo "MongoDB installed and started successfully"
+# Kafka
+setup_component "Kafka" "$KAFKA_VERSION" "$KAFKA_DIR" "kafka_2.12-$KAFKA_VERSION" "https://dlcdn.apache.org/kafka/$KAFKA_VERSION"
+
+# Flink
+setup_component "Flink" "$FLINK_VERSION" "$FLINK_DIR" "flink-$FLINK_VERSION-bin-scala_2.12" "https://dlcdn.apache.org/flink/flink-$FLINK_VERSION"
+
+# ClickHouse
+echo "Checking ClickHouse..."
+
+if [ -d "$CLICKHOUSE_DIR" ]; then
+  echo "ClickHouse already installed at $CLICKHOUSE_DIR."
 else
-    echo "MongoDB is already installed"
-    # Ensure MongoDB is running
-    if ! sudo systemctl is-active --quiet mongod; then
-        echo "Starting MongoDB service..."
-        sudo systemctl start mongod
-        sudo systemctl enable mongod
-    fi
+  echo "Installing ClickHouse..."
+
+  CH_TGZ="clickhouse-common-static-$CLICKHOUSE_VERSION-amd64.tgz"
+  CH_URL="https://packages.clickhouse.com/tgz/stable/$CH_TGZ"
+
+  wget --progress=bar:force "$CH_URL"
+  tar -xzf "$CH_TGZ"
+  rm "$CH_TGZ"
+
+  mv clickhouse-common-static-$CLICKHOUSE_VERSION "$CLICKHOUSE_DIR"
+
+  echo "ClickHouse installed successfully."
 fi
+mkdir -p "$DATA_DIR/$CLICKHOUSE_DIR/var/lib/clickhouse"
+chmod -R 755 "$DATA_DIR/$CLICKHOUSE_DIR"
+
+sed -i 's/<tcp_port>9000<\/tcp_port>/<tcp_port>9001<\/tcp_port>/' \
+"$DATA_DIR/$CLICKHOUSE_DIR/etc/clickhouse-server/config.xml"
 
 
 # Check if EMQX is already installed
@@ -139,19 +149,7 @@ else
     sleep 2
 fi
 
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
 
-export NVM_DIR="$HOME/.nvm"
-# Load nvm immediately in this shell
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-
-nvm install 22
-
-# Kafka
-setup_component "Kafka" "$KAFKA_VERSION" "$KAFKA_DIR" "kafka_2.12-$KAFKA_VERSION" "https://dlcdn.apache.org/kafka/$KAFKA_VERSION"
-
-# Flink
-setup_component "Flink" "$FLINK_VERSION" "$FLINK_DIR" "flink-$FLINK_VERSION-bin-scala_2.12" "https://dlcdn.apache.org/flink/flink-$FLINK_VERSION"
 
 WSL_IP=$(ip addr show eth0 | grep 'inet ' | awk '{print $2}' | cut -d/ -f1)
 echo "listeners=PLAINTEXT://0.0.0.0:9092" >> "$DATA_DIR/$KAFKA_DIR/config/server.properties"
@@ -160,21 +158,6 @@ echo "advertised.listeners=PLAINTEXT://$WSL_IP:9092" >> "$DATA_DIR/$KAFKA_DIR/co
 sed -i'' -E 's/^( *address:).*/\1 0.0.0.0/' "$DATA_DIR/$FLINK_DIR/conf/config.yaml"
 sed -i'' -E 's/^( *bind-host:).*/\1 0.0.0.0/' "$DATA_DIR/$FLINK_DIR/conf/config.yaml"
 sed -i'' -E 's/^( *bind-address:).*/\1 0.0.0.0/' "$DATA_DIR/$FLINK_DIR/conf/config.yaml"
-
-#Install QuestDB
-
-# Check if QuestDB is already installed
-if ! command -v questdb &> /dev/null; then
-    echo "Installing QuestDB..."
-    # https://github.com/questdb/questdb/releases/download/9.0.1/questdb-9.0.1-no-jre-bin.tar.gz
-    curl -L "https://github.com/questdb/questdb/releases/download/$QUESTDB_VERSION/questdb-$QUESTDB_VERSION-no-jre-bin.tar.gz" -o questdb.tar.gz
-    tar -xzf questdb.tar.gz
-    rm questdb.tar.gz
-    mv questdb-$QUESTDB_VERSION-no-jre-bin "$QUESTDB_DIR"
-    echo "QuestDB installed successfully"
-else
-    echo "QuestDB is already installed"
-fi
 
 
 # Create startup script
@@ -188,8 +171,8 @@ sed -i '/^listeners=/c\listeners=PLAINTEXT://0.0.0.0:9092' "\$CONFIG"
 sed -i "/^advertised.listeners=/c\\advertised.listeners=PLAINTEXT://\$WSL_IP:9092" "\$CONFIG"
 "\$DATA_DIR/kafka-$KAFKA_VERSION/bin/zookeeper-server-start.sh" "\$DATA_DIR/kafka-$KAFKA_VERSION/config/zookeeper.properties" &
 sleep 6
-"\$DATA_DIR/$QUESTDB_DIR/bin/start-questdb.sh" &
-sleep 6
+"$DATA_DIR/$CLICKHOUSE_DIR/usr/bin/clickhouse" server --config-file="$DATA_DIR/$CLICKHOUSE_DIR/etc/clickhouse-server/config.xml" &
+sleep 5
 "\$DATA_DIR/kafka-$KAFKA_VERSION/bin/kafka-server-start.sh" "\$DATA_DIR/kafka-$KAFKA_VERSION/config/server.properties" &
 sleep 6
 "\$DATA_DIR/$FLINK_DIR/bin/start-cluster.sh"
@@ -248,13 +231,11 @@ echo "To start real-time-tools: sudo systemctl start real-time-tools"
 echo "To stop real-time-tools: sudo systemctl stop real-time-tools"
 sleep 2
 
-echo "Do you want to start EMQX | FLINK | KAFKA | QuestDB | MongoDB on startup? (y/n):"
+echo "Do you want to start EMQX | FLINK | KAFKA   on startup? (y/n):"
 read -n 1 -s start_on_startup
 if [ "$start_on_startup" = "y" ]; then
     sudo systemctl enable emqx
     sudo systemctl start emqx
-    sudo systemctl enable mongod
-    sudo systemctl start mongod
     sudo systemctl enable real-time-tools
     sudo systemctl start real-time-tools
 fi

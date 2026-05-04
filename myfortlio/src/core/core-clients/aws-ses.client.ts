@@ -25,8 +25,9 @@ export class SESClientUtil {
 
     // First call initializes
     SESClientUtil.initializing = (async () => {
-      const accessKeyId = await this.secretManager.get('AWS_ACCESS_KEY_ID');
-      const secretAccessKey = await this.secretManager.get('AWS_SECRET_ACCESS_KEY');
+      const awsConfig = await this.secretManager.get('AWS_CONFIG').then((res) => JSON.parse(res));
+      const accessKeyId = awsConfig.AWS_ACCESS_KEY_ID;
+      const secretAccessKey = awsConfig.AWS_SECRET_ACCESS_KEY;
 
       SESClientUtil.sesClient = new SESClient({
         credentials: { accessKeyId, secretAccessKey },

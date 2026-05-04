@@ -20,10 +20,10 @@ export class ZincLogger {
   private async initClient(): Promise<void> {
     const secrets = await this.secretManager.get('ZINC_CONFIG').then((res) => JSON.parse(res));
 
-    this.zincUrl = secrets.zincUrl;
-    this.zincIndex = secrets.zincIndex;
-    this.zincUsername = secrets.zincUsername;
-    this.zincPassword = secrets.zincPassword;
+    this.zincUrl = secrets.ZINC_URL;
+    this.zincIndex = secrets.ZINC_INDEX;
+    this.zincUsername = secrets.ZINC_USERNAME;
+    this.zincPassword = secrets.ZINC_PASSWORD;
 
     if (!this.zincUrl || !this.zincIndex) {
       throw new Error('Failed to fetch Zinc configuration');

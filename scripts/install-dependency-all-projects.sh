@@ -11,10 +11,10 @@ check_and_run() {
     if [ -f "$project_dir/package.json" ]; then
       echo "Found package.json in $project_dir"
       pushd "$project_dir" > /dev/null || { echo "Error: Could not navigate to $project_dir"; return 1; }
-      echo "Running npm install in $PWD"
-      npm install 
+      echo "Running bun install in $PWD"
+      bun install 
       if [ $? -ne 0 ]; then
-        echo "Error: npm install failed in $PWD"
+        echo "Error: bun install failed in $PWD"
         popd > /dev/null
         return 1
       fi

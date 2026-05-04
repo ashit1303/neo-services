@@ -17,8 +17,8 @@ export class OllamaClient {
 
   private async initClient(): Promise<void> {
     const secrets = await this.secretManager.get('OLLAMA_CONFIG').then((res) => JSON.parse(res));
-    this.baseUrl = secrets.baseUrl;
-    this.model = secrets.model;
+    this.baseUrl = secrets.HOST;
+    this.model = secrets.MODEL;
 
     if (!this.baseUrl || !this.model) {
       throw new Error('Failed to fetch Ollama configuration');

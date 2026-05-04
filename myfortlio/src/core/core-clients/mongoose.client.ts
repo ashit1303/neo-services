@@ -1,7 +1,7 @@
 import mongoose, { ConnectOptions } from 'mongoose';
-import { Config } from '../../interface';
 import { DatabaseConfigManager } from './all-db-config';
 import { initializeDefaultRoles, initializeDefaultUsers } from '../../seed-defaults';
+import { Config } from '../../interface/common.interface';
 
 export class MongooseClient {
   private config: Config;

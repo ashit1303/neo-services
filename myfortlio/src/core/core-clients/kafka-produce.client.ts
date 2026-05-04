@@ -33,7 +33,8 @@ export class KafkaProducer {
       brokers: JSON.parse(this.brokers),
       ssl: true,
       sasl: {
-        mechanism: 'scram-sha-512', username: this.username,
+        mechanism: 'scram-sha-512',
+        username: this.username,
         password: this.password,
       },
       logLevel: logLevel.INFO,

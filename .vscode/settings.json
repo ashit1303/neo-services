@@ -42,6 +42,9 @@
     "titleBar.inactiveForeground": "#e7e7e799"
   },
   "peacock.remoteColor": "#062378",
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
   // "[typescript]": {
   //   "editor.defaultFormatter": "vscode.typescript-language-features"
   // },

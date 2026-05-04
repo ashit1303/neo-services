@@ -1,6 +1,6 @@
 import * as net from 'net';
 import { SecretManager } from './secret-manager.client';
-import { Config } from '../../interface';
+import { Config } from '../../interface/common.interface';
 export class VectorLogger {
   private secretManager: SecretManager;
 
@@ -22,8 +22,8 @@ export class VectorLogger {
       .get('VECTOR_CONFIG')
       .then((res) => JSON.parse(res));
 
-    this.vectorHost = secrets.host;
-    this.vectorPort = Number(secrets.port);
+    this.vectorHost = secrets.HOST;
+    this.vectorPort = Number(secrets.PORT);
 
     if (!this.vectorHost || !this.vectorPort) {
       throw new Error('Failed to fetch Vector configuration');

@@ -13,9 +13,9 @@ done
 # Function to run lint:fix in a given directory
 run_lint() {
   local dir="$1"
-  echo -e "\n📦 Changes detected in '$dir'. Running npm run lint:fix..."
+  echo -e "\n📦 Changes detected in '$dir'. Running bun run lint:fix..."
 
-  if cd "$dir" && npm run lint:fix --if-present; then
+  if cd "$dir" && bun run lint:fix --if-present; then
     echo -e "✅ Linting in '$dir' completed successfully.\n"
 
     # Detect modified files after linting and stage only those

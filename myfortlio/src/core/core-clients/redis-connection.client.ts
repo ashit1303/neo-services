@@ -24,9 +24,9 @@ export class RedisConnection {
       return this.redisClient;
     }
 
-    const url = await this.secretManager.get('REDIS_URL');
+    const redisConfig = await this.secretManager.get('REDIS_CONFIG').then((res) => JSON.parse(res));
 
-    this.redisClient = createClient({ url });
+    this.redisClient = createClient({ url: redisConfig.HOST });
 
     await this.redisClient.connect();
 

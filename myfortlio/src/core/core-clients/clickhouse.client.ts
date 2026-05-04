@@ -1,8 +1,8 @@
-// npm install @clickhouse/client
+// bun install @clickhouse/client
 
 import { createClient, ClickHouseClient as CHClient } from '@clickhouse/client';
-import { Config, PaginationMeta } from '../../interface';
 import { DatabaseConfigManager } from './all-db-config';
+import { Config, PaginationMeta } from '../../interface/common.interface';
 
 export class ClickHouseClient {
   private client?: CHClient;

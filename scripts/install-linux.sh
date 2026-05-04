@@ -41,6 +41,8 @@ header() {
 # Install VictoriaMetrics
 # Install Zincsearch
 # Install SonicSearch
+# install K6 
+
 
 # Install Afwall+ or iptables
 EOF
@@ -53,7 +55,9 @@ print_message "Updating and upgrading packages..." info
 sudo apt update -y && apt upgrade -y
 print_message "Installing necessary packages..." info
 # sudo apt install tsu figlet openssh git curl tree wget nano nodejs termux-services iptables iproute2 nmap nginx arp-scan mariadb -y
-for package in figlet curl tree wget nano iptables iproute2 nmap arp-scan net-tools openssh git nginx nodejs mariadb-server redis victoria-metrics  ; do
+    curl -fsSL https://bun.com/install | bash # bun install 
+
+for package in figlet curl tree wget nano iptables iproute2 nmap arp-scan net-tools openssh git nginx mariadb-server redis victoria-metrics  ; do
     if command -v "$package" &>/dev/null; then
         print_message "$package is already installed... Skipping..." skip
         continue
@@ -71,11 +75,6 @@ for package in figlet curl tree wget nano iptables iproute2 nmap arp-scan net-to
     elif [ "$package" = "mariadb-server" ]; then
         if command --version mariadb &>/dev/null; then
             print_message "OpenSSH is already installed Skipping..." skip
-            continue
-        fi
-    elif [ "$package" = "nodejs" ]; then
-        if command -v node &>/dev/null; then
-            print_message "Node.js is already installed Skipping..." skip
             continue
         fi
     elif [ "$package" = "iproute2" ]; then
@@ -98,6 +97,27 @@ for package in figlet curl tree wget nano iptables iproute2 nmap arp-scan net-to
     fi
 done
 
+# Check if MongoDB is already installed
+if ! command -v mongod &> /dev/null; then
+    echo "Installing MongoDB..."
+    curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | sudo gpg -o /usr/share/keyrings/mongodb-server-7.0.gpg --dearmor
+    echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list
+    sudo apt update
+    sudo apt-get install -y mongodb-org
+
+    # Start and enable MongoDB service
+    sudo systemctl start mongod
+    sudo systemctl enable mongod
+    echo "MongoDB installed and started successfully"
+else
+    echo "MongoDB is already installed"
+    # Ensure MongoDB is running
+    if ! sudo systemctl is-active --quiet mongod; then
+        echo "Starting MongoDB service..."
+        sudo systemctl start mongod
+        sudo systemctl enable mongod
+    fi
+fi
 
 ZINC_URL= https://github.com/zincsearch/zincsearch/releases/download/v0.4.10/zincsearch_0.4.10_Linux_x86_64.tar.gz
 VECTOR_URL= https://packages.timber.io/vector/0.44.0/vector_0.44.0-1_amd64.deb
