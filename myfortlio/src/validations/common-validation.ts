@@ -1,4 +1,4 @@
-import * as z from 'zod';
+import { z } from './zod';
 
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
@@ -64,4 +64,3 @@ export const FilterQueryValidation = z.object({
   // filterKey: z.object({}).optional(),
 });
 export const EmailValidation = z.object({ email: z.string().trim().regex(emailRegex, { message: 'Invalid email format' }) });
-

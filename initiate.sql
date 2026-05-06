@@ -2,7 +2,7 @@
 # sql to create the database and tables and users with '%' access 
 # db name - neodrive username neodrive grant access for neodrive password neodriveisgenius
 
-# mysql -u root -p < init.sql
+# mariadb -u root -p < init.sql
 # mariadb > init.sql 
 CREATE DATABASE IF NOT EXISTS neodrive;
 

@@ -1,10 +1,12 @@
 import cors from 'cors';
 import helmet from 'helmet';
-import express from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import router from './src/router/index.route';
 import { mongoDbClient, mongooseClient } from './src/clients';
 import { corsOptionsDelegate } from './src/core/core-utils/cors.util';
 import { AppError } from './src/core/core-utils/err-util';
+import swaggerUi from 'swagger-ui-express';
+import { generateOpenApiDocs } from './src/swagger-docs/swagger.client';
 
 const app = express();
 
@@ -21,7 +23,15 @@ app.use(helmet.frameguard({ action: 'deny' }));
 app.use(cors(corsOptionsDelegate));
 app.options('*', cors(corsOptionsDelegate));
 
-app.use((err, _req, res, _next) => {
+// ... your app setup
+
+if (process.env.BUN_ENV !== 'prod') {
+  const docs = generateOpenApiDocs();
+  // If using Express-like framework:
+  app.use('/docs', swaggerUi.serve, swaggerUi.setup(docs));
+}
+
+app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   if (err instanceof AppError) {
     return res.status(err.code).json({
       success: false,

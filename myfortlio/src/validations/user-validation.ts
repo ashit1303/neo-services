@@ -1,4 +1,5 @@
-import * as z from 'zod';
+import { z } from './zod';
+
 import { IdValidation } from './common-validation';
 
 export const UserIdValidation = IdValidation('userId');

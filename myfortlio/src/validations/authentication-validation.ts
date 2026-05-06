@@ -1,4 +1,4 @@
-import * as z from 'zod';
+import { z } from './zod';
 
 export const MobileNumberValidation = z.object({
   mobileNumber: z.string().trim().length(12, 'Mobile Number must be 12 characters long'),

@@ -22,7 +22,7 @@
     "USERNAME": "",
     "NAME": ""
   },
-  "ZING_CONFIG": {
+  "ZINC_CONFIG": {
     "ZINC_URL": "http://127.0.0.1:4080",
     "ZINC_INDEX": "",
     "ZINC_USERNAME": "admin",
