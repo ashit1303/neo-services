@@ -8,7 +8,7 @@ import { readFileSync, mkdirSync, rmSync, existsSync } from 'fs';
 // import { join } from 'path';
 import { S3Client, PutObjectCommand, ListObjectsV2Command, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import * as mongo from 'mongodb';
-import { SecretManager } from 'fortlio-package';
+import { SecretManager } from '../../src/core/core-clients/secret-manager.client';
 const secretManger = new SecretManager(config);
 
 // Interface for our secrets
