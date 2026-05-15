@@ -27,6 +27,7 @@
     "@aws-sdk/s3-request-presigner": "^3.832.0",
     "@clickhouse/client": "^1.15.0",
     "axios": "^1.8.4",
+    "bullmq": "^5.76.8",
     "connect-redis": "^9.0.0",
     "cors": "^2.8.5",
     "csv-parse": "^6.1.0",

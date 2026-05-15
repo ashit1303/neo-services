@@ -5,3 +5,4 @@ export * as AUTHN_MSGS from './authn-msg.constants';
 export * as LEETCODE_MSGS from './leetcode-msg.constants';
 export * as SHORTNER_MSGS from './shortner-msg.constants';
 export * as AWS_MSGS from './aws-msg.constants';
+export * as COMMON_MSGS from './common-msg.constants';

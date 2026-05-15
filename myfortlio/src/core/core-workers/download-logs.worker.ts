@@ -1,7 +1,7 @@
 import { parentPort, workerData } from 'worker_threads';
 import { WorkerDataConfig, WorkerResponse } from '../../interface/worker-interface';
 import { DownloadHelper } from '../core-helper/download-helper';
-import { ERR_MSGS } from '../../constants/role-msg.constants';
+import { COMMON_MSGS } from '../../constants';
 
 const downloadLogsFileWorker = async () => {
   const { dbType, collectionName, pipeline, query, params, userId, fileName, config } = workerData as WorkerDataConfig;
@@ -21,7 +21,7 @@ const downloadLogsFileWorker = async () => {
   } catch (error: any) {
     console.error(error);
     const result: WorkerResponse = {
-      SUCCESS: false, error: error.message || ERR_MSGS.FAILED_WORKER_DOWNLOAD_LOGS_FILE,
+      SUCCESS: false, error: error.message || COMMON_MSGS.ERR.FAILED_WORKER_DOWNLOAD_LOGS_FILE,
     };
     parentPort?.postMessage(result);
   }
