@@ -19,6 +19,9 @@ export class UserRoutes {
   private initializeUserRoutes() {
     this.router.get('/getUsers', checkAccess('getUsers'), (req, res, next) => this.cacheMiddleware.cacheReqRes(req, res, next, 60 * 60), this.userController.getUsers);
     this.router.get('/getUserById', checkAccess('getUserById'), this.userController.getUserById);
+    this.router.post('/createUser', checkAccess('createUser'), this.userController.createUser);
+    this.router.put('/updateUserById', checkAccess('updateUserById'), this.userController.updateUserById);
+    this.router.delete('/deleteUserById', checkAccess('deleteUserById'), this.userController.deleteUserById);
 
   }
 

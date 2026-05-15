@@ -76,6 +76,7 @@ export default [
       // 'object-curly-newline': ['error', { ObjectExpression: 'never' }],
       'object-property-newline': ['error', { allowAllPropertiesOnSameLine: true }],
       'object-curly-spacing': ['error', 'always'],
+      "no-multi-spaces": "error",
     },
   }
 ];

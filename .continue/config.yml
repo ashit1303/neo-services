@@ -9,28 +9,30 @@ models:
     roles:
       - chat
       - edit
+      - autocomplete
 
-  - name: qwencoder-instruct
+  - name: Qwen2.5-Coder-0.5B
     provider: lmstudio
     apiBase: http://localhost:1234/v1/
-    model: qwen2.5-coder-1.5b-instruct
-    roles:
-      - chat
-      - edit
-
-  - name: gemma-1b-coder
-    provider: lmstudio
-    apiBase: http://localhost:1234/v1/
-    model: gemma-1b-coder
+    model: qwen2.5-coder-0.5b-instruct
     roles:
       - chat
       - edit
       - autocomplete
 
-  - name: qwen-0.6b-coder
+  - name: qwen3.5-0.8b
     provider: lmstudio
     apiBase: http://localhost:1234/v1/
-    model: qwen3-0.6b-coders
+    model: qwen3.5-0.8b
+    roles:
+      - chat
+      - edit
+      - autocomplete
+
+  - name: deepseek-r1
+    provider: lmstudio
+    apiBase: http://localhost:1234/v1/
+    model: deepseek-r1-distill-qwen-1.5b
     roles:
       - chat
       - edit
