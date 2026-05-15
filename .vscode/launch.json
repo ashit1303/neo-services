@@ -1,0 +1,20 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "bun",
+      "request": "launch",
+      "name": "Myfortlio Bun (Launch server.ts)",
+      "program": "${workspaceFolder}/myfortlio/server.ts",
+      "cwd": "${workspaceFolder}/myfortlio",
+      "runtime": "bun",
+      "runtimeArgs": [
+        "run"
+      ],
+      "args": [],
+      "watchMode": false,
+      "stopOnEntry": true,
+      "noDebug": false
+    }
+  ]
+}

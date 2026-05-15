@@ -1,0 +1,39 @@
+name: lmstudio-multiple
+version: 1.0.0
+schema: v1
+models:
+  - name: gemma
+    provider: lmstudio
+    apiBase: http://localhost:1234/v1/
+    model: google/gemma-3-1b
+    roles:
+      - chat
+      - edit
+      - autocomplete
+
+  - name: Qwen2.5-Coder-0.5B
+    provider: lmstudio
+    apiBase: http://localhost:1234/v1/
+    model: qwen2.5-coder-0.5b-instruct
+    roles:
+      - chat
+      - edit
+      - autocomplete
+
+  - name: qwen3.5-0.8b
+    provider: lmstudio
+    apiBase: http://localhost:1234/v1/
+    model: qwen3.5-0.8b
+    roles:
+      - chat
+      - edit
+      - autocomplete
+
+  - name: deepseek-r1
+    provider: lmstudio
+    apiBase: http://localhost:1234/v1/
+    model: deepseek-r1-distill-qwen-1.5b
+    roles:
+      - chat
+      - edit
+      - autocomplete

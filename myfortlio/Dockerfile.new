@@ -1,0 +1,19 @@
+# ---- Builder ----
+FROM oven/bun:alpine AS builder
+WORKDIR /app
+COPY myfortlio/package.json myfortlio/bun.lock ./
+RUN bun install
+COPY myfortlio/ .
+# Compile into binary
+RUN bun build src/index.ts --compile --outfile app
+
+
+# ---- Runtime ----
+FROM alpine:3.19
+# RUN apk add ffmpeg
+WORKDIR /app
+# Copy only the binary
+COPY --from=builder /app/app ./app
+EXPOSE 4010
+ENV BUN_ENV=dev
+CMD ["./app"]

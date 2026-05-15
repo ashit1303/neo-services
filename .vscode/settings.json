@@ -1,0 +1,48 @@
+{
+  "editor.tabSize": 2,
+  "editor.wordWrap": "on",
+  "editor.insertSpaces": true,
+  "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+  "editor.formatOnSave": true,
+  "editor.quickSuggestions": {
+    "strings": true
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+  "workbench.colorCustomizations": {
+    "activityBar.activeBackground": "#0831a9",
+    "activityBar.background": "#0831a9",
+    "activityBar.foreground": "#e7e7e7",
+    "activityBar.inactiveForeground": "#e7e7e799",
+    "activityBarBadge.background": "#000000",
+    "activityBarBadge.foreground": "#e7e7e7",
+    "commandCenter.border": "#e7e7e799",
+    "sash.hoverBorder": "#0831a9",
+    "statusBar.background": "#062378",
+    "statusBar.foreground": "#e7e7e7",
+    "statusBarItem.hoverBackground": "#0831a9",
+    "statusBarItem.remoteBackground": "#062378",
+    "statusBarItem.remoteForeground": "#e7e7e7",
+    "titleBar.activeBackground": "#062378",
+    "titleBar.activeForeground": "#e7e7e7",
+    "titleBar.inactiveBackground": "#06237899",
+    "titleBar.inactiveForeground": "#e7e7e799"
+  },
+  "peacock.remoteColor": "#062378",
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+}
