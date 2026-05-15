@@ -11,7 +11,7 @@ SETTINGS index_granularity = 2048;
 INSERT INTO logs (seq_id)
 SELECT seqId                    as seq_id,
 FROM s3(
-  'https://myfortlio.s3.ap-south-1.amazonaws.com/logs-parquet/logs-2025-08-*.parquet',
+  'https://fortlio.s3.ap-south-1.amazonaws.com/logs-parquet/logs-2025-08-*.parquet',
   'Parquet',
   extra_credentials(
     role_arn = 'arn:aws:iam::xxxxxx:role/clickhouse-s3-prod'

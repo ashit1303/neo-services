@@ -6,11 +6,11 @@ CREATE SECRET s3_secret (
   SECRET 'aws-secret',
   REGION 'ap-south-1'
 );
-select distinct column_type from (DESCRIBE SELECT * FROM read_parquet('s3://myfortlio/logs-parquet-dump/logs-2025-10-31.parquet'));
+select distinct column_type from (DESCRIBE SELECT * FROM read_parquet('s3://fortlio/logs-parquet-dump/logs-2025-10-31.parquet'));
 
 select count() from read_parquet('s3://bucket/path/to/*.parquet');
 
-SELECT count() FROM read_parquet('s3://myfortlio/logs-parquet/*.parquet') where m = 'xxx' ;
+SELECT count() FROM read_parquet('s3://fortlio/logs-parquet/*.parquet') where m = 'xxx' ;
 
 create table pincode_all_tagged
 SELECT
@@ -95,7 +95,7 @@ copy pincode_all_tagged to 'pincode_all_tagged.csv';
 
 ---------------------------------------------- TRIPS MIGRATION USING DUCKDB ----------------------------------------------
 mongoexport \
-  --uri="mongodb+srv://myfortlio-password@myfortlio-db.xxxxxx.mongodb.net/myfortlio-db" \
+  --uri="mongodb+srv://fortlio-password@fortlio-db.xxxxxx.mongodb.net/fortlio-db" \
   --collection=log \
   --type=csv \
   --fields="" \
@@ -123,7 +123,7 @@ COPY (
   FROM logs
   ORDER BY h, created_at
 )
-TO 's3://myfortlio/logs-parquet/logs-2026-01-28.parquet'
+TO 's3://fortlio/logs-parquet/logs-2026-01-28.parquet'
 WITH (
   FORMAT PARQUET,
   COMPRESSION 'ZSTD',

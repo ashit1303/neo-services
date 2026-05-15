@@ -243,7 +243,7 @@ export class DownloadHelper {
         </p>
         <p>
           Best regards,<br/>
-          Team Myfortlio Platform
+          Team Fortlio Platform
         </p>
       </div>
     `;

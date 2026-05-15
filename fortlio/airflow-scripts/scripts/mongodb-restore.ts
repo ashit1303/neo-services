@@ -5,7 +5,7 @@ import { config } from '../../config';
 
 // cd airflow-scripts
 // for new db 
-// usage BUN_ENV=dev bun run ./scripts/mongodb-restore.ts mongodb+srv://user:password@myfortlio-db-staging.hsldq6v.mongodb.net/?retryWrites=true&w=majority&appName=myfortlio-db-staging
+// usage BUN_ENV=dev bun run ./scripts/mongodb-restore.ts mongodb+srv://user:password@fortlio-db-staging.hsldq6v.mongodb.net/?retryWrites=true&w=majority&appName=fortlio-db-staging
 // for local
 // usage BUN_ENV=dev bun run ./scripts/mongodb-restore.ts local
 

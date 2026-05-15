@@ -19,7 +19,7 @@ pipeline {
         SSH_CREDENTIAL        = 'ec2-key'
         EC2_IP                = credentials('ec2-ip-prod')
         LOKI_URL              = credentials('loki-url-prod')
-        CONTAINER_NAME        = "${JOB_BASE_NAME.replaceFirst(/^myfortlio-/, '').replaceFirst(/-cicd-prod$/, '')}"
+        CONTAINER_NAME        = "${JOB_BASE_NAME.replaceFirst(/^fortlio-/, '').replaceFirst(/-cicd-prod$/, '')}"
         DOCKER_REGISTRY       = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
     }
 
@@ -34,20 +34,20 @@ pipeline {
             steps {
                 script {
                     def SERVICE_MAP = [
-                        'myfortlio-authentication-cicd-prod'     : [folder: 'authentication',            port: 4000],
-                        'myfortlio-user-cicd-prod'               : [folder: 'user-management',           port: 4010],
-                        'myfortlio-firmware-cicd-prod'           : [folder: 'firmware-management',       port: 4030],
-                        'myfortlio-showroom-cicd-prod'           : [folder: 'showroom-management',       port: 4040],
-                        'myfortlio-service-centre-cicd-prod'     : [folder: 'service-centre-management', port: 4050],
-                        'myfortlio-vehicle-cicd-prod'            : [folder: 'vehicle-management',        port: 4060],
-                        'myfortlio-application-setting-cicd-prod': [folder: 'application-setting',       port: 4070],
-                        'myfortlio-alert-config-cicd-prod'       : [folder: 'alert-config-management',   port: 4080],
-                        'myfortlio-activity-log-cicd-prod'       : [folder: 'activity-log-management',   port: 4090],
-                        'myfortlio-customer-cicd-prod'           : [folder: 'customer-management',       port: 4100],
-                        'myfortlio-jobs-cicd-prod'               : [folder: 'jobs-management',           port: 4130],
-                        'myfortlio-communication-cicd-prod'       : [folder: 'communication-service',   port: 4140],
-                        'myfortlio-external-api-cicd-prod'       : [folder: 'external-api-service',      port: 4150],
-                        'myfortlio-analytics-cicd-prod'          : [folder: 'analytics-service',         port: 4160]
+                        'fortlio-authentication-cicd-prod'     : [folder: 'authentication',            port: 4000],
+                        'fortlio-user-cicd-prod'               : [folder: 'user-management',           port: 4010],
+                        'fortlio-firmware-cicd-prod'           : [folder: 'firmware-management',       port: 4030],
+                        'fortlio-showroom-cicd-prod'           : [folder: 'showroom-management',       port: 4040],
+                        'fortlio-service-centre-cicd-prod'     : [folder: 'service-centre-management', port: 4050],
+                        'fortlio-vehicle-cicd-prod'            : [folder: 'vehicle-management',        port: 4060],
+                        'fortlio-application-setting-cicd-prod': [folder: 'application-setting',       port: 4070],
+                        'fortlio-alert-config-cicd-prod'       : [folder: 'alert-config-management',   port: 4080],
+                        'fortlio-activity-log-cicd-prod'       : [folder: 'activity-log-management',   port: 4090],
+                        'fortlio-customer-cicd-prod'           : [folder: 'customer-management',       port: 4100],
+                        'fortlio-jobs-cicd-prod'               : [folder: 'jobs-management',           port: 4130],
+                        'fortlio-communication-cicd-prod'       : [folder: 'communication-service',   port: 4140],
+                        'fortlio-external-api-cicd-prod'       : [folder: 'external-api-service',      port: 4150],
+                        'fortlio-analytics-cicd-prod'          : [folder: 'analytics-service',         port: 4160]
                     ]
                     def serviceFolder = SERVICE_MAP[env.JOB_BASE_NAME]
                     if (!serviceFolder) {
@@ -66,7 +66,7 @@ pipeline {
                     ]],
                     extensions: [[$class: 'SparseCheckoutPaths', sparseCheckoutPaths: [
                         [path: "${SERVICE_FOLDER}/"],
-                        [path: 'myfortlio-package/']
+                        [path: 'fortlio-package/']
                     ]]]
                 ])
             }

@@ -35,7 +35,7 @@ export class DatabaseConfigManager {
 
   async getMongoUri(): Promise<string> {
     // if (process.env.BUN_ENV === 'local') {
-    //   return 'mongodb://localhost:27017/myfortlio-local';
+    //   return 'mongodb://localhost:27017/fortlio-local';
     // }
     const dbConfig = await this.fetchDbConfig();
     return `mongodb+srv://${dbConfig.username}:${dbConfig.password}@${dbConfig.cluster}/${dbConfig.dbName}?retryWrites=true&w=majority`;

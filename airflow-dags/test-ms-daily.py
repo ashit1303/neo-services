@@ -13,7 +13,7 @@ user = os.getenv('USER', 'ashit')
 # SETTING EMAIL CONFIGURATIONS AND DEFAULT ARGUMENTS
 default_args = {
     'owner': 'ashit',
-    'email': ['myfortlio@obenelectric.com'],
+    'email': ['fortlio@obenelectric.com'],
     'email_on_failure': True,
     'email_on_retry': True,
     'email_on_success': True,

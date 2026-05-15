@@ -9,7 +9,7 @@ PGDATABASE="qdb"
 
 user=$(whoami)
 OUTPUT_DIR="/home/$user/.questdb/export"
-    S3_BUCKET="s3://myfortlio-questdb-prod/logs-parquet"
+    S3_BUCKET="s3://fortlio-questdb-prod/logs-parquet"
     WAIT_TIME=300   # 5 minutes
 
 # ====== DATE RANGE ======

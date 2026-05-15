@@ -19,7 +19,7 @@ pipeline {
         SSH_CREDENTIAL        = 'ec2-key'
         EC2_IP                = credentials('ec2-ip-dev')
         LOKI_URL              = credentials('loki-url-dev')
-        CONTAINER_NAME        = "${JOB_BASE_NAME.replaceFirst(/^myfortlio-/, '').replaceFirst(/-cicd-dev$/, '')}"
+        CONTAINER_NAME        = "${JOB_BASE_NAME.replaceFirst(/^fortlio-/, '').replaceFirst(/-cicd-dev$/, '')}"
         DOCKER_REGISTRY       = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
     }
 
@@ -34,7 +34,7 @@ pipeline {
             steps {
                 script {
                     def SERVICE_MAP = [
-                        'myfortlio-activity-log-cicd-dev'       : [folder: 'activity-log-management',   port: 4010],
+                        'fortlio-activity-log-cicd-dev'       : [folder: 'activity-log-management',   port: 4010],
                     ]
                     def serviceFolder = SERVICE_MAP[env.JOB_BASE_NAME]
                     if (!serviceFolder) {
@@ -53,7 +53,7 @@ pipeline {
                     ]],
                     extensions: [[$class: 'SparseCheckoutPaths', sparseCheckoutPaths: [
                         [path: "${SERVICE_FOLDER}/"],
-                        [path: 'myfortlio-package/']
+                        [path: 'fortlio-package/']
                     ]]]
                 ])
             }

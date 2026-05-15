@@ -2,7 +2,7 @@
 
 ## Test Microservices Daily DAG
 
-This DAG runs automated tests for all microservices in the Myfortlio platform on a daily basis.
+This DAG runs automated tests for all microservices in the Fortlio platform on a daily basis.
 
 ### Overview
 

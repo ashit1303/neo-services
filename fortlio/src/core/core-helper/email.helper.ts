@@ -44,7 +44,7 @@ export const sendLogsMail = async (url: string, collectionName: string, userId: 
         </p>
         <p>
           Best regards,<br/>
-          Team Myfortlio Platform
+          Team Fortlio Platform
         </p>
       </div>
     `;

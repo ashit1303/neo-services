@@ -6,9 +6,9 @@ current_date="$START_DATE"
 while [[ "$current_date" < "$END_DATE" || "$current_date" == "$END_DATE" ]]; do
     LOOP_DATE=$(date -d "$current_date" +"%Y-%m-%d")
     echo "=== Exporting data for: $LOOP_DATE ==="
-    IN_FILE="s3://myfortlio-questdb-prod/logs-parquet/logs-${LOOP_DATE}.parquet"
-    # IN_FILE="s3://myfortlio-logs-prod/logs-parquet-dump/logs-${LOOP_DATE}.parquet"
-    OUT_FILE="s3://myfortlio-logs-prod/logs-parquet/logs-${LOOP_DATE}.parquet"
+    IN_FILE="s3://fortlio-questdb-prod/logs-parquet/logs-${LOOP_DATE}.parquet"
+    # IN_FILE="s3://fortlio-logs-prod/logs-parquet-dump/logs-${LOOP_DATE}.parquet"
+    OUT_FILE="s3://fortlio-logs-prod/logs-parquet/logs-${LOOP_DATE}.parquet"
     # OUT_FILE="/home/${user}/parquet-tests/logs-${LOOP_DATE}.parquet"
 
     duckdb <<EOF

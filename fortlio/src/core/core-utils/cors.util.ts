@@ -6,11 +6,11 @@ export const corsOptionsDelegate = (req: any, callback: (err: Error | null, opti
 
   let domainMatch: RegExp;
   if (env.toLowerCase() === 'prod') {
-    domainMatch = /^https:\/\/ui\.myfortlio\.obenelectric\.com$/;
+    domainMatch = /^https:\/\/ui\.fortlio\.obenelectric\.com$/;
   } else if (env.toLowerCase() === 'stage') {
-    domainMatch = /^https:\/\/ui\.staging\.myfortlio\.obenelectric\.com$/;
+    domainMatch = /^https:\/\/ui\.staging\.fortlio\.obenelectric\.com$/;
   } else {
-    domainMatch = new RegExp(`^https://ui\\.${env.toLowerCase()}\\.myfortlio\\.obenelectric\\.com$`);
+    domainMatch = new RegExp(`^https://ui\\.${env.toLowerCase()}\\.fortlio\\.obenelectric\\.com$`);
   }
   const localhostMatch = /^http:\/\/localhost:\d+$/;
 

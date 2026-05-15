@@ -2,11 +2,11 @@
 FROM oven/bun:alpine AS builder
 WORKDIR /app
 # Copy only dependency files first (better caching)
-COPY myfortlio/package.json myfortlio/bun.lock ./
+COPY fortlio/package.json fortlio/bun.lock ./
 # Install all deps (including dev for build)
 RUN bun install
 # Copy source
-COPY myfortlio/ .
+COPY fortlio/ .
 # Build the app
 RUN bun run build
 

@@ -13,7 +13,7 @@ user = getpass.getuser()
 # SETTING EMAIL CONFIGURATIONS AND DEFAULT ARGUMENTS
 default_args = {
     'owner': 'ashit',  # Set owner dynamically
-    'email': ['ashit@myfortlio.com'],
+    'email': ['ashit@fortlio.com'],
     'email_on_failure': True,
     'email_on_retry': False,
     'email_on_success': False,

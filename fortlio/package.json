@@ -1,5 +1,5 @@
 {
-  "name": "myfortlio",
+  "name": "fortlio",
   "version": "1.0.0",
   "main": "server.ts",
   "type": "module",

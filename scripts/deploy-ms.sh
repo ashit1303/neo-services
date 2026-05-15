@@ -10,7 +10,7 @@ fi
 
 project_dir="./$1"
 container_name="$1"
-image_name="myfortlio-$1"
+image_name="fortlio-$1"
 TEMP_IMAGE_DIR="/tmp/docker_images"
 mkdir -p "$TEMP_IMAGE_DIR"
 
