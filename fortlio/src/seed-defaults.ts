@@ -54,7 +54,7 @@ export async function initializeDefaultRoles() {
     }
 
   } catch (error) {
-    throw fmtPrntErr(error, 111111, { apiName: 'initializeDefaultRoles' });
+    throw fmtPrntErr(error, 400, { apiName: 'initializeDefaultRoles' });
   }
 }
 
@@ -66,6 +66,6 @@ export async function initializeDefaultUsers() {
 
     await User.findOneAndUpdate(filter, update, options);
   } catch (error) {
-    throw fmtPrntErr(error, 111112, { apiName: 'initializeDefaultUsers' });
+    throw fmtPrntErr(error, 400, { apiName: 'initializeDefaultUsers' });
   }
 }

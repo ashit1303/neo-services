@@ -1,4 +1,3 @@
-
 import { openApiRegistry } from '../clients';
 import { EmailValidation } from '../validations/common-validation';
 
@@ -7,10 +6,50 @@ export function registerUserRoutes() {
 
   openApiRegistry.registerPath({
     method: 'get',
-    path: '/getUsers',
+    path: '/user/getUsers',
     responses: {
       200: {
         description: 'Users fetched',
+      },
+    },
+  });
+
+  openApiRegistry.registerPath({
+    method: 'get',
+    path: '/user/getUserById/:id',
+    responses: {
+      200: {
+        description: 'User fetched by ID',
+      },
+    },
+  });
+
+  openApiRegistry.registerPath({
+    method: 'post',
+    path: '/user/createUser',
+    responses: {
+      201: {
+        description: 'User created',
+      },
+    },
+  });
+
+  openApiRegistry.registerPath({
+    method: 'put',
+    path: '/user/updateUserById/:id',
+    responses: {
+      200: {
+        description: 'User updated',
+      },
+    },
+  });
+
+  openApiRegistry.registerPath({
+    method: 'delete',
+    path: '/user/deleteUserById/:id',
+    responses: {
+      204: {
+        description: 'User deleted',
       },
     },
   });
@@ -20,7 +59,7 @@ export function registerUserRoutes() {
 
 //   openApiRegistry.registerPath({
 //     method: 'get',
-//     path: '/getUsers',
+//     path: '/user/getUsers',
 
 //     summary: 'Get all users',
 //     description: 'Fetch a list of users with optional filters applied',

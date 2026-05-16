@@ -1,18 +1,26 @@
 
 import { ZodError } from 'zod';
+import { AxiosError } from 'axios';
 
 type StackEntry = {
   apiName: string;
   msg?: string;
   debugValues?: Record<string, any>;
 };
+export class CustomError extends Error {
+  actualError?: Error;
+  stackEntry?: StackEntry;
+  axiosPayload?: AxiosDebug;
+  status?: number;
+  userMessage?: string;
 
-type WrappedError = {
-  error: Error;
-  customStack: StackEntry[];
-};
-
-import { AxiosError } from 'axios';
+  constructor(actualError: Error, message: string, status = 500) {
+    super(message);
+    this.name = 'CustomError';
+    this.status = status;
+    this.actualError = actualError;
+  }
+}
 
 type AxiosDebug = { url?: string; method?: string; status?: number; responseData?: any; params?: any; requestData?: any; };
 
@@ -25,130 +33,41 @@ const extractAxiosDetails = (error: AxiosError): AxiosDebug => ({
   requestData: error.config?.data,
 });
 
-export class AppError extends Error {
-  code: number;
-  status: string;
-  stackPath?: StackEntry[];
-  errorStack?: string;
-
-  constructor(message: string, code = 500, status = 'error', extra?: any) {
-    super(message);
-    this.code = code;
-    this.status = status;
-
-    if (extra) {
-      this.stackPath = extra.stackPath;
-      this.errorStack = extra.errorStack;
-    }
+export function fmtErr(inputErr: any, stackEntry: StackEntry): CustomError {
+  inputErr.stackEntry ? inputErr.stackEntry.push(stackEntry) : inputErr.stackEntry = [stackEntry];
+  if (inputErr instanceof ZodError) {
+    inputErr.message = inputErr.issues.map(e => e.message).join(', ');
   }
-}
-
-// ✅ Normalize any input into a proper Error
-const normalizeError = (err: any): Error => {
-  if (err instanceof Error) { return err; }
-  return new Error(typeof err === 'string' ? err : JSON.stringify(err));
-};
-
-// ✅ Extract message safely
-const getErrorMessage = (error: any): string => {
-  if (error instanceof ZodError) {
-    return error.issues.map(e => e.message).join(', ');
+  let axiosError;
+  if (inputErr instanceof AxiosError) {
+    axiosError = extractAxiosDetails(inputErr);
   }
-  if (error instanceof AxiosError) {
-    return (
-      error.response?.data?.message ||
-      error.message ||
-      'Axios request failed'
-    );
+  if (axiosError) {
+    inputErr.axiosPayload = axiosError;
   }
-  if (typeof error?.message === 'string') {
-    return error.message;
-  }
-  if (typeof error === 'string') {
-    return error;
-  }
-  return JSON.stringify(error);
-};
-
-// ✅ Keep original stack untouched
-const getErrorStack = (error: Error): string => (error.stack || '').replace(/\s+/g, ' ');
-
-// ✅ Safe stringify
-const safeStringify = (value: any): string => {
-  try {
-    return JSON.stringify(value);
-  } catch {
-    return '"[Circular/Object]"';
-  }
-};
-
-// ✅ Single-line formatter
-const toSingleLine = (value: any): string => {
-  if (value === null || value === undefined) { return ''; }
-  return String(value).replace(/\s+/g, ' ').trim();
-};
-
-// ✅ Build log line
-const buildLogLine = (apiName: string, errorMessage: string, customStack: StackEntry[], errorStack: string) => [
-  `ERROR_CODE:${apiName} `,
-  `MESSAGE:${toSingleLine(errorMessage)} `,
-  `STACK:${safeStringify(customStack)} `,
-  `ERROR_STACK:${toSingleLine(errorStack)} `,
-].join(' | ');
-
-export function fmtErr(input: any, stackEntry: StackEntry): WrappedError {
-  const isWrapped = input?.error && input?.customStack;
-
-  const baseError = isWrapped ? input.error : normalizeError(input);
-
-  // ✅ extract axios debug if applicable
-  let debugValues = stackEntry.debugValues || {};
-
-  if (baseError instanceof AxiosError) {
-    debugValues = {
-      ...debugValues,
-      axios: extractAxiosDetails(baseError),
-    };
-  }
-
-  const entry: StackEntry = {
-    apiName: stackEntry.apiName,
-    msg: stackEntry.msg || getErrorMessage(baseError),
-    debugValues,
-  };
-
-  if (isWrapped) {
-    input.customStack.push(entry);
-    return input;
-  }
-
-  return {
-    error: baseError,
-    customStack: [entry],
-  };
+  return inputErr;
 }
 
 // ✅ Final formatter (top-level only)
-export function fmtPrntErr(input: any, statusCode = 500, stackEntry: StackEntry): AppError {
-  const wrapped = fmtErr(input, stackEntry);
+export function fmtPrntErr(input: any, statusCode = 500, stackEntry: StackEntry): CustomError {
+  const finalError = fmtErr(input, stackEntry);
+  const customErr = new CustomError(input, finalError.message, statusCode);
 
-  const errorMessage = getErrorMessage(wrapped.error);
-  const errorStack = getErrorStack(wrapped.error);
+  // customErr.stackEntry = finalError.stackEntry;
+  // customErr.axiosPayload = finalError.axiosPayload;
+  customErr.actualError = input;
+  customErr.userMessage = stackEntry.msg;
 
-  const fullError = buildLogLine(
-    stackEntry.apiName,
-    errorMessage,
-    wrapped.customStack,
-    errorStack,
-  );
+  console.error('---------------------START---------------------');
+  console.error(JSON.stringify({
+    API_NAME: stackEntry.apiName,
+    MESSAGE: finalError.message,
+    ERROR: customErr,
+    STATUS: statusCode,
+  }));
+  console.error('--------------------ORIGINAL OUTPUT---------------------');
+  console.error(input);
+  console.error('---------------------END---------------------');
 
-  console.error('-----------------------------------------');
-  console.error(fullError);
-  console.error('-----------------------------------------');
-
-  return new AppError(errorMessage, statusCode, 'error', {
-    stackPath: wrapped.customStack,
-    errorStack,
-  });
+  return customErr;
 }
-

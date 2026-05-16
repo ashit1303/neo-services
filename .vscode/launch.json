@@ -4,16 +4,16 @@
     {
       "type": "bun",
       "request": "launch",
-      "name": "Myfortlio Bun (Launch server.ts)",
-      "program": "${workspaceFolder}/myfortlio/server.ts",
-      "cwd": "${workspaceFolder}/myfortlio",
+      "name": "Fortlio Bun (Launch server.ts)",
+      "program": "${workspaceFolder}/fortlio/server.ts",
+      "cwd": "${workspaceFolder}/fortlio",
       "runtime": "bun",
       "runtimeArgs": [
         "run"
       ],
       "args": [],
       "watchMode": false,
-      "stopOnEntry": true,
+      "stopOnEntry": false,
       "noDebug": false
     }
   ]

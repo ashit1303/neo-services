@@ -16,7 +16,7 @@ class Routes {
   }
 
   private initializeRoutes() {
-    this.router.use('/me', userRoutes); // ROUTE CODE : 1000
+    this.router.use('/user', userRoutes); // ROUTE CODE : 1000
     this.router.use('/services', this.cacheMiddleware.cacheReqRes.bind(this.cacheMiddleware), servicesRoutes); // ROUTE CODE : 2000
     this.router.use('/ask', fortiLLMRoutes); // ROUTE CODE : 3000
     this.router.use('/auth', authnRoutes); // ROUTE CODE : 4000

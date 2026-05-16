@@ -4,7 +4,7 @@ import express, { NextFunction, Request, Response } from 'express';
 import router from './src/router/index.route';
 import { mongoDbClient, mongooseClient } from './src/clients';
 import { corsOptionsDelegate } from './src/core/core-utils/cors.util';
-import { AppError } from './src/core/core-utils/err-util';
+import { CustomError } from './src/core/core-utils/err-util';
 import swaggerUi from 'swagger-ui-express';
 import { generateOpenApiDocs } from './src/swagger-docs/swagger.client';
 
@@ -21,7 +21,7 @@ app.use(helmet.referrerPolicy({ policy: 'no-referrer' }));
 app.use(helmet.frameguard({ action: 'deny' }));
 
 app.use(cors(corsOptionsDelegate));
-app.options('*', cors(corsOptionsDelegate));
+app.options('*any', cors(corsOptionsDelegate));
 
 // ... your app setup
 
@@ -31,24 +31,8 @@ if (process.env.BUN_ENV !== 'prod') {
   app.use('/docs', swaggerUi.serve, swaggerUi.setup(docs));
 }
 
-app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-  if (err instanceof AppError) {
-    return res.status(err.code).json({
-      success: false,
-      message: err.message,
-      stackPath: err.stackPath, // optional (hide in prod)
-    });
-  }
-
-  return res.status(500).json({
-    success: false,
-    message: 'Internal Server Error',
-    stackPath: err,
-  });
-});
-
 // Routes initialization
-app.use('/service', router);
+app.use(router);
 
 // Start the server and listen on the specified port
 const PORT = process.env.PORT || 4020;
@@ -68,4 +52,19 @@ process.on('SIGINT', async () => {
   await mongoDbClient.close();
   await mongooseClient.close();
   process.exit(0);
+});
+
+app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+  if (err instanceof CustomError) {
+    return res.status(err?.status || 500).json({
+      success: false,
+      message: err.userMessage,
+    });
+  }
+
+  return res.status(500).json({
+    success: false,
+    message: 'Internal Server Error',
+    stackPath: err,
+  });
 });

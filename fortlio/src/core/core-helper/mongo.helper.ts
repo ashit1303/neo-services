@@ -6,7 +6,8 @@ import { IFilter } from '../../interface/common.interface';
 
 export const getDataByFilter = async <T>(filterQuery: IFilter, basepipeline: PipelineStage[], searchFields: string[], model: mongoose.Model<T>) => {
   try {
-    const { search = '', sortBy = 'createdAt', sortOrder = 'desc', page = FILTER_CONSTANTS.page, limit = FILTER_CONSTANTS.limit, skip = ((page - 1) * limit) || 0, fromDate = '', toDate = '' } = filterQuery;
+    const { search = '', sortBy = 'createdAt', sortOrder = 'desc', page = FILTER_CONSTANTS.page, pageSize = FILTER_CONSTANTS.pageSize, fromDate = '', toDate = '' } = filterQuery;
+    const limit = Number(pageSize), skip = ((Number(page) - 1) * Number(pageSize)) || 0, pageNumber = Number(page);
     const matchStage: FilterQuery<any> = {};
 
     if (fromDate && toDate) {
@@ -46,9 +47,9 @@ export const getDataByFilter = async <T>(filterQuery: IFilter, basepipeline: Pip
       data,
       totalCount,
       totalPages: totalPages,
-      currentPage: page,
-      hasPrev: page > 1,
-      hasNext: page < totalPages,
+      currentPage: pageNumber,
+      hasPrev: pageNumber > 1,
+      hasNext: pageNumber < totalPages,
     };
   } catch (error) {
     throw fmtErr(error, { msg: 'Failed to fetch data by filter query', apiName: 'getDataByFilter', debugValues: { filterQuery, searchFields } });
@@ -57,7 +58,8 @@ export const getDataByFilter = async <T>(filterQuery: IFilter, basepipeline: Pip
 
 export const getDataByFilterSecondary = async <T>(filterQuery: IFilter, basepipeline: PipelineStage[], searchFields: string[], model: mongoose.Model<T>) => {
   try {
-    const { search = '', sortBy = 'createdAt', sortOrder = 'desc', page = FILTER_CONSTANTS.page, limit = FILTER_CONSTANTS.limit, skip = ((page - 1) * limit) || 0, fromDate = '', toDate = '' } = filterQuery;
+    const { search = '', sortBy = 'createdAt', sortOrder = 'desc', page = FILTER_CONSTANTS.page, pageSize = FILTER_CONSTANTS.pageSize, fromDate = '', toDate = '' } = filterQuery;
+    const limit = Number(pageSize), skip = ((Number(page) - 1) * Number(pageSize)) || 0, pageNumber = Number(page);
     const matchStage: FilterQuery<any> = {};
 
     if (fromDate && toDate) {
@@ -94,9 +96,9 @@ export const getDataByFilterSecondary = async <T>(filterQuery: IFilter, basepipe
       data,
       totalCount,
       totalPages: totalPages,
-      currentPage: page,
-      hasPrev: page > 1,
-      hasNext: page < totalPages,
+      currentPage: pageNumber,
+      hasPrev: pageNumber > 1,
+      hasNext: pageNumber < totalPages,
     };
   } catch (error) {
     throw fmtErr(error, { msg: 'Failed to fetch data by filter query', apiName: 'getDataByFilterSecondary', debugValues: { filterQuery, basepipeline, searchFields, model } });
@@ -115,7 +117,8 @@ export const runQueryMongoDriverSecondary = async (mongoDB: Db, collectionName: 
 
 export const getDataWithLookupsAfterFilter = async <T>(filterQuery: IFilter, basepipeline: PipelineStage[], lookupPipeline: any[], searchFields: string[], model: mongoose.Model<T>) => {
   try {
-    const { search = '', sortBy = 'createdAt', sortOrder = 'desc', page = FILTER_CONSTANTS.page, limit = FILTER_CONSTANTS.limit, skip = ((page - 1) * limit) || 0, fromDate = '', toDate = '' } = filterQuery;
+    const { search = '', sortBy = 'createdAt', sortOrder = 'desc', page = FILTER_CONSTANTS.page, pageSize = FILTER_CONSTANTS.pageSize, fromDate = '', toDate = '' } = filterQuery;
+    const limit = Number(pageSize), skip = ((Number(page) - 1) * Number(pageSize)) || 0, pageNumber = Number(page);
     const matchStage: FilterQuery<any> = {};
 
     if (fromDate && toDate) {
@@ -159,9 +162,9 @@ export const getDataWithLookupsAfterFilter = async <T>(filterQuery: IFilter, bas
       data,
       totalCount,
       totalPages: totalPages,
-      currentPage: page,
-      hasPrev: page > 1,
-      hasNext: page < totalPages,
+      currentPage: pageNumber,
+      hasPrev: pageNumber > 1,
+      hasNext: pageNumber < totalPages,
     };
   } catch (error) {
     throw fmtErr(error, { msg: 'Failed to fetch data by filter query', apiName: 'getDataWithLookupsAfterFilter', debugValues: { filterQuery } });

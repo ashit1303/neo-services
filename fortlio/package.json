@@ -4,7 +4,7 @@
   "main": "server.ts",
   "type": "module",
   "scripts": {
-    "local": "BUN_ENV=local bun server.ts --inspect ",
+    "local": "BUN_ENV=local bun --watch --inspect run server.ts",
     "prod": "BUN_ENV=prod bun server.ts",
     "dev": "BUN_ENV=dev bun server.ts",
     "watch": "BUN_ENV=local bun --watch server.ts",
@@ -33,7 +33,7 @@
     "csv-parse": "^6.1.0",
     "dayjs": "^1.11.20",
     "ejs": "^5.0.2",
-    "express": "^4.18.2",
+    "express": "^5.2.1",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.3",
     "kafkajs": "^2.2.4",

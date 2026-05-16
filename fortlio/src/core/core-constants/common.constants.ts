@@ -4,11 +4,10 @@ export const ACCESSTOKEN_EXPIRY = {
 };
 
 export const FILTER_CONSTANTS = {
-  page: 1,
-  limit: 50,
+  page: '1',
+  pageSize: '10',
   sortBy: 'createdAt',
   sortOrder: 'desc',
-  skip: 0,
   fromDate: '',
   toDate: '',
 };

@@ -7,6 +7,7 @@ import { RoleService } from '../services/role.service';
 import { fmtRes } from '../core/core-utils/res-util';
 import { fmtErr, fmtPrntErr } from '../core/core-utils/err-util';
 import { USER_MSGS } from '../constants';
+import { IFilter } from '../interface/common.interface';
 
 class UserController {
   userService: UserService;
@@ -17,20 +18,18 @@ class UserController {
     this.roleService = new RoleService();
   }
 
-  async getUsers(req: Request, res: Response) {
+  getUsers = async (req: Request, res: Response) => {
     try {
-      const { filterQuery } = req.query;
-
-      FilterQueryValidation.parse(filterQuery);
-
-      const users = await this.userService.getUsers(filterQuery as any);
+      const { page, pageSize } = req.query as IFilter;
+      FilterQueryValidation.parse({ page, pageSize });
+      const users = await this.userService.getUsers({ page, pageSize });
 
       return fmtRes(res, users);
     } catch (error: any) {
       throw fmtPrntErr(error, 400, { msg: USER_MSGS.ERR.FAILED_TO_FETCH_USERS, apiName: 'getUsers' });
     }
-  }
-  async getUserById(req: Request, res: Response) {
+  };
+  getUserById = async (req: Request, res: Response) => {
     try {
       const { userId } = req.params;
 
@@ -48,9 +47,9 @@ class UserController {
     } catch (error: any) {
       throw fmtPrntErr(error, 400, { msg: USER_MSGS.ERR.FAILED_TO_FETCH_USER, apiName: 'getUserById' });
     }
-  }
+  };
 
-  async createUser(req: Request, res: Response) {
+  createUser = async (req: Request, res: Response) => {
     try {
       const input: IUserCreate = req.body;
 
@@ -89,8 +88,8 @@ class UserController {
     } catch (error: any) {
       throw fmtPrntErr(error, 400, { msg: USER_MSGS.ERR.FAILED_TO_CREATE_USER, apiName: 'createUser' });
     }
-  }
-  async updateUserById(req: Request, res: Response) {
+  };
+  updateUserById = async (req: Request, res: Response) => {
     try {
       const input: IUserUpdate = req.body;
 
@@ -137,8 +136,8 @@ class UserController {
     } catch (error: any) {
       throw fmtPrntErr(error, 400, { msg: USER_MSGS.ERR.FAILED_TO_UPDATE_USER, apiName: 'updateUserById' });
     }
-  }
-  async deleteUserById(req: Request, res: Response) {
+  };
+  deleteUserById = async (req: Request, res: Response) => {
     try {
       const { userId } = req.params;
 
@@ -164,6 +163,6 @@ class UserController {
     } catch (error: any) {
       throw fmtPrntErr(error, 400, { msg: USER_MSGS.ERR.FAILED_TO_DELETE_USER, apiName: 'deleteUserById' });
     }
-  }
+  };
 }
 export default UserController;

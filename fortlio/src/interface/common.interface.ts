@@ -13,14 +13,16 @@ export interface AuthError {
 }
 
 export interface IFilter {
-    page: number;
-    limit: number;
-    sortBy: string;
-    sortOrder: string;
-    search: string;
-    skip: number;
-    fromDate: string;
-    toDate: string;
+    isDownload?: boolean;
+    page?: string;
+    pageSize?: string;
+    skip?: number;
+    limit?: number;
+    fromDate?: string;
+    toDate?: string;
+    search?: string;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
 }
 export interface DatabaseConfig {
     cluster: string;

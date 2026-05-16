@@ -62,5 +62,5 @@ export const FilterQueryValidation = z.object({
   fromDate: DateValidation('From date').optional(),
   toDate: DateValidation('To date').optional(),
   // filterKey: z.object({}).optional(),
-});
+}).optional();
 export const EmailValidation = z.object({ email: z.string().trim().regex(emailRegex, { message: 'Invalid email format' }) });
