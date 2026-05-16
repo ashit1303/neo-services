@@ -10,7 +10,7 @@ class FortiLLMController {
     this.obiLLMService = new FortiLLMService();
   }
 
-  async getAnswerFromQuestion(req: FortiLLMRequest, res: Response) {
+  getAnswerFromQuestion = async (req: FortiLLMRequest, res: Response) => {
     try {
       // Rolling summary memory (sliding compression window)
       const { question } = req.query as { question: string };
@@ -48,15 +48,15 @@ class FortiLLMController {
       res.write(`data: ${JSON.stringify({ d: true })}\n\n`);
       res.end();
     }
-  }
+  };
 
-  async getSession(_req: Request, res: Response) {
+  getSession = async (_req: Request, res: Response) => {
     try {
       const sessionId = crypto.randomBytes(32).toString('hex');
       res.cookie('sessionId', sessionId, {
         httpOnly: true,
-        secure: true,     // HTTPS only
-        sameSite: 'lax',  // CSRF protection
+        secure: true, // HTTPS only
+        sameSite: 'lax', // CSRF protection
         maxAge: 2 * 60 * 60 * 1000,
       });
       res.json({ success: true });
@@ -64,7 +64,7 @@ class FortiLLMController {
       console.error(error);
       res.status(500).json({ error: 'Internal server error' });
     }
-  }
+  };
 }
 
 export default FortiLLMController;

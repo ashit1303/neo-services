@@ -12,7 +12,7 @@ class ShortnerController {
     this.shortenerService = new ShortenerService();
   }
 
-  async redirectToUrl(req: Request, res: Response) {
+  redirectToUrl = async (req: Request, res: Response) => {
     try {
       const { shortValue } = req.params;
       const url = await this.shortenerService.fetchUrl(shortValue);
@@ -20,9 +20,9 @@ class ShortnerController {
     } catch (error: any) {
       throw fmtPrntErr(error, 400, { msg: SHORTNER_MSGS.ERR.FAILED_TO_REDIRECT_TO_SHORT_URL, apiName: 'redirectToUrl' });
     }
-  }
+  };
 
-  async isAvailable(req: Request, res: Response) {
+  isAvailable = async (req: Request, res: Response) => {
     try {
       const { shortCode } = req.query as { shortCode: string };
       const data = await this.shortenerService.checkIfAvailable(shortCode);
@@ -30,9 +30,9 @@ class ShortnerController {
     } catch (error: any) {
       throw fmtPrntErr(error, 400, { msg: SHORTNER_MSGS.ERR.FAILED_TO_CHECK_SHORT_URL_AVAILABILITY, apiName: 'isAvailable' });
     }
-  }
+  };
 
-  async createShortUrl(req: Request, res: Response) {
+  createShortUrl = async (req: Request, res: Response) => {
     try {
       const { shortCode, originalUrl } = req.query as { shortCode: string; originalUrl: string; };
       const data = await this.shortenerService.createShortUrl(shortCode, originalUrl);
@@ -40,9 +40,9 @@ class ShortnerController {
     } catch (error: any) {
       throw fmtPrntErr(error, 400, { msg: SHORTNER_MSGS.ERR.FAILED_TO_CREATE_SHORT_URL, apiName: 'createShortUrl' });
     }
-  }
+  };
 
-  async createShortUrlByGuest(req: Request, res: Response) {
+  createShortUrlByGuest = async (req: Request, res: Response) => {
     try {
       const { originalUrl } = req.query as { originalUrl: string };
       const shortCode = generateShortCode();
@@ -51,7 +51,7 @@ class ShortnerController {
     } catch (error: any) {
       throw fmtPrntErr(error, 400, { msg: SHORTNER_MSGS.ERR.FAILED_TO_CREATE_SHORT_URL_BY_GUEST, apiName: 'createShortUrlByGuest' });
     }
-  }
+  };
 
 }
 

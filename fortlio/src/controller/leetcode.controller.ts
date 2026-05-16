@@ -12,7 +12,7 @@ class LeetcodeController {
     this.leetCodeService = new LeetCodeService(config);
   }
 
-  async explainLeetQuest(req: Request, res: Response) {
+  explainLeetQuest = async (req: Request, res: Response) => {
     const { url, codelang } = req.query as { url: string; codelang: ICodeLang };
 
     try {
@@ -32,9 +32,9 @@ class LeetcodeController {
     } catch (error: any) {
       throw fmtErr(error, { msg: 'Failed to explain question', apiName: 'explainLeetQuest', debugValues: { url, codelang } });
     }
-  }
+  };
 
-  async searchLeetCodeQuests(req: Request, res: Response) {
+  searchLeetCodeQuests = async (req: Request, res: Response) => {
     const { searchKey } = req.query as { searchKey: string };
 
     try {
@@ -46,9 +46,9 @@ class LeetcodeController {
     } catch (error: any) {
       throw fmtPrntErr(error, 400, { msg: 'Failed to search question', apiName: 'searchLeetCodeQuests', debugValues: { searchKey } });
     }
-  }
+  };
 
-  async searchLeetCodeQuestsTypesense(req: Request, res: Response) {
+  searchLeetCodeQuestsTypesense = async (req: Request, res: Response) => {
     const { searchKey } = req.query as { searchKey: string };
 
     try {
@@ -60,7 +60,7 @@ class LeetcodeController {
       throw fmtPrntErr(error, 400, { msg: 'Failed to search question', apiName: 'searchLeetCodeQuestsTypesense', debugValues: { searchKey } });
 
     }
-  }
+  };
 }
 
 export default LeetcodeController;

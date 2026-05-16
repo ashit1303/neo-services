@@ -24,7 +24,7 @@ class AuthnController {
     this.authnService = new AuthnService();
   }
 
-  async sendOtp(req: Request, res: Response) {
+  sendOtp = async (req: Request, res: Response) => {
     const email = req.query.email as string;
 
     try {
@@ -42,7 +42,7 @@ class AuthnController {
     }
   };
 
-  async resendOtp(req: Request, res: Response) {
+  resendOtp = async (req: Request, res: Response) => {
     const email = req.query.email as string;
 
     try {
@@ -54,7 +54,7 @@ class AuthnController {
     }
   };
 
-  async verifyOtp(req: Request, res: Response) {
+  verifyOtp = async (req: Request, res: Response) => {
     const { email, otp } = req.body;
     try {
       VerifyOtpValidation.parse({ email, otp });
@@ -97,7 +97,7 @@ class AuthnController {
     }
   };
 
-  async authenticate(req: Request, res: Response) {
+  authenticate = async (req: Request, res: Response) => {
     const token = req.headers.authorization as string;
     try {
       TokenValidation.parse({ token });
@@ -138,7 +138,7 @@ class AuthnController {
     }
   };
 
-  async refreshToken(req: Request, res: Response) {
+  refreshToken = async (req: Request, res: Response) => {
     const { refreshToken } = req.body;
     try {
       TokenValidation.parse({ token: refreshToken });
@@ -163,7 +163,7 @@ class AuthnController {
     }
   };
 
-  async logout(req: Request, res: Response) {
+  logout = async (req: Request, res: Response) => {
     const { userId, sessionId } = req.query as { userId: string, sessionId: string };
 
     try {
