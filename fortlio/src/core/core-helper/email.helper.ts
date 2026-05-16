@@ -3,7 +3,7 @@ import dayjs from 'dayjs';
 import { SecretManager } from '../core-clients/secret-manager.client';
 import { SESHelper } from './ses-helper';
 import { UserService } from '../../services/user.service';
-import { fmtErr } from '../core-utils/err-util';
+import { AppError } from '../core-utils/err-util';
 import { config } from '../../../config';
 import { AWS_MSGS, USER_MSGS } from '../../constants';
 const userService = new UserService();
@@ -17,7 +17,7 @@ export const sendLogsMail = async (url: string, collectionName: string, userId: 
     const user = await userService.getUserByUserId(userId);
 
     if (!user) {
-      throw fmtErr(null, { msg: USER_MSGS.ERR.USER_NOT_FOUND, apiName: 'sendLogsMail.getUserByUserId', debugValues: { userId } });
+      throw new AppError(null, { msg: USER_MSGS.ERR.USER_NOT_FOUND, apiName: 'sendLogsMail.getUserByUserId', debugValues: { userId } });
     }
 
     const email = user.email;
@@ -52,7 +52,7 @@ export const sendLogsMail = async (url: string, collectionName: string, userId: 
     await sesHelper.sendEmail(fromEmail, email, `Requested data of ${formattedCollectionName} [${istFromDate} - ${istToDate}]`, emailBody);
 
     return `Email sent successfully to ${email}`;
-  } catch (error) {
-    throw fmtErr(error, { msg: AWS_MSGS.ERR.FAILED_TO_SEND_EMAIL, apiName: 'sendLogsMail', debugValues: { url, collectionName, userId, fromDate, toDate } });
+  } catch (error: any) {
+    throw new AppError(error.message || 'unknown', { msg: AWS_MSGS.ERR.FAILED_TO_SEND_EMAIL, apiName: 'sendLogsMail', debugValues: { url, collectionName, userId, fromDate, toDate } });
   }
 };

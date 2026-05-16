@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import { NextFunction, Request, Response } from 'express';
 import { SecretManager } from '../core/core-clients/secret-manager.client';
 import { Config } from '../interface/common.interface';
+import { AppError } from '../core/core-utils/err-util';
 
 export class ChecksumVerifyMiddleware {
   private secretManager: SecretManager;
@@ -20,7 +21,7 @@ export class ChecksumVerifyMiddleware {
     const raw = req.headers['x-checksum'];
 
     if (!raw) {
-      throw new Error('CHECKSUM_MISSING: Checksum header is missing');
+      throw new AppError('CHECKSUM_MISSING: Checksum header is missing');
     }
 
     const receivedChecksum = Array.isArray(raw) ? raw[0] : raw;
@@ -37,7 +38,7 @@ export class ChecksumVerifyMiddleware {
       Buffer.from(expectedChecksum, 'hex'),
     );
     if (!isValid) {
-      throw new Error('CHECKSUM_INVALID: Checksum verification failed');
+      throw new AppError('CHECKSUM_INVALID: Checksum verification failed');
     }
     next();
   }

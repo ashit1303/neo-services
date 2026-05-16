@@ -27,7 +27,7 @@ const main = async () => {
     await updateCFGValues(secretValue);
     await send();
   }
-  catch (error) {
+  catch (error: any) {
     console.error('Failed to send notification', error);
   }
 };

@@ -1,6 +1,6 @@
 import { Server, WebSocket } from 'ws';
 import { generateUUID } from '../core-utils';
-import { fmtErr } from '../core-utils/err-util';
+import { AppError } from '../core-utils/err-util';
 
 export class WebSocketHandler<T extends { action: string; topic?: string }> {
   private wss: Server;
@@ -76,7 +76,7 @@ export class WebSocketHandler<T extends { action: string; topic?: string }> {
           } else {
             ws.send(JSON.stringify({ status: 'error', message: `Unknown action: ${parsedMessage.action}` }));
           }
-        } catch (error) {
+        } catch (error: any) {
           this.handleError(ws, error);
         }
       });
@@ -101,11 +101,11 @@ export class WebSocketHandler<T extends { action: string; topic?: string }> {
     try {
       const parsedMessage = JSON.parse(message);
       if (!parsedMessage.action) {
-        throw fmtErr(null, { msg: 'Action is required in the message', apiName: 'validateMessage', debugValues: { message } });
+        throw new AppError('Action is required in the message', { msg: 'Action is required in the message', apiName: 'validateMessage', debugValues: { message } });
       }
       return parsedMessage;
-    } catch (error) {
-      throw fmtErr(error, { msg: 'Invalid message format', apiName: 'validateMessage', debugValues: { message } });
+    } catch (error: any) {
+      throw new AppError(error.message || 'unknown', { msg: 'Invalid message format', apiName: 'validateMessage', debugValues: { message } });
     }
   }
 

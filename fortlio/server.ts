@@ -4,7 +4,7 @@ import express, { NextFunction, Request, Response } from 'express';
 import router from './src/router/index.route';
 import { mongoDbClient, mongooseClient } from './src/clients';
 import { corsOptionsDelegate } from './src/core/core-utils/cors.util';
-import { CustomError } from './src/core/core-utils/err-util';
+import { AppError } from './src/core/core-utils/err-util';
 import swaggerUi from 'swagger-ui-express';
 import { generateOpenApiDocs } from './src/swagger-docs/swagger.client';
 
@@ -42,7 +42,7 @@ app.listen(PORT, async () => {
     await mongooseClient.connect();
 
     console.info(`🚀 Server ready at port ${PORT}`);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error starting the server:', error);
   }
 });
@@ -55,10 +55,10 @@ process.on('SIGINT', async () => {
 });
 
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-  if (err instanceof CustomError) {
-    return res.status(err?.status || 500).json({
+  if (err instanceof AppError) {
+    return res.status(err?.statusCode || 500).json({
       success: false,
-      message: err.userMessage,
+      message: err?.userMessage || 'Internal Server Error',
     });
   }
 

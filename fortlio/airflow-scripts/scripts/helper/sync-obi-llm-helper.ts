@@ -35,7 +35,7 @@ export const syncKnowledgeBase = async (secrets: any) => {
     const response = await client.send(command);
     console.info('Ingestion started:', response);
     return response;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to start ingestion:', error);
     throw error;
   }
@@ -155,7 +155,7 @@ export const syncFolderToS3 = async (s3Client: any, folderPath: string, bucketNa
     console.info('⬆️ Uploading new files...');
     await uploadFolderToS3(s3Client, bucketName, folderPath, prefix);
     console.info('✅ Sync complete!');
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Sync failed:', error);
   }
 };
@@ -163,7 +163,7 @@ export const syncFolderToS3 = async (s3Client: any, folderPath: string, bucketNa
 export const updateFileWithPayload = async (_data: any) => {
   // const dataFile = convertToJson(data);
   try {
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error writing files:', error);
   }
 };

@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { LeetCodeService } from '../services/leetcode.service';
 import { ICodeLang } from '../interface/leetcode.interface';
 import { config } from '../../config';
-import { fmtErr, fmtPrntErr } from '../core/core-utils/err-util';
+import { AppError } from '../core/core-utils/err-util';
 import { fmtRes } from '../core/core-utils/res-util';
 
 class LeetcodeController {
@@ -30,7 +30,7 @@ class LeetcodeController {
       }
       return fmtRes(res, explain);
     } catch (error: any) {
-      throw fmtErr(error, { msg: 'Failed to explain question', apiName: 'explainLeetQuest', debugValues: { url, codelang } });
+      throw new AppError(error.message || 'unknown', { msg: 'Failed to explain question', apiName: 'explainLeetQuest', debugValues: { url, codelang } }, 400);
     }
   };
 
@@ -44,7 +44,7 @@ class LeetcodeController {
       const resStmts = await this.leetCodeService.getQuestByIds(result);
       return fmtRes(res, resStmts);
     } catch (error: any) {
-      throw fmtPrntErr(error, 400, { msg: 'Failed to search question', apiName: 'searchLeetCodeQuests', debugValues: { searchKey } });
+      throw new AppError(error.message || 'unknown', { msg: 'Failed to search question', apiName: 'searchLeetCodeQuests', debugValues: { searchKey } }, 400);
     }
   };
 
@@ -57,7 +57,7 @@ class LeetcodeController {
       const resp = result.hits.map((hit: Typesense.SearchClient['apiCall']['hits'][0]) => hit.document);
       return fmtRes(res, resp);
     } catch (error: any) {
-      throw fmtPrntErr(error, 400, { msg: 'Failed to search question', apiName: 'searchLeetCodeQuestsTypesense', debugValues: { searchKey } });
+      throw new AppError(error.message || 'unknown', { msg: 'Failed to search question', apiName: 'searchLeetCodeQuestsTypesense', debugValues: { searchKey } }, 400);
 
     }
   };

@@ -2,6 +2,7 @@
 import { config } from '../../config';
 import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
 import { ClickHouseClient } from '../../src/core/core-clients/clickhouse.client';
+import { AppError } from '../../src/core/core-utils/err-util';
 const clickhouseClient = new ClickHouseClient(config);
 
 const last4Day = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000);
@@ -41,7 +42,7 @@ const clickhouseToS3Parquet = async (): Promise<String> => {
     await clickhouseClient.execute(clickhouseToS3ParquetQuery(configSecret));
 
     return 'Successfully created s3 parquet from ' + last5Days + ' to ' + last4Day;;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed', error);
     return 'Failed';
   }
@@ -58,10 +59,10 @@ const main = async () => {
     const output = await clickhouseToS3Parquet();
     console.info('Task Executed:', output);
     if (output === 'Failed') {
-      throw new Error('Failed');
+      throw new AppError('Failed');
     }
     process.exit(0);
-  } catch (error) {
+  } catch (error: any) {
     console.error(' Failed', error);
     process.exit(1);
   }

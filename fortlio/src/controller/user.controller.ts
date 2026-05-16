@@ -5,7 +5,7 @@ import { UserCreateValidation, UserIdValidation, UserUpdateValidation } from '..
 import { IRoleDoc, IUserCreate, IUserDoc, IUserUpdate } from '../interface/user-interface';
 import { RoleService } from '../services/role.service';
 import { fmtRes } from '../core/core-utils/res-util';
-import { fmtErr, fmtPrntErr } from '../core/core-utils/err-util';
+import { AppError } from '../core/core-utils/err-util';
 import { USER_MSGS } from '../constants';
 import { IFilter } from '../interface/common.interface';
 
@@ -26,7 +26,7 @@ class UserController {
 
       return fmtRes(res, users);
     } catch (error: any) {
-      throw fmtPrntErr(error, 400, { msg: USER_MSGS.ERR.FAILED_TO_FETCH_USERS, apiName: 'getUsers' });
+      throw new AppError(error.message || 'unknown', { msg: USER_MSGS.ERR.FAILED_TO_FETCH_USERS, apiName: 'getUsers' }, 400);
     }
   };
   getUserById = async (req: Request, res: Response) => {
@@ -45,7 +45,7 @@ class UserController {
 
       return fmtRes(res, user);
     } catch (error: any) {
-      throw fmtPrntErr(error, 400, { msg: USER_MSGS.ERR.FAILED_TO_FETCH_USER, apiName: 'getUserById' });
+      throw new AppError(error.message || 'unknown', { msg: USER_MSGS.ERR.FAILED_TO_FETCH_USER, apiName: 'getUserById' }, 400);
     }
   };
 
@@ -86,7 +86,7 @@ class UserController {
         },
       });
     } catch (error: any) {
-      throw fmtPrntErr(error, 400, { msg: USER_MSGS.ERR.FAILED_TO_CREATE_USER, apiName: 'createUser' });
+      throw new AppError(error.message || 'unknown', { msg: USER_MSGS.ERR.FAILED_TO_CREATE_USER, apiName: 'createUser' }, 400);
     }
   };
   updateUserById = async (req: Request, res: Response) => {
@@ -98,7 +98,8 @@ class UserController {
       const user = await this.userService.getUserByUserId(input.userId);
 
       if (!user) {
-        fmtErr(null, { msg: USER_MSGS.ERR.USER_NOT_FOUND, apiName: 'updateUserById' });
+        console
+          .error(null, { msg: USER_MSGS.ERR.USER_NOT_FOUND, apiName: 'updateUserById' });
       }
 
       // email must be unique
@@ -106,7 +107,8 @@ class UserController {
         const existingEmail = await this.userService.getUserByEmail(input.email);
 
         if (existingEmail) {
-          fmtErr(null, { msg: USER_MSGS.ERR.EMAIL_ALREADY_EXISTS, apiName: 'updateUserById' });
+          console
+            .error(null, { msg: USER_MSGS.ERR.EMAIL_ALREADY_EXISTS, apiName: 'updateUserById' });
         }
       }
 
@@ -114,7 +116,8 @@ class UserController {
         const role = await this.roleService.getRoleById(input.roleId);
 
         if (!role) {
-          fmtErr(null, { msg: USER_MSGS.ERR.ROLE_NOT_FOUND, apiName: 'updateUserById' });
+          console
+            .error(null, { msg: USER_MSGS.ERR.ROLE_NOT_FOUND, apiName: 'updateUserById' });
         }
       }
 
@@ -134,7 +137,7 @@ class UserController {
         },
       });
     } catch (error: any) {
-      throw fmtPrntErr(error, 400, { msg: USER_MSGS.ERR.FAILED_TO_UPDATE_USER, apiName: 'updateUserById' });
+      throw new AppError(error.message || 'unknown', { msg: USER_MSGS.ERR.FAILED_TO_UPDATE_USER, apiName: 'updateUserById' }, 400);
     }
   };
   deleteUserById = async (req: Request, res: Response) => {
@@ -161,7 +164,7 @@ class UserController {
         message: response,
       });
     } catch (error: any) {
-      throw fmtPrntErr(error, 400, { msg: USER_MSGS.ERR.FAILED_TO_DELETE_USER, apiName: 'deleteUserById' });
+      throw new AppError(error.message || 'unknown', { msg: USER_MSGS.ERR.FAILED_TO_DELETE_USER, apiName: 'deleteUserById' }, 400);
     }
   };
 }

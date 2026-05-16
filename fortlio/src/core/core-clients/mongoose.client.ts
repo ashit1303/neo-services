@@ -22,7 +22,7 @@ export class MongooseClient {
       console.info('✅ MongoDB Connected Successfully');
       await initializeDefaultRoles();
       await initializeDefaultUsers();
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ MongoDB Connection Failed', error);
       process.exit(1);
     }
@@ -32,7 +32,7 @@ export class MongooseClient {
     try {
       await mongoose.connection.close();
       console.info('📡 MongoDB Connection Closed');
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Error Closing MongoDB Connection', error);
     }
   }

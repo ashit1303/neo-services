@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { Config } from '../../interface/common.interface';
 import { SecretManager } from './secret-manager.client';
+import { AppError } from '../core-utils/err-util';
 
 export class ZincLogger {
   private secretManager: SecretManager;
@@ -26,7 +27,7 @@ export class ZincLogger {
     this.zincPassword = secrets.ZINC_PASSWORD;
 
     if (!this.zincUrl || !this.zincIndex) {
-      throw new Error('Failed to fetch Zinc configuration');
+      throw new AppError('Failed to fetch Zinc configuration');
     }
 
     this.initialized = true;

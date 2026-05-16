@@ -5,7 +5,7 @@ import { SecretManager } from '../core/core-clients/secret-manager.client';
 import { config } from '../../config';
 import { IUserAccesstokenDetails } from '../interface/user-interface';
 import { AuthRequest } from '../interface/authn.interface';
-import { fmtErr } from '../core/core-utils/err-util';
+import { AppError } from '../core/core-utils/err-util';
 import { AUTHN_MSGS } from '../constants';
 export class AuthnService {
 
@@ -27,11 +27,11 @@ export class AuthnService {
     try {
       const JWT_SECRET = await this.secretManager.get('JWT_SECRET');
       return jwt.verify(token, JWT_SECRET) as AuthRequest;
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof jwt.TokenExpiredError) {
-        throw fmtErr(error, { msg: AUTHN_MSGS.ERR.TOKEN_EXPIRED, apiName: 'verifyToken' });
+        throw new AppError(error.message || 'unknown', { msg: AUTHN_MSGS.ERR.TOKEN_EXPIRED, apiName: 'verifyToken' });
       }
-      throw fmtErr(error, { msg: AUTHN_MSGS.ERR.INVALID_TOKEN, apiName: 'verifyToken' });
+      throw new AppError(error.message || 'unknown', { msg: AUTHN_MSGS.ERR.INVALID_TOKEN, apiName: 'verifyToken' });
     }
   };
 
@@ -40,8 +40,8 @@ export class AuthnService {
       const response = jwt.decode(token, { complete: true, json: true });
 
       return response?.payload as AuthRequest;
-    } catch (error) {
-      throw fmtErr(error, { msg: AUTHN_MSGS.ERR.INVALID_TOKEN, apiName: 'decodeToken' });
+    } catch (error: any) {
+      throw new AppError(error.message || 'unknown', { msg: AUTHN_MSGS.ERR.INVALID_TOKEN, apiName: 'decodeToken' });
     }
   };
 
@@ -49,11 +49,11 @@ export class AuthnService {
     try {
       const token = accesstoken?.split(' ')[1]; // Extract token from Authorization header
       if (!token) {
-        throw fmtErr(null, { msg: AUTHN_MSGS.ERR.TOKEN_MISSING, apiName: 'authenticate.no_accesstoken', debugValues: { token } });
+        throw new AppError(AUTHN_MSGS.ERR.TOKEN_MISSING, { msg: AUTHN_MSGS.ERR.TOKEN_MISSING, apiName: 'authenticate.no_accesstoken', debugValues: { token } });
       }
       const payload = await this.verifyToken(token); // Verify JWT token
       if (!payload) {
-        throw fmtErr(null, { msg: AUTHN_MSGS.ERR.INVALID_TOKEN, apiName: 'authenticate.invalid_token', debugValues: { token } });
+        throw new AppError(AUTHN_MSGS.ERR.INVALID_TOKEN, { msg: AUTHN_MSGS.ERR.INVALID_TOKEN, apiName: 'authenticate.invalid_token', debugValues: { token } });
       }
       const { userId, sessionId, name, role } = payload;
       // Check Redis for the session IDs associated with the userId
@@ -62,8 +62,8 @@ export class AuthnService {
       }
 
       return { userId, sessionId, name, role };
-    } catch (error) {
-      throw fmtErr(error, { msg: AUTHN_MSGS.ERR.FAILED_TO_AUTHENTICATE_USER, apiName: 'authenticate', debugValues: { error } });
+    } catch (error: any) {
+      throw new AppError(error.message || 'unknown', { msg: AUTHN_MSGS.ERR.FAILED_TO_AUTHENTICATE_USER, apiName: 'authenticate', debugValues: { error } });
     }
   };
 }

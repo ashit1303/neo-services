@@ -1,7 +1,7 @@
 import { BedrockAgentRuntimeClient, RetrieveAndGenerateCommand } from '@aws-sdk/client-bedrock-agent-runtime';
 import { config } from '../../config';
 import { secretManger } from '../clients';
-import { fmtErr } from '../core/core-utils/err-util';
+import { AppError } from '../core/core-utils/err-util';
 
 class FortiLLMService {
 
@@ -29,8 +29,8 @@ class FortiLLMService {
       });
 
       return { command, client };
-    } catch (error) {
-      throw fmtErr(error, { msg: 'Failed to get answer from knowledge base', apiName: 'getAnswerFromKnowledgeBase' });
+    } catch (error: any) {
+      throw new AppError(error.message || 'unknown', { msg: 'Failed to get answer from knowledge base', apiName: 'getAnswerFromKnowledgeBase' });
     }
   }
 }

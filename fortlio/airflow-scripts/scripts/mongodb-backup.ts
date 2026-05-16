@@ -9,6 +9,7 @@ import { readFileSync, mkdirSync, rmSync, existsSync } from 'fs';
 import { S3Client, PutObjectCommand, ListObjectsV2Command, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import * as mongo from 'mongodb';
 import { SecretManager } from '../../src/core/core-clients/secret-manager.client';
+import { AppError } from '../../src/core/core-utils/err-util';
 const secretManger = new SecretManager(config);
 
 // Interface for our secrets
@@ -63,12 +64,12 @@ const createMongoDump = async (): Promise<string> => {
 
     await client.close();
     return dumpDir;
-  } catch (error) {
+  } catch (error: any) {
     // Cleanup on failure
     if (existsSync(dumpDir)) {
       rmSync(dumpDir, { recursive: true, force: true });
     }
-    throw new Error(`MongoDB dump failed: ${error}`);
+    throw new AppError(`MongoDB dump failed: ${error}`);
   }
 };
 
@@ -80,11 +81,11 @@ const compressDirectory = (directory: string): string => {
     const tarCreateCmd = `tar -czf ${tarPath} -C ${directory} .`;
     execSync(tarCreateCmd, { stdio: 'inherit' });
     return tarPath;
-  } catch (error) {
+  } catch (error: any) {
     if (existsSync(tarPath)) {
       rmSync(tarPath);
     }
-    throw new Error(`Compression failed: ${error}`);
+    throw new AppError(`Compression failed: ${error}`);
   }
 };
 
@@ -130,8 +131,8 @@ const uploadToS3 = async (filePath: string): Promise<void> => {
         }));
       }
     }
-  } catch (error) {
-    throw new Error(`S3 operation failed: ${error}`);
+  } catch (error: any) {
+    throw new AppError(`S3 operation failed: ${error}`);
   }
 };
 
@@ -157,7 +158,7 @@ const main = async () => {
     rmSync(tarPath);
 
     console.info('Backup process completed successfully');
-  } catch (error) {
+  } catch (error: any) {
     console.error('Backup process failed:', error);
     process.exit(1);
   }

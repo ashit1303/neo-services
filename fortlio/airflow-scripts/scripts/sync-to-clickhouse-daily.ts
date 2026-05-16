@@ -3,6 +3,7 @@ import { PipelineStage } from 'mongoose';
 import { config } from '../../config';
 import { MongoDBClient } from '../../src/core/core-clients/mongodb.client';
 import { ClickHouseClient } from '../../src/core/core-clients/clickhouse.client';
+import { AppError } from '../../src/core/core-utils/err-util';
 const mongoClient = new MongoDBClient(config);
 const clickhouseClient = new ClickHouseClient(config);
 
@@ -50,7 +51,7 @@ const syncLatestCreatedOrUpdatedData = async (): Promise<String> => {
     console.info('Failed Imeis', failedImei.join(','));
 
     return 'Successfully inserted ' + count + ' data';
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed', error);
     return 'Failed';
   }
@@ -65,10 +66,10 @@ const main = async () => {
     const output = await syncLatestCreatedOrUpdatedData();
     console.info('Task Executed:', output);
     if (output === 'Failed') {
-      throw new Error('Failed');
+      throw new AppError('Failed');
     }
     process.exit(0);
-  } catch (error) {
+  } catch (error: any) {
     console.error(' Failed', error);
     process.exit(1);
   }

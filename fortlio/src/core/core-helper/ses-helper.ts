@@ -3,7 +3,7 @@ import nodemailer from 'nodemailer';
 import { SESClientUtil } from '../core-clients/aws-ses.client';
 import { AWS_MSGS } from '../../constants';
 import { Config } from '../../interface/common.interface';
-import { fmtErr } from '../core-utils/err-util';
+import { AppError } from '../core-utils/err-util';
 export class SESHelper {
   private sesClientUtil: SESClientUtil;
 
@@ -21,8 +21,8 @@ export class SESHelper {
       const sesClient = await this.sesClientUtil.getSESClient();
       await sesClient.send(createTemplate);
       return templateId;
-    } catch (error) {
-      throw fmtErr(error, { msg: AWS_MSGS.ERR.FAILED_TO_CREATE_SES_TEMPLATE, apiName: 'createSESTemplate' });
+    } catch (error: any) {
+      throw new AppError(error.message || 'unknown', { msg: AWS_MSGS.ERR.FAILED_TO_CREATE_SES_TEMPLATE, apiName: 'createSESTemplate' });
     }
   }
 
@@ -45,8 +45,8 @@ export class SESHelper {
       await sesClient.send(createTemplate);
 
       return templateId;
-    } catch (error) {
-      throw fmtErr(error, { msg: AWS_MSGS.ERR.FAILED_TO_UPDATE_SES_TEMPLATE, apiName: 'updateSESTemplate' });
+    } catch (error: any) {
+      throw new AppError(error.message || 'unknown', { msg: AWS_MSGS.ERR.FAILED_TO_UPDATE_SES_TEMPLATE, apiName: 'updateSESTemplate' });
     }
   }
 
@@ -59,8 +59,9 @@ export class SESHelper {
       const getTemplate = new GetTemplateCommand(templateDetails);
       const template = await sesClient.send(getTemplate);
       return template;
-    } catch (error) {
-      fmtErr(error, { msg: AWS_MSGS.ERR.FAILED_TO_GET_SES_TEMPLATE, apiName: 'getSESTemplate' });
+    } catch (error: any) {
+      console
+        .error(error, { msg: AWS_MSGS.ERR.FAILED_TO_GET_SES_TEMPLATE, apiName: 'getSESTemplate' });
     }
   }
 
@@ -92,8 +93,8 @@ export class SESHelper {
       const sesClient = await this.sesClientUtil.getSESClient();
       const response: SendEmailResponse = await sesClient.send(sendEmailCommand);
       return response;
-    } catch (error) {
-      throw fmtErr(error, { msg: AWS_MSGS.ERR.FAILED_TO_SEND_EMAIL, apiName: 'sendEmail' });
+    } catch (error: any) {
+      throw new AppError(error.message || 'unknown', { msg: AWS_MSGS.ERR.FAILED_TO_SEND_EMAIL, apiName: 'sendEmail' });
     }
   }
 
@@ -129,8 +130,8 @@ export class SESHelper {
       });
 
       console.info('Email sent successfully');
-    } catch (error) {
-      throw fmtErr(error, { msg: AWS_MSGS.ERR.FAILED_TO_SEND_EMAIL, apiName: 'sendSesEmail' });
+    } catch (error: any) {
+      throw new AppError(error.message || 'unknown', { msg: AWS_MSGS.ERR.FAILED_TO_SEND_EMAIL, apiName: 'sendSesEmail' });
     }
   }
 }

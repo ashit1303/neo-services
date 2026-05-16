@@ -1,5 +1,5 @@
 import { PipelineStage } from 'mongoose';
-import { Config } from '.';
+import { Config } from './common.interface';
 
 export interface WorkerData {
   dbType: 'mongodb' | 'clickhouse';

@@ -1,4 +1,4 @@
-import { fmtErr } from '../core-utils/err-util';
+import { AppError } from '../core-utils/err-util';
 import mongoose, { FilterQuery, PipelineStage } from 'mongoose';
 import { Db } from 'mongodb';
 import { FILTER_CONSTANTS } from '../core-constants/common.constants';
@@ -51,8 +51,8 @@ export const getDataByFilter = async <T>(filterQuery: IFilter, basepipeline: Pip
       hasPrev: pageNumber > 1,
       hasNext: pageNumber < totalPages,
     };
-  } catch (error) {
-    throw fmtErr(error, { msg: 'Failed to fetch data by filter query', apiName: 'getDataByFilter', debugValues: { filterQuery, searchFields } });
+  } catch (error: any) {
+    throw new AppError(error.message || 'unknown', { msg: 'Failed to fetch data by filter query', apiName: 'getDataByFilter', debugValues: { filterQuery, searchFields } });
   }
 };
 
@@ -100,8 +100,8 @@ export const getDataByFilterSecondary = async <T>(filterQuery: IFilter, basepipe
       hasPrev: pageNumber > 1,
       hasNext: pageNumber < totalPages,
     };
-  } catch (error) {
-    throw fmtErr(error, { msg: 'Failed to fetch data by filter query', apiName: 'getDataByFilterSecondary', debugValues: { filterQuery, basepipeline, searchFields, model } });
+  } catch (error: any) {
+    throw new AppError(error.message || 'unknown', { msg: 'Failed to fetch data by filter query', apiName: 'getDataByFilterSecondary', debugValues: { filterQuery, basepipeline, searchFields, model } });
   }
 };
 
@@ -110,8 +110,8 @@ export const runQueryMongoDriverSecondary = async (mongoDB: Db, collectionName: 
 
     return await mongoDB.collection(collectionName).aggregate(basepipeline).toArray();
 
-  } catch (error) {
-    throw fmtErr(error, { msg: 'Failed to fetch data by filter query', apiName: 'runQueryMongoDriverSecondary', debugValues: { collectionName, basepipeline } });
+  } catch (error: any) {
+    throw new AppError(error.message || 'unknown', { msg: 'Failed to fetch data by filter query', apiName: 'runQueryMongoDriverSecondary', debugValues: { collectionName, basepipeline } });
   }
 };
 
@@ -166,8 +166,8 @@ export const getDataWithLookupsAfterFilter = async <T>(filterQuery: IFilter, bas
       hasPrev: pageNumber > 1,
       hasNext: pageNumber < totalPages,
     };
-  } catch (error) {
-    throw fmtErr(error, { msg: 'Failed to fetch data by filter query', apiName: 'getDataWithLookupsAfterFilter', debugValues: { filterQuery } });
+  } catch (error: any) {
+    throw new AppError(error.message || 'unknown', { msg: 'Failed to fetch data by filter query', apiName: 'getDataWithLookupsAfterFilter', debugValues: { filterQuery } });
   }
 };
 

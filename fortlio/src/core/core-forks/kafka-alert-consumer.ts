@@ -1,7 +1,7 @@
 import { Kafka, EachBatchPayload, Consumer, logLevel } from 'kafkajs';
 import { SecretManager } from '../core-clients/secret-manager.client';
-import { Config } from '../../interface';
 import { KAKFA_TOPICS } from '../core-constants/common.constants';
+import { Config } from '../../interface/common.interface';
 
 type Pending = {
   messages: EachBatchPayload['batch']['messages'];

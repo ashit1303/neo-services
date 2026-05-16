@@ -1,7 +1,7 @@
 import { config } from '../../../config';
 import { RedisService } from './redis-service.client';
 import { ACCESSTOKEN_EXPIRY } from '../core-constants/common.constants';
-import { Config } from '../../interface';
+import { Config } from '../../interface/common.interface';
 
 class SessionManager {
   private static instance: SessionManager;

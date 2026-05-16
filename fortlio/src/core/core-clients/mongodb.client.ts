@@ -1,6 +1,7 @@
 import { MongoClient, Db, ClientSession } from 'mongodb';
 import { DatabaseConfigManager } from './all-db-config';
 import { Config } from '../../interface/common.interface';
+import { AppError } from '../core-utils/err-util';
 
 export class MongoDBClient {
   private commonClient?: MongoClient;
@@ -14,8 +15,8 @@ export class MongoDBClient {
 
   private getOptions() {
     return {
-      maxPoolSize: 20,        // pool of 20
-      maxIdleTimeMS: 30000,   // 30 seconds
+      maxPoolSize: 20, // pool of 20
+      maxIdleTimeMS: 30000, // 30 seconds
     };
   }
 
@@ -35,7 +36,7 @@ export class MongoDBClient {
   async startSession(): Promise<ClientSession> {
     await this.connect(); // Ensure client is connected
     if (!this.commonClient) {
-      throw new Error('Failed to initialize MongoDB client');
+      throw new AppError('Failed to initialize MongoDB client');
     }
     return this.commonClient.startSession();
   }

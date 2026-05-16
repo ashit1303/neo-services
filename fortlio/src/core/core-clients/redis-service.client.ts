@@ -1,4 +1,5 @@
 import { Config } from '../../interface/common.interface';
+import { AppError } from '../core-utils/err-util';
 import { RedisConnection } from './redis-connection.client';
 
 export class RedisService {
@@ -12,7 +13,7 @@ export class RedisService {
     const redisClient = await this.redisConnection.getClient();
 
     if (!redisClient) {
-      throw new Error('Redis client not initialized');
+      throw new AppError('Redis client not initialized');
     }
 
     await redisClient.set(key, value, {
@@ -24,7 +25,7 @@ export class RedisService {
     const redisClient = await this.redisConnection.getClient();
 
     if (!redisClient) {
-      throw new Error('Redis client not initialized');
+      throw new AppError('Redis client not initialized');
     }
 
     const data = await redisClient.get(key);
@@ -40,7 +41,7 @@ export class RedisService {
     const redisClient = await this.redisConnection.getClient();
 
     if (!redisClient) {
-      throw new Error('Redis client not initialized');
+      throw new AppError('Redis client not initialized');
     }
 
     await redisClient.del(key);
@@ -50,7 +51,7 @@ export class RedisService {
     const redisClient = await this.redisConnection.getClient();
 
     if (!redisClient) {
-      throw new Error('Redis client not initialized');
+      throw new AppError('Redis client not initialized');
     }
 
     await this.delete(key);
@@ -64,7 +65,7 @@ export class RedisService {
     const redisClient = await this.redisConnection.getClient();
 
     if (!redisClient) {
-      throw new Error('Redis client not initialized');
+      throw new AppError('Redis client not initialized');
     }
 
     await redisClient.sAdd(key, value); // Add value to Redis set
@@ -78,7 +79,7 @@ export class RedisService {
     const redisClient = await this.redisConnection.getClient();
 
     if (!redisClient) {
-      throw new Error('Redis client not initialized');
+      throw new AppError('Redis client not initialized');
     }
 
     await redisClient.sAdd(key, values); // Add values to Redis set
@@ -92,7 +93,7 @@ export class RedisService {
     const redisClient = await this.redisConnection.getClient();
 
     if (!redisClient) {
-      throw new Error('Redis client not initialized');
+      throw new AppError('Redis client not initialized');
     }
 
     const members = await redisClient.sMembers(key); // Get all members of the set
@@ -104,7 +105,7 @@ export class RedisService {
     const redisClient = await this.redisConnection.getClient();
 
     if (!redisClient) {
-      throw new Error('Redis client not initialized');
+      throw new AppError('Redis client not initialized');
     }
 
     await redisClient.sRem(key, value); // Remove specific value from the set
@@ -114,7 +115,7 @@ export class RedisService {
     const redisClient = await this.redisConnection.getClient();
 
     if (!redisClient) {
-      throw new Error('Redis client not initialized');
+      throw new AppError('Redis client not initialized');
     }
     const exists = await redisClient.sIsMember(key, value); // Check if the value exists in the set
     return Boolean(exists);
@@ -124,7 +125,7 @@ export class RedisService {
     const redisClient = await this.redisConnection.getClient();
 
     if (!redisClient) {
-      throw new Error('Redis client not initialized');
+      throw new AppError('Redis client not initialized');
     }
     const exists = await redisClient.exists(key); // Check if the value exists in the set
     return Boolean(exists);

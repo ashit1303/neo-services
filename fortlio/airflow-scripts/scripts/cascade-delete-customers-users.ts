@@ -34,7 +34,7 @@ async function run() {
 
     console.info('Transaction completed');
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error:', error);
   } finally {
     await mongoClient.close();

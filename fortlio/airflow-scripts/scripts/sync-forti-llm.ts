@@ -17,7 +17,7 @@ const main = async () => {
     await syncFolderToS3(s3Client, secrets.AWS_BACKUP_BUCKET, '../obi-markdown-knowledge-base/', 'obi-markdown-knowledge-base/');
     await syncKnowledgeBase(secrets);
     console.info('Successfully sync knowledge base');
-  } catch (error) {
+  } catch (error: any) {
     console.error('Backup process failed:', error);
     process.exit(1);
   }

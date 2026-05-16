@@ -1,6 +1,7 @@
 import * as Typesense from 'typesense';
 import { Config } from '../../interface/common.interface';
 import { SecretManager } from './secret-manager.client';
+import { AppError } from '../core-utils/err-util';
 
 export class TypesenseService {
   private secretManager: SecretManager;
@@ -32,7 +33,7 @@ export class TypesenseService {
     };
 
     if (!secrets.host || !secrets.apiKey) {
-      throw new Error('Failed to fetch Typesense configuration');
+      throw new AppError('Failed to fetch Typesense configuration');
     }
 
     this.typesenseSearch = new Typesense.Client(typesenseConfig);
@@ -77,7 +78,7 @@ export class TypesenseService {
     try {
       await this.typesenseSearch.health.retrieve();
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Typesense ping failed:', error);
       return false;
     }

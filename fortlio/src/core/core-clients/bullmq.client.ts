@@ -68,7 +68,7 @@ export class BullMQService {
       async (job) => {
         try {
           await handler(job);
-        } catch (error) {
+        } catch (error: any) {
           console.error(
             `[BullMQ Worker Error] Queue: ${queueName}`,
             error,

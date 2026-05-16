@@ -1,4 +1,4 @@
-throw fmtErr(error, [{ msg: 'Failed to fetch data by filter query', apiName: 'runQueryMongoDriverSecondary', debugValues: { collectionName, basepipeline } }]);
+throw new AppError(error.message || 'unknown', [{ msg: 'Failed to fetch data by filter query', apiName: 'runQueryMongoDriverSecondary', debugValues: { collectionName, basepipeline } }]);
 i want to format error like this 
 
 Now a() callled b() -> c() -> d() and error is thrown in d() then i want to format error like this

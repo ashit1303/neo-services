@@ -65,7 +65,7 @@ describe('Users API', () => {
       });
 
       if (creditResponse.status !== 200) {
-        throw new Error(`Expected 200, got ${creditResponse.status}`);
+        throw new AppError(`Expected 200, got ${creditResponse.status}`);
       }
 
       expect(creditResponse?.body.data.creditDebitCoins.userId).toBe(creditCoinsVariables.input.userId);

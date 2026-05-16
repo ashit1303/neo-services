@@ -1,5 +1,6 @@
 import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
 import { Config } from '../../interface/common.interface';
+import { AppError } from '../core-utils/err-util';
 
 export class SecretManager {
   private static cache: any = null;
@@ -30,7 +31,7 @@ export class SecretManager {
     } else if (response.SecretBinary) {
       secret = JSON.parse(response.SecretBinary.toString());
     } else {
-      throw new Error('No secret data returned');
+      throw new AppError('No secret data returned');
     }
 
     SecretManager.cache = secret;
@@ -48,7 +49,7 @@ export class SecretManager {
 
     const secrets = await this.fetchSecretAndCache();
     if (!(key in secrets)) {
-      throw new Error(`Secret key ${key} not found`);
+      throw new AppError(`Secret key ${key} not found`);
     }
     return secrets[key];
   }
