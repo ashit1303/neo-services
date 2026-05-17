@@ -1,5 +1,7 @@
+import z from 'zod';
 import { openApiRegistry } from '../clients';
-import { EmailValidation } from '../validations/common-validation';
+import { EmailValidation, FilterQueryValidation } from '../validations/common-validation';
+import { UserIdValidation } from '../validations/user-validation';
 
 export function registerUserRoutes() {
   openApiRegistry.register('EmailValidation', EmailValidation);
@@ -7,6 +9,9 @@ export function registerUserRoutes() {
   openApiRegistry.registerPath({
     method: 'get',
     path: '/user/getUsers',
+    request: {
+      query: FilterQueryValidation,
+    },
     responses: {
       200: {
         description: 'Users fetched',
@@ -16,7 +21,7 @@ export function registerUserRoutes() {
 
   openApiRegistry.registerPath({
     method: 'get',
-    path: '/user/getUserById/:id',
+    path: '/user/getUserById/',
     responses: {
       200: {
         description: 'User fetched by ID',
@@ -46,7 +51,10 @@ export function registerUserRoutes() {
 
   openApiRegistry.registerPath({
     method: 'delete',
-    path: '/user/deleteUserById/:id',
+    path: '/user/deleteUserById/{userId}', // ✅ correct
+    request: {
+      params: z.object({ userId: UserIdValidation }),
+    },
     responses: {
       204: {
         description: 'User deleted',

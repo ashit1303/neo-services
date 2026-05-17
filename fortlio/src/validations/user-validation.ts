@@ -3,7 +3,7 @@ import { z } from './zod';
 import { IdValidation } from './common-validation';
 
 export const UserIdValidation = IdValidation('userId');
-
+// z.object({ userId: IdValidation('userId') });
 export const MobileNumberValidation = z.string().trim().length(12, { message: 'Mobile number must be 12 digits' });
 
 export const UserCreateValidation = z.object({

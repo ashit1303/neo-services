@@ -26,26 +26,24 @@ class UserController {
 
       return fmtRes(res, users);
     } catch (error: any) {
-      throw new AppError(error.message || 'unknown', { msg: USER_MSGS.ERR.FAILED_TO_FETCH_USERS, apiName: 'getUsers' }, 400);
+      throw new AppError(error.message || 'unknown', { msg: USER_MSGS.ERR.FAILED_TO_FETCH_USERS, apiName: 'getUsers', debugValues: { query: req.query }, error }, 400);
     }
   };
   getUserById = async (req: Request, res: Response) => {
     try {
-      const { userId } = req.params;
+      const { userId } = req.query;
 
       UserIdValidation.parse(userId);
 
       const user = await this.userService.getUserByUserId(userId);
 
       if (!user) {
-        return res.status(404).send({
-          message: USER_MSGS.ERR.USER_NOT_FOUND,
-        });
+        throw new AppError(USER_MSGS.ERR.USER_NOT_FOUND, { msg: USER_MSGS.ERR.USER_NOT_FOUND, apiName: 'getUserById', debugValues: { userId } });
       }
 
       return fmtRes(res, user);
     } catch (error: any) {
-      throw new AppError(error.message || 'unknown', { msg: USER_MSGS.ERR.FAILED_TO_FETCH_USER, apiName: 'getUserById' }, 400);
+      throw new AppError(error.message || 'unknown', { msg: USER_MSGS.ERR.FAILED_TO_FETCH_USER, apiName: 'getUserById', error }, 400);
     }
   };
 
@@ -59,17 +57,13 @@ class UserController {
       const existingEmail = await this.userService.getUserByEmail(input.email);
 
       if (existingEmail) {
-        return res.status(409).send({
-          message: USER_MSGS.ERR.EMAIL_ALREADY_EXISTS,
-        });
+        throw new AppError(USER_MSGS.ERR.EMAIL_ALREADY_EXISTS, { msg: USER_MSGS.ERR.EMAIL_ALREADY_EXISTS, apiName: 'createUser', debugValues: { email: input.email } });
       }
 
       const role = await this.roleService.getRoleById(input.roleId);
 
       if (!role) {
-        return res.status(404).send({
-          message: USER_MSGS.ERR.ROLE_NOT_FOUND,
-        });
+        throw new AppError(USER_MSGS.ERR.ROLE_NOT_FOUND, { msg: USER_MSGS.ERR.ROLE_NOT_FOUND, apiName: 'createUser', debugValues: { roleId: input.roleId } });
       }
 
       const user = await this.userService.createUser(input);
@@ -86,7 +80,7 @@ class UserController {
         },
       });
     } catch (error: any) {
-      throw new AppError(error.message || 'unknown', { msg: USER_MSGS.ERR.FAILED_TO_CREATE_USER, apiName: 'createUser' }, 400);
+      throw new AppError(error.message || 'unknown', { msg: USER_MSGS.ERR.FAILED_TO_CREATE_USER, apiName: 'createUser', error }, 400);
     }
   };
   updateUserById = async (req: Request, res: Response) => {
@@ -98,8 +92,7 @@ class UserController {
       const user = await this.userService.getUserByUserId(input.userId);
 
       if (!user) {
-        console
-          .error(null, { msg: USER_MSGS.ERR.USER_NOT_FOUND, apiName: 'updateUserById' });
+        throw new AppError(USER_MSGS.ERR.USER_NOT_FOUND, { msg: USER_MSGS.ERR.USER_NOT_FOUND, apiName: 'updateUserById', debugValues: { userId: input.userId } });
       }
 
       // email must be unique
@@ -107,8 +100,7 @@ class UserController {
         const existingEmail = await this.userService.getUserByEmail(input.email);
 
         if (existingEmail) {
-          console
-            .error(null, { msg: USER_MSGS.ERR.EMAIL_ALREADY_EXISTS, apiName: 'updateUserById' });
+          throw new AppError(USER_MSGS.ERR.EMAIL_ALREADY_EXISTS, { msg: USER_MSGS.ERR.EMAIL_ALREADY_EXISTS, apiName: 'updateUserById', debugValues: { email: input.email } });
         }
       }
 
@@ -116,8 +108,7 @@ class UserController {
         const role = await this.roleService.getRoleById(input.roleId);
 
         if (!role) {
-          console
-            .error(null, { msg: USER_MSGS.ERR.ROLE_NOT_FOUND, apiName: 'updateUserById' });
+          throw new AppError(USER_MSGS.ERR.ROLE_NOT_FOUND, { msg: USER_MSGS.ERR.ROLE_NOT_FOUND, apiName: 'updateUserById', debugValues: { roleId: input.roleId } });
         }
       }
 
@@ -137,7 +128,7 @@ class UserController {
         },
       });
     } catch (error: any) {
-      throw new AppError(error.message || 'unknown', { msg: USER_MSGS.ERR.FAILED_TO_UPDATE_USER, apiName: 'updateUserById' }, 400);
+      throw new AppError(error.message || 'unknown', { msg: USER_MSGS.ERR.FAILED_TO_UPDATE_USER, apiName: 'updateUserById', error }, 400);
     }
   };
   deleteUserById = async (req: Request, res: Response) => {
@@ -149,9 +140,7 @@ class UserController {
       const user = await this.userService.getUserByUserId(userId);
 
       if (!user) {
-        return res.status(404).send({
-          message: USER_MSGS.ERR.USER_NOT_FOUND,
-        });
+        throw new AppError(USER_MSGS.ERR.USER_NOT_FOUND, { msg: USER_MSGS.ERR.USER_NOT_FOUND, apiName: 'deleteUserById', debugValues: { userId } });
       }
 
       await this.userService.deleteUserById(userId);
@@ -164,7 +153,7 @@ class UserController {
         message: response,
       });
     } catch (error: any) {
-      throw new AppError(error.message || 'unknown', { msg: USER_MSGS.ERR.FAILED_TO_DELETE_USER, apiName: 'deleteUserById' }, 400);
+      throw new AppError(error.message || 'unknown', { msg: USER_MSGS.ERR.FAILED_TO_DELETE_USER, apiName: 'deleteUserById', error }, 400);
     }
   };
 }

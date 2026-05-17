@@ -16,23 +16,15 @@ export class AppError extends Error {
 
   constructor(
     message: string,
-    opts?: {
-      msg?: string;
-      apiName?: string;
-      debugValues?: Record<string, any>;
-      error?: unknown;
-    },
+    opts?: { msg?: string; apiName?: string; debugValues?: Record<string, any>; error?: unknown; },
     statusCode?: number,
 
   ) {
     super(message);
 
-    this.name = 'AppError';
     this.statusCode = statusCode ?? 500;
     this.error = opts?.error;
     this.userMessage = opts?.msg || message;
-
-    // normalize into stackJourney format
     if (opts?.apiName) {
       this.stackJourney.push({
         apiName: opts.apiName,
@@ -43,12 +35,8 @@ export class AppError extends Error {
     Object.setPrototypeOf(this, AppError.prototype);
     Error.captureStackTrace?.(this, this.constructor);
 
-    // 1. build stack journey immediately
-    // this.buildStackJourney(opts?.stackEntry);
-
-    // 2. auto enrich based on error type
     this.enrich();
-
+    this.name = 'AppError';
     // 3. optional auto log (ONLY if statusCode is explicitly provided)
     if (statusCode) {
       this.log();
@@ -78,12 +66,14 @@ export class AppError extends Error {
 
     // ✅ Zod handling
     if (err instanceof ZodError) {
-      err.message = err.issues.map(e => e.message).join(', ');
+      this.message = err.issues.map(e => e.message).join(', ');
     }
 
     // ✅ Axios handling
     if (err instanceof AxiosError) {
-      this.axiosDebug = {
+      this.message = err.message;
+      this.error = {
+        message: err.message,
         url: err.config?.url,
         method: err.config?.method,
         status: err.response?.status,
