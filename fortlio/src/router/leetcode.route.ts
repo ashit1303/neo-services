@@ -27,14 +27,12 @@ class LeetcodeRoutes {
 
     this.router.get(
       '/search',
-      checkAccess('searchLeetCodeQuests'),
       (req, res, next) => this.cacheMiddleware.cacheReqRes(req, res, next, 3600),
       this.leetcodeController.searchLeetCodeQuests.bind(this.leetcodeController),
     );
 
     this.router.get(
-      '/search-by-typesense',
-      checkAccess('searchLeetCodeQuestsTypesense'),
+      '/advanceSearch',
       (req, res, next) => this.cacheMiddleware.cacheReqRes(req, res, next, 3600),
       this.leetcodeController.searchLeetCodeQuestsTypesense.bind(this.leetcodeController),
     );

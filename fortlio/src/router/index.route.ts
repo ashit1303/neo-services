@@ -5,6 +5,7 @@ import { authnRoutes } from './authn.route';
 import { fortiLLMRoutes } from './forti-llm-route';
 import { CachingMiddleware } from '../middleware/cache.middleware';
 import { config } from '../../config';
+import { roleRoutes } from './role.route';
 
 class Routes {
   cacheMiddleware: CachingMiddleware;
@@ -16,10 +17,11 @@ class Routes {
   }
 
   private initializeRoutes() {
-    this.router.use('/user', userRoutes); // ROUTE CODE : 1000
-    this.router.use('/services', this.cacheMiddleware.cacheReqRes.bind(this.cacheMiddleware), servicesRoutes); // ROUTE CODE : 2000
-    this.router.use('/ask', fortiLLMRoutes); // ROUTE CODE : 3000
-    this.router.use('/auth', authnRoutes); // ROUTE CODE : 4000
+    this.router.use('/auth', authnRoutes);
+    this.router.use('/user', userRoutes);
+    this.router.use('/role', this.cacheMiddleware.cacheReqRes.bind(this.cacheMiddleware), roleRoutes);
+    this.router.use('/services', this.cacheMiddleware.cacheReqRes.bind(this.cacheMiddleware), servicesRoutes);
+    this.router.use('/ask', fortiLLMRoutes);
   }
 }
 

@@ -31,7 +31,7 @@ class UserController {
   };
   getUserById = async (req: Request, res: Response) => {
     try {
-      const { userId } = req.query;
+      const { userId } = req.query as { userId: string };
 
       UserIdValidation.parse(userId);
 

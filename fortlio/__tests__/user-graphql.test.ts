@@ -1,12 +1,13 @@
 import { expect, describe, it } from 'bun:test';
 import { config } from '../config';
 import crypto from 'crypto';
+import { AppError } from '../src/core/core-utils/err-util';
 
 const { port } = config;
 const BASE_URL = `http://localhost:${port}/user/graphql`;
-const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2N2M3ZDk2NzY0OGFhYmFlMWM1NzQ1YmMiLCJuYW1lIjoiQXJndXMgQWRtaW4iLCJyb2xlIjoiQWRtaW4iLCJzZXNzaW9uSWQiOiI0YjVmODJiMC0wOWUxLTRjZDYtYmZmOS05NzU5ZTMyMTlhMDAiLCJpYXQiOjE3NDM0MDg1ODYsImV4cCI6MTc3NDk0NDU4Nn0.nyeBa870yF11bhUyqF4Oyol0ltM_tCij5NIvSxF0GNE';
+const token = 'token';
 
-const secret = 'aa209c3cb736ed65aa13035b2ef74afceb3e1315b352caa012c174ecdfb31f5bbe1560b8ee5301434ddea5e7ee757319b87612197a63cf638880e3b85480e173';
+const secret = 'secret';
 
 const creditCoinsVariables: any = {
   input: {

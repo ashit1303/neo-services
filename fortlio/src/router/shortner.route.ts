@@ -20,14 +20,14 @@ class ShortnerRoutes {
     // new routes
 
     this.router.post(
-      '/short-it',
+      '/shortIt',
       checkAccess('createShortUrl'),
       (req, res, next) => this.cacheMiddleware.cacheReqRes(req, res, next, 0),
       this.shortUrlController.createShortUrl.bind(this.shortUrlController),
     );
 
     this.router.post(
-      '/short-it-by-guest',
+      '/shortItByGuest',
       (req, res, next) => this.cacheMiddleware.cacheReqRes(req, res, next, 0),
       this.shortUrlController.createShortUrlByGuest.bind(this.shortUrlController),
     );
