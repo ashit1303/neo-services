@@ -162,7 +162,8 @@ class AuthnController {
       if (!token) {
         throw new AppError(AUTHN_MSGS.ERR.TOKEN_MISSING, { msg: AUTHN_MSGS.ERR.TOKEN_MISSING, apiName: 'refreshToken', debugValues: { token } });
       }
-      const { userId, name, email, sessionId } = await this.authnService.decodeToken(token); // Verify Refresh Token
+      const extractedToken = token.split(' ')[1];
+      const { userId, name, email, sessionId } = await this.authnService.decodeToken(extractedToken); // Verify Refresh Token
 
       if (!userId || !name || !email || !sessionId) {
         throw new AppError(AUTHN_MSGS.ERR.USER_ID_AND_SESSION_ID_REQUIRED, { msg: AUTHN_MSGS.ERR.USER_ID_AND_SESSION_ID_REQUIRED, apiName: 'refreshToken', debugValues: { userId, sessionId } });
