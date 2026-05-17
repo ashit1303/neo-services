@@ -1,8 +1,7 @@
 import { ObjectId } from 'mongodb';
 
 export interface IUserCreate {
-  firstName: string
-  lastName: string
+  fullName: string
   mobileNumber?: string
   email: string
   status: boolean
@@ -11,8 +10,7 @@ export interface IUserCreate {
 
 export interface IUserUpdate {
   userId: string;
-  firstName?: string;
-  lastName?: string;
+  fullName?: string;
   mobileNumber?: string;
   userPrivileges?: string[];
   email?: string;
@@ -54,8 +52,7 @@ export interface IRole {
 export interface IUserDoc extends Document {
   userId?: ObjectId;
   _id: ObjectId;
-  firstName: string;
-  lastName: string;
+  fullName: string;
   status: boolean;
   mobileNumber: string;
   email: string;
@@ -68,8 +65,16 @@ export interface IUserDoc extends Document {
   coinBalance: number;
 }
 
+export interface IUserOTP {
+  userId: string;
+  otp: string;
+  expiryAt: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface IUserAccesstokenDetails {
   userId: string;
   name: string;
-  role: string;
+  email: string;
 }

@@ -43,6 +43,12 @@ export function generateRandomString(): string {
   return `${raw.slice(0, 3)}-${raw.slice(3, 6)}-${raw.slice(6)}`;
 }
 
+export function generateRandomNumber(num: number): string {
+  // always of given number
+  const raw = randomString(10);
+  return `${raw.slice(0, num)}`;
+}
+
 export function getSkipLimit(page?: number, limit?: number): { skip: number; limit: number } {
   const defaultPage = page ? Number(page) : 1;
   const defaultLimit = limit ? Number(limit) : 10;
@@ -95,7 +101,7 @@ export function cleanHTML(html: String): string {
     return cleanText;
   } catch (e) {
     console.error('Error cleaning HTML:', e, 'Input:', html, 'Output:', '');
-    return ''; 
+    return '';
   }
 }
 

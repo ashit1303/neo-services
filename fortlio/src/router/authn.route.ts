@@ -19,7 +19,7 @@ class AuthnRoutes {
     // new routes
     this.router.get('/sendOtp', this.authnController.sendOtp.bind(this.authnController));
     this.router.get('/resendOtp', this.authnController.resendOtp.bind(this.authnController));
-    this.router.get('/verifyOtp', this.authnController.verifyOtp.bind(this.authnController));
+    this.router.post('/verifyOtp', this.authnController.verifyOtp.bind(this.authnController));
     this.router.get('/authenticate', this.authnController.authenticate.bind(this.authnController));
     this.router.get('/refreshToken', this.authnController.refreshToken.bind(this.authnController));
     this.router.get('/logout', this.authnController.logout.bind(this.authnController));

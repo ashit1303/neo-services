@@ -16,7 +16,7 @@ import { S3Client, ListObjectsV2Command, GetObjectCommand } from '@aws-sdk/clien
 import * as mongo from 'mongodb';
 import { SecretManager } from '../../src/core/core-clients/secret-manager.client';
 import { AppError } from '../../src/core/core-utils/err-util';
-const secretManger = new SecretManager(config);
+const secretManager = new SecretManager(config);
 
 // Interface for our secrets
 interface Secrets {
@@ -31,8 +31,8 @@ interface Secrets {
 
 // Get secrets from AWS Secrets Manager
 const getSecrets = async (): Promise<Secrets> => {
-  const awsConfig = await secretManger.get('AWS_CONFIG').then((res) => JSON.parse(res));
-  const mongoConfig = await secretManger.get('MONGO_BASE_CONFIG').then((res) => JSON.parse(res));
+  const awsConfig = await secretManager.get('AWS_CONFIG').then((res) => JSON.parse(res));
+  const mongoConfig = await secretManager.get('MONGO_BASE_CONFIG').then((res) => JSON.parse(res));
   const dbAndS3Config: any = {
     DB_USERNAME: mongoConfig['USERNAME'],
     DB_PASSWORD: mongoConfig['PASSWORD'],

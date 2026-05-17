@@ -10,7 +10,7 @@ import { S3Client, PutObjectCommand, ListObjectsV2Command, DeleteObjectCommand }
 import * as mongo from 'mongodb';
 import { SecretManager } from '../../src/core/core-clients/secret-manager.client';
 import { AppError } from '../../src/core/core-utils/err-util';
-const secretManger = new SecretManager(config);
+const secretManager = new SecretManager(config);
 
 // Interface for our secrets
 interface Secrets {
@@ -25,7 +25,7 @@ interface Secrets {
 
 // Get secrets from AWS Secrets Manager
 const getSecrets = async (): Promise<Secrets> => {
-  const secrets = await secretManger.fetchAll();
+  const secrets = await secretManager.fetchAll();
   const dbAndS3Config: any = {
     DB_USERNAME: secrets['DB_USERNAME'],
     DB_PASSWORD: secrets['DB_PASSWORD'],

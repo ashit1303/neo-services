@@ -5,7 +5,6 @@ import { PipelineStage } from 'mongoose';
 import { downloadCSVExportFileToS3CHSQL } from '../../queries/download.queries';
 import { GetObjectCommand, GetObjectCommandInput, PutObjectCommand, PutObjectCommandInput, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { SESHelper } from './ses-helper';
 import { MongoDBClient } from '../core-clients/mongodb.client';
 import { SecretManager } from '../core-clients/secret-manager.client';
 import { S3ClientClass } from '../core-clients/aws-s3.client';
@@ -205,54 +204,6 @@ export class DownloadHelper {
     } catch (error: any) {
       console.error(error);
       throw error;
-    }
-  };
-
-  public async sendLogsMail(url: string, collectionName: string, userId: string, fromDate: string, toDate: string) {
-    try {
-
-      const fromEmail = await this.secretManager.get('NOTIFICATION_SENDER_EMAIL');
-
-      const user = await this.getUserInfo(userId);
-
-      if (!user) {
-        throw new AppError(null, { msg: USER_MSGS.ERR.USER_NOT_FOUND, apiName: 'sendLogsMail.getUserByUserId', debugValues: { userId } });
-      }
-
-      const email = user.email;
-      const username = `${user.firstName} ${user.lastName}`;
-      const formattedCollectionName = collectionName.split('_').join(' ').toLowerCase();
-      const istFromDate = dayjs(fromDate).utcOffset('+05:30').format('DD-MM-YYYY HH:mm:ss A');
-      const istToDate = dayjs(toDate).utcOffset('+05:30').format('DD-MM-YYYY HH:mm:ss A');
-
-      const emailBody = `
-      <div style="font-family: Arial, sans-serif; color: #222;">
-        <p>Dear ${username || 'User'},</p>
-        <p>
-          Please find the requested ${formattedCollectionName} attached via the link below:
-          <br/>
-          From Date: ${istFromDate}
-          <br/>
-          To Date: ${istToDate}
-        </p>
-        <p>
-          <a href="${url}" style="color: #1a73e8; text-decoration: underline;">Download  Logs</a>
-        </p>
-        <p>
-          If you have any questions or require further assistance, please do not hesitate to contact our support team.
-        </p>
-        <p>
-          Best regards,<br/>
-          Team Fortlio Platform
-        </p>
-      </div>
-    `;
-
-      await this.sesHelper.sendEmail(fromEmail, email, `Requested data of ${formattedCollectionName} [${istFromDate} - ${istToDate}]`, emailBody);
-
-      return `Email sent successfully to ${email}`;
-    } catch (error: any) {
-      throw new AppError(error.message, { msg: AWS_MSGS.ERR.FAILED_TO_SEND_EMAIL, apiName: 'sendLogsMail', debugValues: { url, collectionName, userId, fromDate, toDate } });
     }
   };
 

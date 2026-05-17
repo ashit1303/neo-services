@@ -61,7 +61,7 @@ export async function initializeDefaultRoles() {
 export async function initializeDefaultUsers() {
   try {
     const filter = { _id: DB_CONSTANTS.DEFAULT_SYSTEM_ADMIN_ID };
-    const update = { _id: DB_CONSTANTS.DEFAULT_SYSTEM_ADMIN_ID, email: DB_CONSTANTS.DEFAULT_SYSTEM_ADMIN_EMAIL, firstName: DB_CONSTANTS.DEFAULT_SYSTEM_ADMIN.split(' ')[0], lastName: DB_CONSTANTS.DEFAULT_SYSTEM_ADMIN.split(' ')[1], mobileNumber: DB_CONSTANTS.DEFAULT_SYSTEM_ADMIN_MOBILE, roleId: DB_CONSTANTS.DEFAULT_ROLE_ADMIN_ID };
+    const update = { _id: DB_CONSTANTS.DEFAULT_SYSTEM_ADMIN_ID, email: DB_CONSTANTS.DEFAULT_SYSTEM_ADMIN_EMAIL, fullName: DB_CONSTANTS.DEFAULT_SYSTEM_ADMIN, mobileNumber: DB_CONSTANTS.DEFAULT_SYSTEM_ADMIN_MOBILE, roleId: DB_CONSTANTS.DEFAULT_ROLE_ADMIN_ID };
     const options = { upsert: true, new: true, setDefaultsOnInsert: true };
 
     await User.findOneAndUpdate(filter, update, options);

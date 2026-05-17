@@ -1,10 +1,10 @@
-import { SESClient } from '@aws-sdk/client-ses';
+import { SESv2Client } from '@aws-sdk/client-sesv2';
 import { SecretManager } from './secret-manager.client';
 import { Config } from '../../interface/common.interface';
 
 export class SESClientUtil {
-  private static sesClient: SESClient | null = null;
-  private static initializing: Promise<SESClient> | null = null;
+  private static sesClient: SESv2Client | null = null;
+  private static initializing: Promise<SESv2Client> | null = null;
 
   private secretManager: SecretManager;
 
@@ -12,7 +12,7 @@ export class SESClientUtil {
     this.secretManager = new SecretManager(config);
   }
 
-  async getSESClient(): Promise<SESClient> {
+  async getSESClient(): Promise<SESv2Client> {
     // Already initialized
     if (SESClientUtil.sesClient) {
       return SESClientUtil.sesClient;
@@ -29,7 +29,7 @@ export class SESClientUtil {
       const accessKeyId = awsConfig.AWS_ACCESS_KEY_ID;
       const secretAccessKey = awsConfig.AWS_SECRET_ACCESS_KEY;
 
-      SESClientUtil.sesClient = new SESClient({
+      SESClientUtil.sesClient = new SESv2Client({
         credentials: { accessKeyId, secretAccessKey },
         region: process.env.AWS_REGION,
       });

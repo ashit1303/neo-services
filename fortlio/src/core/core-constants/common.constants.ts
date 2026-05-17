@@ -23,3 +23,5 @@ export const BYPASS_USERS = [
 export const BULLMQQUEUES = {
   NOTIFICATION_FALL_DETECTION_QUEUE: 'notification-fall-detection-queue',
 };
+
+export const EMAIL_SEND_FROM = 'noreply@obenelectric.com';

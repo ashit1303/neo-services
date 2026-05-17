@@ -1,13 +1,13 @@
 import { BedrockAgentRuntimeClient, RetrieveAndGenerateCommand } from '@aws-sdk/client-bedrock-agent-runtime';
 import { config } from '../../config';
-import { secretManger } from '../clients';
+import { secretManager } from '../clients';
 import { AppError } from '../core/core-utils/err-util';
 
 class FortiLLMService {
 
   async getAnswerFromKnowledgeBase(question: string, orchestrationPrompt: string, generationPrompt: string) {
     try {
-      const obiLLMSecrets = await secretManger.get('OBI_LLM').then((res) => JSON.parse(res));
+      const obiLLMSecrets = await secretManager.get('OBI_LLM').then((res) => JSON.parse(res));
 
       const client = new BedrockAgentRuntimeClient({ region: config.awsRegion });
 

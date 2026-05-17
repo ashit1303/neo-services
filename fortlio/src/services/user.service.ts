@@ -15,7 +15,7 @@ export class UserService {
         { $unwind: { path: '$role', preserveNullAndEmptyArrays: true } },
         { $addFields: { userId: '$_id', 'role.roleId': '$role._id' } },
       ];
-      const searchFields = ['firstName', 'lastName', 'mobileNumber', 'email'];
+      const searchFields = ['fullName', 'lastName', 'mobileNumber', 'email'];
 
       return await getDataByFilter(filterQuery, pipeline, searchFields, User);
     } catch (error: any) {

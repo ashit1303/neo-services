@@ -1,15 +1,17 @@
-import mongoose from 'mongoose';
 import { AuthnService } from '../services/authn.services';
 import SessionManager from '../core/core-clients/session-manager.client';
-import { generateUUID } from '../core/core-utils';
+import { generateRandomNumber, generateUUID } from '../core/core-utils';
 import { Request, Response } from 'express';
 import { EmailValidation } from '../validations/common-validation';
 import { IUserAccesstokenDetails } from '../interface/user-interface';
-import { TokenValidation, VerifyOtpValidation } from '../validations/authentication-validation';
+import { LogoutValidation, SendOtpValidation, TokenValidation, VerifyOtpValidation } from '../validations/authn-validation';
 import { AppError } from '../core/core-utils/err-util';
 import { AUTHN_MSGS } from '../constants';
 import { BYPASS_USERS } from '../core/core-constants/common.constants';
 import { fmtRes } from '../core/core-utils/res-util';
+import UserOTP from '../models/user-otp.model';
+import dayjs from 'dayjs';
+import User from '../models/user.model';
 
 const sessionManager = SessionManager.getInstance();
 const internalEmailUsers = [
@@ -25,17 +27,17 @@ class AuthnController {
   }
 
   sendOtp = async (req: Request, res: Response) => {
-    const email = req.query.email as string;
-
+    const { email, fullName } = req.query as { email: string; fullName: string };
     try {
-      EmailValidation.parse({ email });
+      SendOtpValidation.parse({ email, fullName });
       const internalUser = internalEmailUsers.find((user) => user.email === email);
       if (internalUser) {
-        const userId = internalUser.userId;
-        return { message: AUTHN_MSGS.RES.OTP_SENT_SUCCESSFULLY, userId };
+        return fmtRes(res, { success: true, message: AUTHN_MSGS.RES.OTP_SENT_SUCCESSFULLY });
       }
-
-      await this.authnService.sendOtp(email);
+      const user = await User.findOneAndUpdate({ email }, { fullName }, { upsert: true, new: true }).lean();
+      const otp = generateRandomNumber(6);
+      await UserOTP.findOneAndUpdate({ userId: user._id }, { userId: user._id, otp, expiryAt: dayjs().add(30, 'minute').toISOString(), updatedAt: new Date() }, { upsert: true, new: true });
+      await this.authnService.sendOtp(email, otp);
       return fmtRes(res, { success: true, message: AUTHN_MSGS.RES.OTP_SENT_SUCCESSFULLY });
     } catch (error: any) {
       throw new AppError(error.message || 'unknown', { msg: AUTHN_MSGS.ERR.FAILED_TO_SEND_OTP, apiName: 'sendOtp', debugValues: { email } }, 400);
@@ -44,10 +46,21 @@ class AuthnController {
 
   resendOtp = async (req: Request, res: Response) => {
     const email = req.query.email as string;
-
     try {
       EmailValidation.parse({ email });
-      await this.authnService.resendOtp(email);
+      const internalUser = internalEmailUsers.find((user) => user.email === email);
+      if (internalUser) {
+        return fmtRes(res, { success: true, message: AUTHN_MSGS.RES.OTP_SENT_SUCCESSFULLY });
+      }
+      const user = await User.findOne({ email }).lean();
+      if (!user) {
+        throw new AppError(AUTHN_MSGS.ERR.USER_NOT_FOUND, { msg: AUTHN_MSGS.ERR.USER_NOT_FOUND, apiName: 'resendOtp', debugValues: { email } });
+      }
+      const userOtp = await UserOTP.findOne({ userId: user._id.toString() }).lean();
+      if (!userOtp) {
+        throw new AppError(AUTHN_MSGS.ERR.USER_NOT_FOUND, { msg: AUTHN_MSGS.ERR.USER_NOT_FOUND, apiName: 'resendOtp', debugValues: { email } });
+      }
+      await this.authnService.sendOtp(email, userOtp.otp);
       return fmtRes(res, { success: true, message: AUTHN_MSGS.RES.OTP_RESENT_SUCCESSFULLY });
     } catch (error: any) {
       throw new AppError(error.message || 'unknown', { msg: AUTHN_MSGS.ERR.FAILED_TO_RESEND_OTP, apiName: 'resendOtp', debugValues: { email } }, 400);
@@ -58,30 +71,34 @@ class AuthnController {
     const { email, otp } = req.body;
     try {
       VerifyOtpValidation.parse({ email, otp });
+      const internalUser = internalEmailUsers.find((user) => user.email === email);
 
-      const user = await getUserByEmail(mongoose, email);
+      if (internalUser) {
+        if (process.env.BUN_ENV === 'prod' && otp !== internalUser.otpProd) {
+          throw new AppError(AUTHN_MSGS.ERR.INVALID_OTP, { msg: AUTHN_MSGS.ERR.INVALID_OTP, apiName: 'verifyOtp.internalUser.PROD', debugValues: { email, otp } });
+        } else if (process.env.BUN_ENV !== 'prod' && otp !== internalUser.otpDev) {
+          throw new AppError(AUTHN_MSGS.ERR.INVALID_OTP, { msg: AUTHN_MSGS.ERR.INVALID_OTP, apiName: 'verifyOtp.internalUser.DEV', debugValues: { email, otp } });
+        }
+      }
 
+      const user = await User.findOne({ email }).lean();
       if (!user) {
-        throw new AppError(AUTHN_MSGS.ERR.USER_NOT_FOUND, { msg: AUTHN_MSGS.ERR.USER_NOT_FOUND, apiName: 'verifyOtp.getUserByEmail', debugValues: { email } });
+        throw new AppError(AUTHN_MSGS.ERR.USER_NOT_FOUND, { msg: AUTHN_MSGS.ERR.USER_NOT_FOUND, apiName: 'resendOtp', debugValues: { email } });
+      }
+      const userOtp = await UserOTP.findOne({ userId: user._id.toString() }).lean();
+      if (!userOtp) {
+        throw new AppError(AUTHN_MSGS.ERR.USER_NOT_FOUND, { msg: AUTHN_MSGS.ERR.USER_NOT_FOUND, apiName: 'resendOtp', debugValues: { email } });
+      }
+      if (otp !== userOtp.otp) {
+        throw new AppError(AUTHN_MSGS.ERR.INVALID_OTP, { msg: AUTHN_MSGS.ERR.INVALID_OTP, apiName: 'verifyOtp', debugValues: { email, otp } });
       }
 
       const userDetails: IUserAccesstokenDetails = {
         userId: user._id.toString(),
-        name: `${user.firstName} ${user.lastName}`,
-        role: user.role.roleName,
+        name: user.fullName,
+        email: user.email,
+        // role: internalUser.role.roleName,
       };
-
-      const internalUser = internalEmailUsers.find((user) => user.email === email);
-
-      if (internalUser) {
-        if (process.env.APP_ENV === 'PROD' && otp !== internalUser.otpProd) {
-          throw new AppError(AUTHN_MSGS.ERR.INVALID_OTP, { msg: AUTHN_MSGS.ERR.INVALID_OTP, apiName: 'verifyOtp.internalUser.PROD', debugValues: { email, otp } });
-        } else if (process.env.APP_ENV !== 'PROD' && otp !== internalUser.otpDev) {
-          throw new AppError(AUTHN_MSGS.ERR.INVALID_OTP, { msg: AUTHN_MSGS.ERR.INVALID_OTP, apiName: 'verifyOtp.internalUser.DEV', debugValues: { email, otp } });
-        }
-      } else {
-        await this.authnService.verifyOtp(email, otp);
-      }
 
       const sessionId = generateUUID();
 
@@ -112,7 +129,7 @@ class AuthnController {
           message: AUTHN_MSGS.RES.TOKEN_VERIFIED,
           userId: decodedToken?.userId,
           name: decodedToken?.name,
-          role: decodedToken?.role,
+          email: decodedToken?.email,
         };
       }
 
@@ -122,7 +139,7 @@ class AuthnController {
         throw new AppError(AUTHN_MSGS.ERR.INVALID_TOKEN, { msg: AUTHN_MSGS.ERR.INVALID_TOKEN, apiName: 'authenticate', debugValues: { token } });
       }
 
-      const { userId, sessionId, name, role } = payload;
+      const { userId, sessionId, name, email } = payload;
 
       // Validate session ID in Redis
       if (!['local', 'test'].includes(process.env.BUN_ENV as string)) {
@@ -132,25 +149,25 @@ class AuthnController {
         }
       }
 
-      return fmtRes(res, { message: AUTHN_MSGS.RES.TOKEN_VERIFIED, userId, name, role });
+      return fmtRes(res, { message: AUTHN_MSGS.RES.TOKEN_VERIFIED, userId, name, email });
     } catch (error: any) {
       throw new AppError(error.message || 'unknown', { msg: AUTHN_MSGS.ERR.FAILED_TO_AUTHENTICATE_USER, apiName: 'authenticate', debugValues: { token } }, 400);
     }
   };
 
   refreshToken = async (req: Request, res: Response) => {
-    const { refreshToken } = req.body;
+    const token = req.headers.authorization;
     try {
-      TokenValidation.parse({ token: refreshToken });
-      if (!refreshToken) {
-        throw new AppError(AUTHN_MSGS.ERR.TOKEN_MISSING, { msg: AUTHN_MSGS.ERR.TOKEN_MISSING, apiName: 'refreshToken', debugValues: { refreshToken } });
+      TokenValidation.parse({ token });
+      if (!token) {
+        throw new AppError(AUTHN_MSGS.ERR.TOKEN_MISSING, { msg: AUTHN_MSGS.ERR.TOKEN_MISSING, apiName: 'refreshToken', debugValues: { token } });
       }
-      const { userId, name, role, sessionId } = await this.authnService.decodeToken(refreshToken); // Verify Refresh Token
+      const { userId, name, email, sessionId } = await this.authnService.decodeToken(token); // Verify Refresh Token
 
-      if (!userId || !name || !role || !sessionId) {
+      if (!userId || !name || !email || !sessionId) {
         throw new AppError(AUTHN_MSGS.ERR.USER_ID_AND_SESSION_ID_REQUIRED, { msg: AUTHN_MSGS.ERR.USER_ID_AND_SESSION_ID_REQUIRED, apiName: 'refreshToken', debugValues: { userId, sessionId } });
       }
-      const userDetails: IUserAccesstokenDetails = { userId: userId, name: name, role: role };
+      const userDetails: IUserAccesstokenDetails = { userId: userId, name: name, email: email };
 
       await sessionManager.delete(userId, sessionId);
       const newSessionId = generateUUID();
@@ -159,7 +176,7 @@ class AuthnController {
 
       return fmtRes(res, { accessToken: newAccessToken });
     } catch (error: any) {
-      throw new AppError(error.message || 'unknown', { msg: AUTHN_MSGS.ERR.FAILED_TO_REFRESH_TOKEN, apiName: 'refreshToken', debugValues: { refreshToken } }, 400);
+      throw new AppError(error.message || 'unknown', { msg: AUTHN_MSGS.ERR.FAILED_TO_REFRESH_TOKEN, apiName: 'refreshToken', debugValues: { token } }, 400);
     }
   };
 
@@ -167,9 +184,7 @@ class AuthnController {
     const { userId, sessionId } = req.query as { userId: string, sessionId: string };
 
     try {
-      if (!userId || !sessionId) {
-        throw new AppError(AUTHN_MSGS.ERR.USER_ID_AND_SESSION_ID_REQUIRED, { msg: AUTHN_MSGS.ERR.USER_ID_AND_SESSION_ID_REQUIRED, apiName: 'logout', debugValues: { userId, sessionId } });
-      }
+      LogoutValidation.parse({ userId, sessionId });
 
       // Validate session before deletion
       const storedSession = await sessionManager.get(userId);

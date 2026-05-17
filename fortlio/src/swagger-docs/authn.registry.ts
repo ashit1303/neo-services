@@ -1,19 +1,14 @@
 import { openApiRegistry } from '../clients';
-import { EmailValidation, FilterQueryValidation } from '../validations/common-validation';
+import { LogoutValidation, SendOtpValidation, VerifyOtpValidation } from '../validations/authn-validation';
+import { EmailValidation } from '../validations/common-validation';
 
 export function registerAuthnRoutes() {
   openApiRegistry.register('EmailValidation', EmailValidation);
-  //sendOtp
-  //resendOtp
-  //verifyOtp
-  //authenticate
-  //refreshToken
-  //logout
   openApiRegistry.registerPath({
     method: 'get',
     tags: ['Authn'],
     path: '/auth/sendOtp',
-    request: { query: EmailValidation },
+    request: { query: SendOtpValidation },
     responses: { 200: { description: 'Authn fetched' } },
   });
 
@@ -25,10 +20,10 @@ export function registerAuthnRoutes() {
     responses: { 200: { description: 'Authn: Successfully resent OTP' } },
   });
   openApiRegistry.registerPath({
-    method: 'get',
+    method: 'post',
     tags: ['Authn'],
     path: '/auth/verifyOtp',
-    request: { query: FilterQueryValidation },
+    request: { body: { content: { 'application/json': { schema: VerifyOtpValidation } } } },
     responses: { 200: { description: 'Authn: Successfully verified OTP' } },
   });
 
@@ -36,7 +31,6 @@ export function registerAuthnRoutes() {
     method: 'get',
     tags: ['Authn'],
     path: '/auth/authenticate/',
-    request: { body: { content: { 'application/json': { schema: FilterQueryValidation } } } },
     responses: { 200: { description: 'Authn: Successfully authenticated' } },
   });
 
@@ -44,7 +38,6 @@ export function registerAuthnRoutes() {
     method: 'get',
     tags: ['Authn'],
     path: '/auth/refreshToken',
-    request: { body: { content: { 'application/json': { schema: FilterQueryValidation } } } },
     responses: { 200: { description: 'Authn: Successfully refreshed token' } },
   });
 
@@ -52,7 +45,7 @@ export function registerAuthnRoutes() {
     method: 'get',
     tags: ['Authn'],
     path: '/auth/logout',
-    request: { body: { content: { 'application/json': { schema: FilterQueryValidation } } } },
+    request: { query: LogoutValidation },
     responses: { 200: { description: 'Authn: Successfully logged out' } },
   });
 

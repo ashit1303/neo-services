@@ -1,13 +1,15 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import * as ejs from 'ejs';
+import ejs from 'ejs';
 import * as utils from 'util';
 
 const readFile = utils.promisify(fs.readFile);
 
-async function loadTemplateHtml(fileName: string, data: Record<string, any>) {
+export async function loadTemplateHtml(fileName: string, data: Record<string, any>) {
   try {
-    const filePath = path.resolve(__dirname, fileName);
+    // const filePath = path.resolve(__dirname, fileName);
+    const basePath = (process.env.BUN_ENV === 'prod') ? path.resolve(process.cwd(), 'dist/templates') : path.resolve(process.cwd(), 'src/ejs-templates');
+    const filePath = path.join(basePath, fileName);
     const ejsFile = await readFile(filePath, 'utf8');
     const rendered = ejs.render(ejsFile, data);
     return rendered;
@@ -17,4 +19,3 @@ async function loadTemplateHtml(fileName: string, data: Record<string, any>) {
   }
 }
 
-module.exports = { loadTemplateHtml };
