@@ -122,8 +122,8 @@ class AuthnController {
       if (!token) {
         throw new AppError(AUTHN_MSGS.ERR.TOKEN_MISSING, { msg: AUTHN_MSGS.ERR.TOKEN_MISSING, apiName: 'authenticate', debugValues: { token } }, 400);
       }
-
-      const decodedToken = await this.authnService.decodeToken(token);
+      const extractedToken = token.split(' ')[1];
+      const decodedToken = await this.authnService.decodeToken(extractedToken);
       if (decodedToken.userId && BYPASS_USERS.includes(decodedToken.userId)) {
         return {
           message: AUTHN_MSGS.RES.TOKEN_VERIFIED,
@@ -134,9 +134,9 @@ class AuthnController {
       }
 
       // Verify JWT access token
-      const payload = await this.authnService.verifyToken(token);
+      const payload = await this.authnService.verifyToken(extractedToken);
       if (!payload) {
-        throw new AppError(AUTHN_MSGS.ERR.INVALID_TOKEN, { msg: AUTHN_MSGS.ERR.INVALID_TOKEN, apiName: 'authenticate', debugValues: { token } });
+        throw new AppError(AUTHN_MSGS.ERR.INVALID_TOKEN, { msg: AUTHN_MSGS.ERR.INVALID_TOKEN, apiName: 'authenticate', debugValues: { extractedToken } });
       }
 
       const { userId, sessionId, name, email } = payload;

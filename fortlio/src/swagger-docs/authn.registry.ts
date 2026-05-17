@@ -31,6 +31,7 @@ export function registerAuthnRoutes() {
     method: 'get',
     tags: ['Authn'],
     path: '/auth/authenticate/',
+    security: [{ bearerAuth: [] }],
     responses: { 200: { description: 'Authn: Successfully authenticated' } },
   });
 
@@ -38,6 +39,7 @@ export function registerAuthnRoutes() {
     method: 'get',
     tags: ['Authn'],
     path: '/auth/refreshToken',
+    security: [{ bearerAuth: [] }],
     responses: { 200: { description: 'Authn: Successfully refreshed token' } },
   });
 
