@@ -1,12 +1,16 @@
 import cors from 'cors';
 import helmet from 'helmet';
-import express, { NextFunction, Request, Response } from 'express';
+import express from 'express';
+// eslint-disable-next-line no-duplicate-imports
+import type { NextFunction, Request, Response as ExpressResponse } from 'express';
+// import express, { NextFunction, Request, Response } from 'express';
 import router from './src/router/index.route';
 import { mongoDbClient, mongooseClient } from './src/clients';
 import { corsOptionsDelegate } from './src/core/core-utils/cors.util';
 import { AppError } from './src/core/core-utils/err-util';
 import swaggerUi from 'swagger-ui-express';
 import { generateOpenApiDocs } from './src/swagger-docs/swagger.client';
+import { WebSocketHandler, BunWS } from './src/core/core-clients/web-socket.client';
 
 const app = express();
 
@@ -47,14 +51,7 @@ app.listen(PORT, async () => {
   }
 });
 
-// close mongodb connection
-process.on('SIGINT', async () => {
-  await mongoDbClient.close();
-  await mongooseClient.close();
-  process.exit(0);
-});
-
-app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+app.use((err: any, _req: Request, res: ExpressResponse, _next: NextFunction) => {
   if (err instanceof AppError) {
     return res.status(err?.statusCode || 500).json({
       success: false,
@@ -68,3 +65,35 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     stackPath: err,
   });
 });
+const wsHandler = new WebSocketHandler({ message: async (_ws: BunWS, msg) => { console.info('message:', msg); } }, 1000);
+
+const wsServer = Bun.serve({
+  port: Number(PORT) + 1,
+  fetch(req, server) {
+    const upgraded = server.upgrade(req, { data: { clientId: crypto.randomUUID() } });
+    if (upgraded) { console.info('🔌 WebSocket upgraded'); return; }
+    return new Response('Not a websocket route', { status: 400 });
+  },
+  websocket: {
+    open(ws: BunWS) { wsHandler.open(ws); },
+    message(ws: BunWS, msg) { wsHandler.message(ws, msg); },
+    close(ws: BunWS) { wsHandler.close(ws); },
+  },
+});
+
+// close mongodb connection
+process.on('SIGINT', async () => {
+  await mongoDbClient.close();
+  await mongooseClient.close();
+  await wsServer.stop(true);
+  process.exit(0);
+});
+
+console.info(`🚀 WS Server running at ws://localhost:${wsServer.port}`);
+// Websocket connection example
+// wsHandler.sendToSubscribers('user_123', { from: 'user_456', message: 'hello', });
+// wsHandler.sendToSubscribers('user_123', { from: 'user_456', message: 'hello', });
+// { "action": "subscribe", "topic": "group_abc" }
+// wsHandler.sendToSubscribers('group_abc', { from: 'user_1', message: 'hello group', });
+// { "action": "subscribe", "topic": "global" } 
+// wsHandler.sendToSubscribers('global', { message: 'system update', });

@@ -5,7 +5,7 @@ import { AppError } from '../core-utils/err-util';
 
 export class MongoDBClient {
   private commonClient?: MongoClient;
-  private logsClient?: MongoClient;
+  // private logsClient?: MongoClient;
   private commonDb?: Db;
   private config: Config;
 
@@ -46,9 +46,9 @@ export class MongoDBClient {
       this.commonClient.close();
       console.info('📡 MongoDB Client Connection Closed for Common DB');
     }
-    if (this.logsClient) {
-      this.logsClient.close();
-      console.info('📡 MongoDB Client Connection Closed for Logs DB');
-    }
+    // if (this.logsClient) {
+    //   this.logsClient.close();
+    //   console.info('📡 MongoDB Client Connection Closed for Logs DB');
+    // }
   }
 }
