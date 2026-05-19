@@ -1,4 +1,4 @@
-import { AxiosError } from 'axios';
+// import { AxiosError } from 'axios';
 import { ZodError } from 'zod';
 
 export type StackEntry = {
@@ -12,7 +12,7 @@ export class AppError extends Error {
   stackJourney: StackEntry[] = [];
   userMessage?: string;
   error?: unknown;
-  axiosDebug?: any;
+  // axiosDebug?: any;
 
   constructor(
     message: string,
@@ -69,19 +69,19 @@ export class AppError extends Error {
       this.message = err.issues.map(e => e.message).join(', ');
     }
 
-    // ✅ Axios handling
-    if (err instanceof AxiosError) {
-      this.message = err.message;
-      this.error = {
-        message: err.message,
-        url: err.config?.url,
-        method: err.config?.method,
-        status: err.response?.status,
-        responseData: err.response?.data,
-        params: err.config?.params,
-        requestData: err.config?.data,
-      };
-    }
+    // 
+    // if (err instanceof AxiosError) {
+    //   this.message = err.message;
+    //   this.error = {
+    //     message: err.message,
+    //     url: err.config?.url,
+    //     method: err.config?.method,
+    //     status: err.response?.status,
+    //     responseData: err.response?.data,
+    //     params: err.config?.params,
+    //     requestData: err.config?.data,
+    //   };
+    // }
   }
 
   // -----------------------------
@@ -99,7 +99,7 @@ export class AppError extends Error {
     console.error('--------------- ERROR TRACE START ---------------');
 
     console.error(
-      JSON.stringify({ message: this.message, statusCode: this.statusCode, stackJourney: this.stackJourney, axios: this.axiosDebug, stack: this.stack, error: this.error }),
+      JSON.stringify({ message: this.message, statusCode: this.statusCode, stackJourney: this.stackJourney, stack: this.stack, error: this.error }),
     );
 
     console.error('--------------- ERROR TRACE END -----------------');
