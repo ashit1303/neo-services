@@ -1,6 +1,7 @@
-import axios from 'axios';
 import { Config } from '../../interface/common.interface';
 import { SecretManager } from './secret-manager.client';
+import { AppError } from '../core-utils/err-util';
+import { post } from '../core-utils/fetch.util';
 
 export class ZincLogger {
   private secretManager: SecretManager;
@@ -26,7 +27,7 @@ export class ZincLogger {
     this.zincPassword = secrets.ZINC_PASSWORD;
 
     if (!this.zincUrl || !this.zincIndex) {
-      throw new Error('Failed to fetch Zinc configuration');
+      throw new AppError('Failed to fetch Zinc configuration');
     }
 
     this.initialized = true;
@@ -47,7 +48,7 @@ export class ZincLogger {
       password: this.zincPassword,
     };
 
-    await axios.post(
+    await post(
       `${this.zincUrl}/api/index/error`,
       {
         name: 'error',
@@ -55,10 +56,11 @@ export class ZincLogger {
         settings: {},
         mappings: {},
       },
-      { auth, headers: { 'Content-Type': 'application/json' } },
+      // Authorization: Basic base64("userId:password") 
+      { headers: { 'Content-Type': 'application/json', Authorization: `Basic ${Buffer.from(`${auth.username}:${auth.password}`).toString('base64')}` } },
     );
 
-    await axios.post(
+    await post(
       `${this.zincUrl}/api/index/logs`,
       {
         name: 'logs',
@@ -66,7 +68,7 @@ export class ZincLogger {
         settings: {},
         mappings: {},
       },
-      { auth, headers: { 'Content-Type': 'application/json' } },
+      { headers: { 'Content-Type': 'application/json', Authorization: `Basic ${Buffer.from(`${auth.username}:${auth.password}`).toString('base64')}` } },
     );
 
     this.createdIndex = true;
@@ -90,15 +92,12 @@ export class ZincLogger {
 
     try {
       // non-blocking fire-and-forget
-      axios.post(
-        `${this.zincUrl}/api/${this.zincIndex}/_doc`,
-        logEntry,
+      post(`${this.zincUrl}/api/${this.zincIndex}/_doc`, logEntry,
         {
-          auth: {
-            username: this.zincUsername,
-            password: this.zincPassword,
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Basic ${Buffer.from(`${this.zincUsername}:${this.zincPassword}`).toString('base64')}`,
           },
-          headers: { 'Content-Type': 'application/json' },
         },
       );
     } catch (error: any) {

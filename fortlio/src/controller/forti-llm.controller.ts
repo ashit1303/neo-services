@@ -42,7 +42,7 @@ class FortiLLMController {
       }
       res.write(`data: ${JSON.stringify({ d: true })}\n\n`);
       res.end();
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
       res.write(`data: ${JSON.stringify('FAILED_TO_INITIATE_LLM')}\n\n`);
       res.write(`data: ${JSON.stringify({ d: true })}\n\n`);
@@ -60,7 +60,7 @@ class FortiLLMController {
         maxAge: 2 * 60 * 60 * 1000,
       });
       res.json({ success: true });
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
       res.status(500).json({ error: 'Internal server error' });
     }

@@ -4,7 +4,7 @@ import { PipelineStage } from 'mongoose';
 import { MongoDBClient } from '../core/core-clients/mongodb.client';
 import { RedisService } from '../core/core-clients/redis-service.client';
 import { AuthnService } from '../services/authn.services';
-import { fmtPrntErr } from '../core/core-utils/err-util';
+import { AppError } from '../core/core-utils/err-util';
 import { AUTHN_MSGS } from '../constants';
 
 export class RestAuthMiddleware {
@@ -28,7 +28,7 @@ export class RestAuthMiddleware {
       const accesstoken = req.headers.authorization as string;
 
       if (!accesstoken) {
-        throw fmtPrntErr(null, 401, { msg: AUTHN_MSGS.ERR.FAILED_TO_AUTHENTICATE_USER, apiName: 'authn', debugValues: {} });
+        throw new AppError(AUTHN_MSGS.ERR.FAILED_TO_AUTHENTICATE_USER, { msg: AUTHN_MSGS.ERR.FAILED_TO_AUTHENTICATE_USER, apiName: 'authn', debugValues: {} }, 401);
       }
 
       const userDetails = await new AuthnService().verifyToken(accesstoken);
@@ -82,10 +82,10 @@ export class RestAuthMiddleware {
 
       const allPrivileges = [...roleAccesses, ...userAccesses];
       if (!RestAuthMiddleware.checkRoleAccess(allPrivileges, apiName)) {
-        throw fmtPrntErr(null, 401, { msg: AUTHN_MSGS.ERR.FAILED_TO_AUTHENTICATE_USER, apiName: 'authz', debugValues: {} });
+        throw new AppError(AUTHN_MSGS.ERR.FAILED_TO_AUTHENTICATE_USER, { msg: AUTHN_MSGS.ERR.FAILED_TO_AUTHENTICATE_USER, apiName: 'authz', debugValues: {} }, 401);
       }
 
-    } catch (error) {
+    } catch (error: any) {
       throw error;
     }
   }
@@ -99,8 +99,8 @@ export class RestAuthMiddleware {
 
       next();
     } catch (error: any) {
-      console.error(`Error in RestAuthenticateAndAuthorizeMiddleware: ${error.message}`);
-      throw fmtPrntErr(error, 401, { msg: AUTHN_MSGS.ERR.FAILED_TO_AUTHENTICATE_USER, apiName: 'main', debugValues: {} });
+      // console.error(`Error in RestAuthenticateAndAuthorizeMiddleware: ${error.message}`);
+      throw next(error);
     }
   }
 };

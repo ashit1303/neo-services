@@ -19,11 +19,11 @@ export class MongooseClient {
 
     try {
       await mongoose.connect(uri, options);
-      console.info('✅ MongoDB Connected Successfully');
+      console.info('✅ Mongoose Connected Successfully');
       await initializeDefaultRoles();
       await initializeDefaultUsers();
-    } catch (error) {
-      console.error('❌ MongoDB Connection Failed', error);
+    } catch (error: any) {
+      console.error('❌ Mongoose Connection Failed', error);
       process.exit(1);
     }
   }
@@ -31,9 +31,9 @@ export class MongooseClient {
   async close(): Promise<void> {
     try {
       await mongoose.connection.close();
-      console.info('📡 MongoDB Connection Closed');
-    } catch (error) {
-      console.error('❌ Error Closing MongoDB Connection', error);
+      console.info('📡 Mongoose Connection Closed');
+    } catch (error: any) {
+      console.error('❌ Error Closing Mongoose Connection', error);
     }
   }
 }

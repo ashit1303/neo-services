@@ -2,7 +2,7 @@ import { FilterQueryValidation } from '../validations/common-validation';
 import { RoleService } from '../services/role.service';
 import { Request, Response } from 'express';
 import { fmtRes } from '../core/core-utils/res-util';
-import { fmtErr, fmtPrntErr } from '../core/core-utils/err-util';
+import { AppError } from '../core/core-utils/err-util';
 import { RoleCreateValidation, RoleIdValidation, RoleUpdateValidation } from '../validations/role-validation';
 import { IRole } from '../interface/user-interface';
 import { ROLE_MSGS } from '../constants';
@@ -23,7 +23,7 @@ export class RoleController {
 
       return fmtRes(res, roles);
     } catch (error: any) {
-      throw fmtPrntErr(error, 400, { msg: ROLE_MSGS.ERR.FAILED_TO_FETCH_ALL_ROLES, apiName: 'getRoles' });
+      throw new AppError(error.message || 'unknown', { msg: ROLE_MSGS.ERR.FAILED_TO_FETCH_ALL_ROLES, apiName: 'getRoles' }, 400);
       ;
     }
   };
@@ -41,7 +41,7 @@ export class RoleController {
 
       return fmtRes(res, roles);
     } catch (error: any) {
-      throw fmtPrntErr(error, 400, { msg: ROLE_MSGS.ERR.FAILED_TO_FETCH_ALL_ROLES, apiName: 'getRolesWithPrivileges' });
+      throw new AppError(error.message || 'unknown', { msg: ROLE_MSGS.ERR.FAILED_TO_FETCH_ALL_ROLES, apiName: 'getRolesWithPrivileges' }, 400);
     }
   };
   getPrivileges = async (req: Request, res: Response) => {
@@ -57,7 +57,7 @@ export class RoleController {
 
       return fmtRes(res, privileges);
     } catch (error: any) {
-      throw fmtPrntErr(error, 400, { msg: ROLE_MSGS.ERR.FAILED_TO_FETCH_ALL_PRIVILEGES, apiName: 'getPrivileges' });
+      throw new AppError(error.message || 'unknown', { msg: ROLE_MSGS.ERR.FAILED_TO_FETCH_ALL_PRIVILEGES, apiName: 'getPrivileges' }, 400);
     }
   };
   getRoleById = async (req: Request, res: Response) => {
@@ -69,12 +69,12 @@ export class RoleController {
       const role = await this.roleService.getRoleById(roleId);
 
       if (!role) {
-        throw fmtErr(null, { msg: ROLE_MSGS.ERR.ROLE_NOT_FOUND, apiName: 'getRoleById', debugValues: { roleId } });
+        throw new AppError(ROLE_MSGS.ERR.ROLE_NOT_FOUND, { msg: ROLE_MSGS.ERR.ROLE_NOT_FOUND, apiName: 'getRoleById', debugValues: { roleId } });
       }
 
       return fmtRes(res, { roleId, ...role.toObject() });
     } catch (error: any) {
-      throw fmtPrntErr(error, 400, { msg: ROLE_MSGS.ERR.FAILED_TO_FETCH_ROLE, apiName: 'getRoleById' });
+      throw new AppError(error.message || 'unknown', { msg: ROLE_MSGS.ERR.FAILED_TO_FETCH_ROLE, apiName: 'getRoleById' }, 400);
     }
   };
 
@@ -93,7 +93,7 @@ export class RoleController {
       const { _id: roleId, ...roleDetails } = role.toObject();
       return res.status(201).send({ roleId, ...roleDetails });
     } catch (error: any) {
-      throw fmtPrntErr(error, 400, { msg: ROLE_MSGS.ERR.FAILED_TO_CREATE_ROLE, apiName: 'createRole', debugValues: { roleName: input.roleName } });
+      throw new AppError(error.message || 'unknown', { msg: ROLE_MSGS.ERR.FAILED_TO_CREATE_ROLE, apiName: 'createRole', debugValues: { roleName: input.roleName } });
     }
   };
   updateRole = async (req: Request, res: Response) => {
@@ -110,14 +110,14 @@ export class RoleController {
         userId,
       );
       if (!role) {
-        throw fmtErr(null, { msg: ROLE_MSGS.ERR.ROLE_NOT_FOUND, apiName: 'updateRole', debugValues: { roleId: input.roleId } });
+        throw new AppError(ROLE_MSGS.ERR.ROLE_NOT_FOUND, { msg: ROLE_MSGS.ERR.ROLE_NOT_FOUND, apiName: 'updateRole', debugValues: { roleId: input.roleId } });
       }
 
       const { _id: roleId, ...roleDetails } = role.toObject();
 
       return fmtRes(res, { roleId, ...roleDetails });
     } catch (error: any) {
-      throw fmtPrntErr(error, 400, { msg: ROLE_MSGS.ERR.FAILED_TO_UPDATE_ROLE, apiName: 'updateRole' });
+      throw new AppError(error.message || 'unknown', { msg: ROLE_MSGS.ERR.FAILED_TO_UPDATE_ROLE, apiName: 'updateRole' }, 400);
     }
   };
   deleteRole = async (req: Request, res: Response) => {
@@ -126,11 +126,11 @@ export class RoleController {
       RoleIdValidation.parse(roleId);
       const role = await this.roleService.deleteRoleById(roleId);
       if (!role) {
-        throw fmtErr(null, { msg: ROLE_MSGS.ERR.ROLE_NOT_FOUND, apiName: 'deleteRole', debugValues: { roleId } });
+        throw new AppError(ROLE_MSGS.ERR.ROLE_NOT_FOUND, { msg: ROLE_MSGS.ERR.ROLE_NOT_FOUND, apiName: 'deleteRole', debugValues: { roleId } });
       }
       return fmtRes(res, { roleId, ...role.toObject() });
     } catch (error: any) {
-      throw fmtPrntErr(error, 400, { msg: ROLE_MSGS.ERR.FAILED_TO_DELETE_ROLE, apiName: 'deleteRole' });
+      throw new AppError(error.message || 'unknown', { msg: ROLE_MSGS.ERR.FAILED_TO_DELETE_ROLE, apiName: 'deleteRole' }, 400);
     }
   };
 

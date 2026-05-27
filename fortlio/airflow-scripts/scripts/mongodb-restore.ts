@@ -15,7 +15,8 @@ import { mkdirSync, rmSync, existsSync, writeFileSync } from 'fs';
 import { S3Client, ListObjectsV2Command, GetObjectCommand } from '@aws-sdk/client-s3';
 import * as mongo from 'mongodb';
 import { SecretManager } from '../../src/core/core-clients/secret-manager.client';
-const secretManger = new SecretManager(config);
+import { AppError } from '../../src/core/core-utils/err-util';
+const secretManager = new SecretManager(config);
 
 // Interface for our secrets
 interface Secrets {
@@ -30,8 +31,8 @@ interface Secrets {
 
 // Get secrets from AWS Secrets Manager
 const getSecrets = async (): Promise<Secrets> => {
-  const awsConfig = await secretManger.get('AWS_CONFIG').then((res) => JSON.parse(res));
-  const mongoConfig = await secretManger.get('MONGO_BASE_CONFIG').then((res) => JSON.parse(res));
+  const awsConfig = await secretManager.get('AWS_CONFIG').then((res) => JSON.parse(res));
+  const mongoConfig = await secretManager.get('MONGO_BASE_CONFIG').then((res) => JSON.parse(res));
   const dbAndS3Config: any = {
     DB_USERNAME: mongoConfig['USERNAME'],
     DB_PASSWORD: mongoConfig['PASSWORD'],
@@ -64,7 +65,7 @@ const findBackupFile = async (daysOld: number): Promise<string> => {
     }));
 
     if (!Contents || Contents.length === 0) {
-      throw new Error('No backup files found in S3');
+      throw new AppError('No backup files found in S3');
     }
 
     // Sort backups by LastModified (newest first)
@@ -84,12 +85,12 @@ const findBackupFile = async (daysOld: number): Promise<string> => {
     });
 
     if (!backupFile || !backupFile.Key) {
-      throw new Error(`No backup found from ${daysOld} days ago`);
+      throw new AppError(`No backup found from ${daysOld} days ago`);
     }
 
     return backupFile.Key;
-  } catch (error) {
-    throw new Error(`Failed to find backup file: ${error}`);
+  } catch (error: any) {
+    throw new AppError(`Failed to find backup file: ${error}`);
   }
 };
 
@@ -117,7 +118,7 @@ const downloadBackup = async (s3Key: string): Promise<string> => {
     }));
 
     if (!Body) {
-      throw new Error('No data received from S3');
+      throw new AppError('No data received from S3');
     }
 
     // Convert stream to buffer and write to file
@@ -128,7 +129,7 @@ const downloadBackup = async (s3Key: string): Promise<string> => {
     execSync(`tar -xzf ${tarPath} -C ${downloadDir}`, { stdio: 'inherit' });
 
     return downloadDir;
-  } catch (error) {
+  } catch (error: any) {
     // Cleanup on failure
     if (existsSync(downloadDir)) {
       rmSync(downloadDir, { recursive: true, force: true });
@@ -136,7 +137,7 @@ const downloadBackup = async (s3Key: string): Promise<string> => {
     if (existsSync(tarPath)) {
       rmSync(tarPath);
     }
-    throw new Error(`Failed to download and extract backup: ${error}`);
+    throw new AppError(`Failed to download and extract backup: ${error}`);
   }
 };
 
@@ -180,8 +181,8 @@ const restoreCollections = async (restoreDir: string, dbType: string): Promise<v
     }
 
     await client.close();
-  } catch (error) {
-    throw new Error(`Failed to restore collections: ${error}`);
+  } catch (error: any) {
+    throw new AppError(`Failed to restore collections: ${error}`);
   }
 };
 
@@ -206,7 +207,7 @@ const mainRestore = async (daysOldFile: number, dbType: string) => {
     rmSync(restoreDir, { recursive: true, force: true });
 
     console.info('Restore process completed successfully');
-  } catch (error) {
+  } catch (error: any) {
     console.error('Restore process failed:', error);
     process.exit(1);
   }

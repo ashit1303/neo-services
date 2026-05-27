@@ -2,8 +2,10 @@ import { Request, Response } from 'express';
 import { LeetCodeService } from '../services/leetcode.service';
 import { ICodeLang } from '../interface/leetcode.interface';
 import { config } from '../../config';
-import { fmtErr, fmtPrntErr } from '../core/core-utils/err-util';
+import { AppError } from '../core/core-utils/err-util';
 import { fmtRes } from '../core/core-utils/res-util';
+import { sensiSearch } from '../clients';
+import { TYPSENSE_COLLECTION_NAME } from '../core/core-constants/common.constants';
 
 class LeetcodeController {
   leetCodeService: LeetCodeService;
@@ -30,34 +32,18 @@ class LeetcodeController {
       }
       return fmtRes(res, explain);
     } catch (error: any) {
-      throw fmtErr(error, { msg: 'Failed to explain question', apiName: 'explainLeetQuest', debugValues: { url, codelang } });
+      throw new AppError(error.message || 'unknown', { msg: 'Failed to explain question', apiName: 'explainLeetQuest', debugValues: { url, codelang } }, 400);
     }
   };
 
   searchLeetCodeQuests = async (req: Request, res: Response) => {
     const { searchKey } = req.query as { searchKey: string };
-
     try {
-      await this.search.ping();
-      await this.search.suggest('leetcode', searchKey);
-      const result = await this.search.search('leetcode', searchKey);
-      const resStmts = await this.leetCodeService.getQuestByIds(result);
-      return fmtRes(res, resStmts);
-    } catch (error: any) {
-      throw fmtPrntErr(error, 400, { msg: 'Failed to search question', apiName: 'searchLeetCodeQuests', debugValues: { searchKey } });
-    }
-  };
-
-  searchLeetCodeQuestsTypesense = async (req: Request, res: Response) => {
-    const { searchKey } = req.query as { searchKey: string };
-
-    try {
-      await this.search.ping();
-      const result = await this.typesense.search(Constants.LeetCollection, { q: searchKey, query_by: 'questionTitle' });
-      const resp = result.hits.map((hit: Typesense.SearchClient['apiCall']['hits'][0]) => hit.document);
+      const result = await sensiSearch.search(TYPSENSE_COLLECTION_NAME.DSA_QUESTIONS, { q: searchKey, query_by: 'questionTitle,titleSlug', text_match_type: 'max_score', weights: '2,1' });
+      const resp = result?.hits?.map((hit) => hit.document) || [];
       return fmtRes(res, resp);
     } catch (error: any) {
-      throw fmtPrntErr(error, 400, { msg: 'Failed to search question', apiName: 'searchLeetCodeQuestsTypesense', debugValues: { searchKey } });
+      throw new AppError(error.message || 'unknown', { msg: 'Failed to search question', apiName: 'searchLeetCodeQuestsTypesense', debugValues: { searchKey } }, 400);
 
     }
   };

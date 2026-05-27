@@ -2,7 +2,7 @@ import { getDataByFilter } from '../core/core-helper';
 import Privilege from '../models/privilege.model';
 import Role from '../models/role.model';
 import { redisClient } from '../clients';
-import { fmtErr } from '../core/core-utils/err-util';
+import { AppError } from '../core/core-utils/err-util';
 import { ROLE_MSGS } from '../constants';
 
 export class RoleService {
@@ -11,16 +11,16 @@ export class RoleService {
       const newRole = new Role({ roleName: name, description, rolePrivileges, createdBy });
       await newRole.save();
       return newRole;
-    } catch (error) {
-      throw fmtErr(error, { msg: ROLE_MSGS.ERR.FAILED_TO_CREATE_ROLE, apiName: 'createRole' });
+    } catch (error: any) {
+      throw new AppError(error.message || 'unknown', { msg: ROLE_MSGS.ERR.FAILED_TO_CREATE_ROLE, apiName: 'createRole' });
     }
   }
 
   async getRoles() {
     try {
       return await Role.find();
-    } catch (error) {
-      throw fmtErr(error, { msg: ROLE_MSGS.ERR.FAILED_TO_FETCH_ROLES, apiName: 'getRoles' });
+    } catch (error: any) {
+      throw new AppError(error.message || 'unknown', { msg: ROLE_MSGS.ERR.FAILED_TO_FETCH_ROLES, apiName: 'getRoles' });
     }
   }
   async getRolesWithPrivileges(filterQuery: any) {
@@ -31,8 +31,8 @@ export class RoleService {
         { $addFields: { rolePrivileges: { $map: { input: '$rolePrivileges', as: 'p', in: { $mergeObjects: ['$$p', { privilegeId: '$$p._id' }] } } } } },
       ];
       return await getDataByFilter(filterQuery, basePipeline, ['tags', 'name'], Role);
-    } catch (error) {
-      throw fmtErr(error, { msg: ROLE_MSGS.ERR.FAILED_TO_FETCH_ROLES_WITH_PRIVILEGES, apiName: 'getRolesWithPrivileges' });
+    } catch (error: any) {
+      throw new AppError(error.message || 'unknown', { msg: ROLE_MSGS.ERR.FAILED_TO_FETCH_ROLES_WITH_PRIVILEGES, apiName: 'getRolesWithPrivileges' });
     }
   }
 
@@ -41,24 +41,24 @@ export class RoleService {
       const basePipeline = [{ $addFields: { privilegeId: '$_id' } }];
       const result = await getDataByFilter(filterQuery, basePipeline, ['tags', 'name'], Privilege);
       return result;
-    } catch (error) {
-      throw fmtErr(error, { msg: ROLE_MSGS.ERR.FAILED_TO_FETCH_PRIVILEGES, apiName: 'getPrivileges' });
+    } catch (error: any) {
+      throw new AppError(error.message || 'unknown', { msg: ROLE_MSGS.ERR.FAILED_TO_FETCH_PRIVILEGES, apiName: 'getPrivileges' });
     }
   }
 
   async getRoleById(id: string) {
     try {
       return await Role.findById(id);
-    } catch (error) {
-      throw fmtErr(error, { msg: ROLE_MSGS.ERR.FAILED_TO_FETCH_ROLE_BY_ID, apiName: 'getRoleById' });
+    } catch (error: any) {
+      throw new AppError(error.message || 'unknown', { msg: ROLE_MSGS.ERR.FAILED_TO_FETCH_ROLE_BY_ID, apiName: 'getRoleById' });
     }
   }
 
   async getRoleByName(name: string) {
     try {
       return await Role.findOne({ roleName: name });
-    } catch (error) {
-      throw fmtErr(error, { msg: ROLE_MSGS.ERR.FAILED_TO_FETCH_ROLE_BY_NAME, apiName: 'getRoleByName' });
+    } catch (error: any) {
+      throw new AppError(error.message || 'unknown', { msg: ROLE_MSGS.ERR.FAILED_TO_FETCH_ROLE_BY_NAME, apiName: 'getRoleByName' });
     }
   }
 
@@ -68,16 +68,16 @@ export class RoleService {
       const roleDetails = await Role.findById(id);
       await redisClient.delete(`${roleDetails?.roleName}_permissions`);
       return await Role.findByIdAndUpdate(id, { rolePrivileges, roleName: name, description, modifiedBy }, { new: true });
-    } catch (error) {
-      throw fmtErr(error, { msg: ROLE_MSGS.ERR.FAILED_TO_UPDATE_ROLE, apiName: 'updateRole' });
+    } catch (error: any) {
+      throw new AppError(error.message || 'unknown', { msg: ROLE_MSGS.ERR.FAILED_TO_UPDATE_ROLE, apiName: 'updateRole' });
     }
   }
 
   async deleteRoleById(id: string) {
     try {
       return await Role.findByIdAndDelete(id);
-    } catch (error) {
-      throw fmtErr(error, { msg: ROLE_MSGS.ERR.FAILED_TO_DELETE_ROLE_BY_ID, apiName: 'deleteRoleById' });
+    } catch (error: any) {
+      throw new AppError(error.message || 'unknown', { msg: ROLE_MSGS.ERR.FAILED_TO_DELETE_ROLE_BY_ID, apiName: 'deleteRoleById' });
     }
   }
 }

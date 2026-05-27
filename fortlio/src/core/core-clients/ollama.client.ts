@@ -1,6 +1,7 @@
 
 import { Config } from '../../interface/common.interface';
 import { get, post } from '../core-utils';
+import { AppError } from '../core-utils/err-util';
 import { SecretManager } from './secret-manager.client';
 
 export class OllamaClient {
@@ -21,7 +22,7 @@ export class OllamaClient {
     this.model = secrets.MODEL;
 
     if (!this.baseUrl || !this.model) {
-      throw new Error('Failed to fetch Ollama configuration');
+      throw new AppError('Failed to fetch Ollama configuration');
     }
   }
 
@@ -33,16 +34,16 @@ export class OllamaClient {
         stream: false,
       });
       return response;
-    } catch (error) {
-      throw new Error(`Ollama API error: ${(error as Error).message}`);
+    } catch (error: any) {
+      throw new AppError(`Ollama API error: ${(error as Error).message}`);
     }
   }
   async listModels() {
     try {
       const response = await get(`${this.baseUrl}/api/tags`);
       return response;
-    } catch (error) {
-      throw new Error(`Failed to fetch models: ${(error as Error).message}`);
+    } catch (error: any) {
+      throw new AppError(`Failed to fetch models: ${(error as Error).message}`);
     }
   }
 
@@ -54,8 +55,8 @@ export class OllamaClient {
         stream: false,
       });
       return response;
-    } catch (error) {
-      throw new Error(`Chat API error: ${(error as Error).message}`);
+    } catch (error: any) {
+      throw new AppError(`Chat API error: ${(error as Error).message}`);
     }
   }
 }

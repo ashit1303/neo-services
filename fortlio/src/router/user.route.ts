@@ -21,7 +21,7 @@ export class UserRoutes {
     this.router.get('/getUserById', checkAccess('getUserById'), this.userController.getUserById);
     this.router.post('/createUser', checkAccess('createUser'), this.userController.createUser);
     this.router.put('/updateUserById', checkAccess('updateUserById'), this.userController.updateUserById);
-    this.router.delete('/deleteUserById', checkAccess('deleteUserById'), this.userController.deleteUserById);
+    this.router.delete('/deleteUserById/:userId', checkAccess('deleteUserById'), this.userController.deleteUserById);
 
   }
 

@@ -1,6 +1,7 @@
 import { Kafka, Producer, logLevel } from 'kafkajs';
 import { Config } from '../../interface/common.interface';
 import { SecretManager } from './secret-manager.client';
+import { AppError } from '../core-utils/err-util';
 
 export class KafkaProducer {
   private producer: Producer | null = null;
@@ -25,7 +26,7 @@ export class KafkaProducer {
     this.brokers = secrets['BROKER'];
 
     if (!this.topic || !this.username || !this.password || !this.brokers) {
-      throw new Error('Failed to fetch Kafka credentials');
+      throw new AppError('Failed to fetch Kafka credentials');
     }
 
     const kafka = new Kafka({
@@ -49,7 +50,7 @@ export class KafkaProducer {
     }
 
     if (!this.producer) {
-      throw new Error('Failed to initialize Kafka producer');
+      throw new AppError('Failed to initialize Kafka producer');
     }
 
     if (!this.isConnected) {
@@ -66,11 +67,11 @@ export class KafkaProducer {
       }
 
       if (!this.producer) {
-        throw new Error('Failed to initialize Kafka producer');
+        throw new AppError('Failed to initialize Kafka producer');
       }
 
       if (!this.topic) {
-        throw new Error('Failed to fetch Kafka topic');
+        throw new AppError('Failed to fetch Kafka topic');
       }
 
       await this.producer.send({
@@ -83,7 +84,7 @@ export class KafkaProducer {
       });
 
       console.info(`Message sent to topic "${this.topic}"`);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error sending Kafka message:', error);
       throw error;
     }

@@ -1,6 +1,7 @@
 import * as net from 'net';
 import { SecretManager } from './secret-manager.client';
 import { Config } from '../../interface/common.interface';
+import { AppError } from '../core-utils/err-util';
 export class VectorLogger {
   private secretManager: SecretManager;
 
@@ -26,7 +27,7 @@ export class VectorLogger {
     this.vectorPort = Number(secrets.PORT);
 
     if (!this.vectorHost || !this.vectorPort) {
-      throw new Error('Failed to fetch Vector configuration');
+      throw new AppError('Failed to fetch Vector configuration');
     }
 
     this.client = new net.Socket();

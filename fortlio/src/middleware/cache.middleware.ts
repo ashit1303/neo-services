@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { RedisService } from '../core/core-clients/redis-service.client';
-import { Config } from '../interface';
+import { Config } from '../interface/common.interface';
 
 export class CachingMiddleware {
   private redisService: RedisService;

@@ -20,24 +20,17 @@ class LeetcodeRoutes {
 
     this.router.get(
       '/explain',
-      checkAccess('explainLeetQuest'),
+      // checkAccess('explainLeetQuest'),
       (req, res, next) => this.cacheMiddleware.cacheReqRes(req, res, next, 3600),
       this.leetcodeController.explainLeetQuest.bind(this.leetcodeController),
     );
 
     this.router.get(
       '/search',
-      checkAccess('searchLeetCodeQuests'),
       (req, res, next) => this.cacheMiddleware.cacheReqRes(req, res, next, 3600),
       this.leetcodeController.searchLeetCodeQuests.bind(this.leetcodeController),
     );
 
-    this.router.get(
-      '/search-by-typesense',
-      checkAccess('searchLeetCodeQuestsTypesense'),
-      (req, res, next) => this.cacheMiddleware.cacheReqRes(req, res, next, 3600),
-      this.leetcodeController.searchLeetCodeQuestsTypesense.bind(this.leetcodeController),
-    );
   }
 }
 

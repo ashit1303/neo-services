@@ -9,6 +9,6 @@
 //     if (ast.kind === 'StringValue' || ast.kind === 'IntValue' || ast.kind === 'FloatValue' || ast.kind === 'BooleanValue') {
 //       return ast.value;
 //     }
-//     throw new Error(`Unsupported literal kind: ${ast.kind}`);
+//     throw new AppError(`Unsupported literal kind: ${ast.kind}`);
 //   },
 // });

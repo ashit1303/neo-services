@@ -4,7 +4,7 @@ import { customerDefaultAccess, privilegesAllDefault } from './core/core-helper/
 import User from './models/user.model';
 import Privilege from './models/privilege.model';
 import { DB_CONSTANTS } from './core/core-constants/mongodb.constants';
-import { fmtPrntErr } from './core/core-utils/err-util';
+import { AppError } from './core/core-utils/err-util';
 
 function checkPrivilegesDuplicates() {
   const privilegesCodes = privilegesAllDefault.map(a => a.code);
@@ -53,19 +53,19 @@ export async function initializeDefaultRoles() {
       await Role.updateOne({ roleName: DB_CONSTANTS.DEFAULT_ROLE_ADMIN }, { $set: { rolePrivileges: privilegesAllDefault.map((access) => access.code) } });
     }
 
-  } catch (error) {
-    throw fmtPrntErr(error, 400, { apiName: 'initializeDefaultRoles' });
+  } catch (error: any) {
+    throw new AppError(error.message, { apiName: 'initializeDefaultRoles' }, 500);
   }
 }
 
 export async function initializeDefaultUsers() {
   try {
     const filter = { _id: DB_CONSTANTS.DEFAULT_SYSTEM_ADMIN_ID };
-    const update = { _id: DB_CONSTANTS.DEFAULT_SYSTEM_ADMIN_ID, email: DB_CONSTANTS.DEFAULT_SYSTEM_ADMIN_EMAIL, firstName: DB_CONSTANTS.DEFAULT_SYSTEM_ADMIN.split(' ')[0], lastName: DB_CONSTANTS.DEFAULT_SYSTEM_ADMIN.split(' ')[1], mobileNumber: DB_CONSTANTS.DEFAULT_SYSTEM_ADMIN_MOBILE, roleId: DB_CONSTANTS.DEFAULT_ROLE_ADMIN_ID };
+    const update = { _id: DB_CONSTANTS.DEFAULT_SYSTEM_ADMIN_ID, email: DB_CONSTANTS.DEFAULT_SYSTEM_ADMIN_EMAIL, fullName: DB_CONSTANTS.DEFAULT_SYSTEM_ADMIN, mobileNumber: DB_CONSTANTS.DEFAULT_SYSTEM_ADMIN_MOBILE, roleId: DB_CONSTANTS.DEFAULT_ROLE_ADMIN_ID };
     const options = { upsert: true, new: true, setDefaultsOnInsert: true };
 
     await User.findOneAndUpdate(filter, update, options);
-  } catch (error) {
-    throw fmtPrntErr(error, 400, { apiName: 'initializeDefaultUsers' });
+  } catch (error: any) {
+    throw new AppError(error.message, { apiName: 'initializeDefaultUsers' }, 500);
   }
 }

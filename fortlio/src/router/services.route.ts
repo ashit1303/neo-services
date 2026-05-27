@@ -10,10 +10,10 @@ class ServicesRoutes {
 
   constructor() {
     this.cacheMiddleware = new CachingMiddleware(config);
-    this.SnitializeDervicesRoutes();
+    this.itializeDervicesRoutes();
   }
 
-  private SnitializeDervicesRoutes() {
+  private itializeDervicesRoutes() {
     this.router.use('/leetcode', (req, res, next) => this.cacheMiddleware.cacheReqRes(req, res, next, 60 * 60), leetcodeRoutes); // ROUTE CODE : 2100 
     this.router.use('/shortner', this.cacheMiddleware.cacheReqRes.bind(this.cacheMiddleware), shortnerRoutes); // ROUTE CODE : 2200
 

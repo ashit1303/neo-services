@@ -1,13 +1,13 @@
 import { BedrockAgentRuntimeClient, RetrieveAndGenerateCommand } from '@aws-sdk/client-bedrock-agent-runtime';
 import { config } from '../../config';
-import { secretManger } from '../clients';
-import { fmtErr } from '../core/core-utils/err-util';
+import { secretManager } from '../clients';
+import { AppError } from '../core/core-utils/err-util';
 
 class FortiLLMService {
 
   async getAnswerFromKnowledgeBase(question: string, orchestrationPrompt: string, generationPrompt: string) {
     try {
-      const obiLLMSecrets = await secretManger.get('OBI_LLM').then((res) => JSON.parse(res));
+      const obiLLMSecrets = await secretManager.get('OBI_LLM').then((res) => JSON.parse(res));
 
       const client = new BedrockAgentRuntimeClient({ region: config.awsRegion });
 
@@ -29,8 +29,8 @@ class FortiLLMService {
       });
 
       return { command, client };
-    } catch (error) {
-      throw fmtErr(error, { msg: 'Failed to get answer from knowledge base', apiName: 'getAnswerFromKnowledgeBase' });
+    } catch (error: any) {
+      throw new AppError(error.message || 'unknown', { msg: 'Failed to get answer from knowledge base', apiName: 'getAnswerFromKnowledgeBase' });
     }
   }
 }

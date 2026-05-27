@@ -1,73 +1,107 @@
-
+// import { AxiosError } from 'axios';
 import { ZodError } from 'zod';
-import { AxiosError } from 'axios';
 
-type StackEntry = {
+export type StackEntry = {
   apiName: string;
   msg?: string;
   debugValues?: Record<string, any>;
 };
-export class CustomError extends Error {
-  actualError?: Error;
-  stackEntry?: StackEntry;
-  axiosPayload?: AxiosDebug;
-  status?: number;
+
+export class AppError extends Error {
+  statusCode: number;
+  stackJourney: StackEntry[] = [];
   userMessage?: string;
+  error?: unknown;
+  // axiosDebug?: any;
 
-  constructor(actualError: Error, message: string, status = 500) {
+  constructor(
+    message: string,
+    opts?: { msg?: string; apiName?: string; debugValues?: Record<string, any>; error?: unknown; },
+    statusCode?: number,
+
+  ) {
     super(message);
-    this.name = 'CustomError';
-    this.status = status;
-    this.actualError = actualError;
+
+    this.statusCode = statusCode ?? 500;
+    this.error = opts?.error;
+    this.userMessage = opts?.msg || message;
+    if (opts?.apiName) {
+      this.stackJourney.push({
+        apiName: opts.apiName,
+        msg: opts.msg,
+        debugValues: opts.debugValues,
+      });
+    }
+    Object.setPrototypeOf(this, AppError.prototype);
+    Error.captureStackTrace?.(this, this.constructor);
+
+    this.enrich();
+    this.name = 'AppError';
+    // 3. optional auto log (ONLY if statusCode is explicitly provided)
+    if (statusCode) {
+      this.log();
+    }
   }
-}
 
-type AxiosDebug = { url?: string; method?: string; status?: number; responseData?: any; params?: any; requestData?: any; };
+  // -----------------------------
+  // STACK JOURNEY BUILDER
+  // -----------------------------
+  // private buildStackJourney(entry?: StackEntry | StackEntry[]) {
+  //   if (!entry) { return; }
 
-const extractAxiosDetails = (error: AxiosError): AxiosDebug => ({
-  url: error.config?.url,
-  method: error.config?.method,
-  status: error.response?.status,
-  responseData: error.response?.data,
-  params: error.config?.params,
-  requestData: error.config?.data,
-});
+  //   if (Array.isArray(entry)) {
+  //     this.stackJourney.push(...entry);
+  //   } else {
+  //     this.stackJourney.push(entry);
+  //   }
+  // }
 
-export function fmtErr(inputErr: any, stackEntry: StackEntry): CustomError {
-  inputErr.stackEntry ? inputErr.stackEntry.push(stackEntry) : inputErr.stackEntry = [stackEntry];
-  if (inputErr instanceof ZodError) {
-    inputErr.message = inputErr.issues.map(e => e.message).join(', ');
+  // -----------------------------
+  // AUTO TYPE ENRICHMENT
+  // -----------------------------
+  private enrich() {
+    const err: any = this.error;
+
+    if (!err) { return; }
+
+    // ✅ Zod handling
+    if (err instanceof ZodError) {
+      this.message = err.issues.map(e => e.message).join(', ');
+    }
+
+    // 
+    // if (err instanceof AxiosError) {
+    //   this.message = err.message;
+    //   this.error = {
+    //     message: err.message,
+    //     url: err.config?.url,
+    //     method: err.config?.method,
+    //     status: err.response?.status,
+    //     responseData: err.response?.data,
+    //     params: err.config?.params,
+    //     requestData: err.config?.data,
+    //   };
+    // }
   }
-  let axiosError;
-  if (inputErr instanceof AxiosError) {
-    axiosError = extractAxiosDetails(inputErr);
+
+  // -----------------------------
+  // OPTIONAL: add more context internally (no external calls needed)
+  // -----------------------------
+  addInternalContext(entry: StackEntry) {
+    this.stackJourney.push(entry);
+    return this;
   }
-  if (axiosError) {
-    inputErr.axiosPayload = axiosError;
+
+  // -----------------------------
+  // LOGGER (single source of truth)
+  // -----------------------------
+  log() {
+    console.error('--------------- ERROR TRACE START ---------------');
+
+    console.error(
+      JSON.stringify({ message: this.message, statusCode: this.statusCode, stackJourney: this.stackJourney, stack: this.stack, error: this.error }),
+    );
+
+    console.error('--------------- ERROR TRACE END -----------------');
   }
-  return inputErr;
-}
-
-// ✅ Final formatter (top-level only)
-export function fmtPrntErr(input: any, statusCode = 500, stackEntry: StackEntry): CustomError {
-  const finalError = fmtErr(input, stackEntry);
-  const customErr = new CustomError(input, finalError.message, statusCode);
-
-  // customErr.stackEntry = finalError.stackEntry;
-  // customErr.axiosPayload = finalError.axiosPayload;
-  customErr.actualError = input;
-  customErr.userMessage = stackEntry.msg;
-
-  console.error('---------------------START---------------------');
-  console.error(JSON.stringify({
-    API_NAME: stackEntry.apiName,
-    MESSAGE: finalError.message,
-    ERROR: customErr,
-    STATUS: statusCode,
-  }));
-  console.error('--------------------ORIGINAL OUTPUT---------------------');
-  console.error(input);
-  console.error('---------------------END---------------------');
-
-  return customErr;
 }

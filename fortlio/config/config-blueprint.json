@@ -33,7 +33,7 @@
     "PORT": "9000"
   },
   "REDIS_CONFIG": {
-    "HOST": "redis://default:argusdev789@redis.dev.argus.internal:6379"
+    "HOST": "redis://default:123@redis.dev.argus.internal:6379"
   },
   "SONIC_CONFIG": {
     "HOST": "localhost",
