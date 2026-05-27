@@ -87,5 +87,9 @@ export class LMStudioClient {
     }
   }
   // await client.chatStream([{ role: "user", content: "Write a poem about AI" }], (token) => { process.stdout.write(token); });
+  // res.write(`data: ${JSON.stringify(chunk)}\n\n`);
+  // res.setHeader("Content-Type", "text/event-stream");
+  // res.setHeader("Cache-Control", "no-cache");
+  // res.setHeader("Connection", "keep-alive");
 }
 

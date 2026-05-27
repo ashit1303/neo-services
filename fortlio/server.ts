@@ -67,7 +67,7 @@ app.use((err: any, _req: Request, res: ExpressResponse, _next: NextFunction) => 
 });
 const wsHandler = new WebSocketHandler({ message: async (_ws: BunWS, msg) => { console.info('message:', msg); } }, 1000);
 
-const wsServer = Bun.serve({
+const wsServer = Bun.serve<{ clientId: string }>({
   port: Number(PORT) + 1,
   fetch(req, server) {
     const upgraded = server.upgrade(req, { data: { clientId: crypto.randomUUID() } });
