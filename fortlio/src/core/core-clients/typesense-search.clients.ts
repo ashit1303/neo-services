@@ -22,17 +22,17 @@ export class TypesenseService {
     const typesenseConfig = {
       nodes: [
         {
-          host: secrets.host,
-          protocol: secrets.protocol || 'http',
-          port: Number(secrets.port),
+          host: secrets.TYPESENSE_HOST,
+          protocol: secrets.TYPESENSE_PROTOCOL || 'http',
+          port: Number(secrets.TYPESENSE_PORT),
         },
       ],
       numRetries: 3,
       connectionTimeoutSeconds: 10,
-      apiKey: secrets.apiKey,
+      apiKey: secrets.TYPESENSE_API_KEY,
     };
 
-    if (!secrets.host || !secrets.apiKey) {
+    if (!secrets.TYPESENSE_HOST || !secrets.TYPESENSE_API_KEY) {
       throw new AppError('Failed to fetch Typesense configuration');
     }
 
@@ -53,13 +53,10 @@ export class TypesenseService {
     return this.typesenseSearch.collections().create(schemaToUse);
   }
 
-  async search(
-    collectionName: string,
-    searchParameters: any,
-  ): Promise<any> {
+  async search<T extends object>(collectionName: string, searchParameters: any): Promise<Typesense.SearchResponse<T>> {
     await this.ensureInit();
     return this.typesenseSearch
-      .collections(collectionName)
+      .collections<T>(collectionName)
       .documents()
       .search(searchParameters);
   }
@@ -84,7 +81,7 @@ export class TypesenseService {
     }
   }
 
-  async retrieveDocument(collectionName: string, documentId: string) {
+  async retrieveDocument(collectionName: string, documentId: string): Promise<any> {
     await this.ensureInit();
     return this.typesenseSearch
       .collections(collectionName)
@@ -92,7 +89,7 @@ export class TypesenseService {
       .retrieve();
   }
 
-  async remove(collectionName: string, documentId: string) {
+  async remove(collectionName: string, documentId: string): Promise<any> {
     await this.ensureInit();
     return this.typesenseSearch
       .collections(collectionName)
@@ -111,7 +108,7 @@ export class TypesenseService {
     return this.typesenseSearch
       .collections(collectionName)
       .documents()
-      .import(documentsArray, { action: 'create' });
+      .import(documentsArray, { action: 'upsert' });
   }
 
   async getCollection(name: string) {
@@ -126,21 +123,6 @@ export class TypesenseService {
       .collections(collectionName)
       .synonyms()
       .upsert(synonymSchema.id, synonymSchema);
-  }
-
-  async searchInDepth(
-    q: string,
-    query_by: string,
-    filter_by: string,
-    sort_by: string,
-    facet_by: string,
-  ) {
-    await this.ensureInit();
-
-    return this.typesenseSearch
-      .collections('products')
-      .documents()
-      .search({ q, query_by, filter_by, sort_by, facet_by });
   }
 
   async createKey(keySchema: any) {

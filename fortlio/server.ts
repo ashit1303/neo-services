@@ -5,12 +5,13 @@ import express from 'express';
 import type { NextFunction, Request, Response as ExpressResponse } from 'express';
 // import express, { NextFunction, Request, Response } from 'express';
 import router from './src/router/index.route';
-import { mongoDbClient, mongooseClient } from './src/clients';
+import { bullMQService, mongoDbClient, mongooseClient } from './src/clients';
 import { corsOptionsDelegate } from './src/core/core-utils/cors.util';
 import { AppError } from './src/core/core-utils/err-util';
 import swaggerUi from 'swagger-ui-express';
 import { generateOpenApiDocs } from './src/swagger-docs/swagger.client';
 import { WebSocketHandler, BunWS } from './src/core/core-clients/web-socket.client';
+import { initializeBullMQTypesenseSync, scheduleTypesenseSync } from './src/core/core-workers/bullmq.workers';
 
 const app = express();
 
@@ -44,6 +45,7 @@ app.listen(PORT, async () => {
   try {
     await mongoDbClient.connect();
     await mongooseClient.connect();
+    await initializeBullMQTypesenseSync().then(scheduleTypesenseSync);
 
     console.info(`🚀 Server ready at port ${PORT}`);
   } catch (error: any) {
@@ -85,9 +87,12 @@ const wsServer = Bun.serve<{ clientId: string }>({
 process.on('SIGINT', async () => {
   await mongoDbClient.close();
   await mongooseClient.close();
+  await bullMQService.close();
   await wsServer.stop(true);
   process.exit(0);
 });
+
+// BULL MQ TASKS
 
 console.info(`🚀 WS Server running at ws://localhost:${wsServer.port}`);
 // Websocket connection example

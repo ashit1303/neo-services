@@ -8,6 +8,7 @@ import { SESClientUtil } from './core/core-clients/aws-ses.client';
 import { RedisService } from './core/core-clients/redis-service.client';
 import { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
 import { BullMQService } from './core/core-clients/bullmq.client';
+import { TypesenseService } from './core/core-clients/typesense-search.clients';
 
 // export const clickHouseClient = new ClickHouseClient(config);
 // export const downloadClient = new ExportHelper(config);
@@ -17,4 +18,5 @@ export const secretManager = new SecretManager(config);
 export const sesClientUtil = new SESClientUtil(config);
 export const redisClient = new RedisService(config);
 export const openApiRegistry = new OpenAPIRegistry();
+export const sensiSearch = new TypesenseService(config);
 export const bullMQService = BullMQService.getInstance(config);

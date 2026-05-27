@@ -31,11 +31,6 @@ class LeetcodeRoutes {
       this.leetcodeController.searchLeetCodeQuests.bind(this.leetcodeController),
     );
 
-    this.router.get(
-      '/advanceSearch',
-      (req, res, next) => this.cacheMiddleware.cacheReqRes(req, res, next, 3600),
-      this.leetcodeController.searchLeetCodeQuestsTypesense.bind(this.leetcodeController),
-    );
   }
 }
 

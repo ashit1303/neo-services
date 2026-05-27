@@ -69,10 +69,7 @@ export class BullMQService {
         try {
           await handler(job);
         } catch (error: any) {
-          console.error(
-            `[BullMQ Worker Error] Queue: ${queueName}`,
-            error,
-          );
+          console.error(`[BullMQ Worker Error] Queue: ${queueName}`, error);
           throw error;
         }
       },
@@ -80,16 +77,10 @@ export class BullMQService {
     );
 
     worker.on('completed', (job) => {
-      console.info(
-        '[BullMQ] Job completed',
-        {
-          queue: queueName,
-          jobId: job.id,
-        },
-      );
+      console.info('[BullMQ] Job completed', { queue: queueName, jobId: job.id });
     });
 
-    worker.on('failed', (job, err) => {
+    worker.on('failed', (job, err: any) => {
       console.error('[BullMQ] Job failed', { queue: queueName, jobId: job?.id, error: err.message });
     });
 
@@ -144,6 +135,11 @@ export class BullMQService {
     return queue.add(jobName, data, { delay: delayInMs, jobId });
   }
 
+  async addRepeatedJob(queueName: string, jobName: string, cronExpression: string) {
+    const queue = await this.getQueue(queueName);
+    return queue.upsertJobScheduler(jobName, { pattern: cronExpression }, { opts: { removeOnComplete: true, removeOnFail: { count: 10 } } });
+  }
+
   async getJob(queueName: string, jobId: string) {
     const queue = await this.getQueue(queueName);
 
@@ -189,9 +185,7 @@ export class BullMQService {
   async obliterateQueue(queueName: string) {
     const queue = await this.getQueue(queueName);
 
-    return queue.obliterate({
-      force: true,
-    });
+    return queue.obliterate({ force: true });
   }
 
   async pauseQueue(queueName: string) {
@@ -215,6 +209,7 @@ export class BullMQService {
   async close() {
     for (const worker of this.workers.values()) {
       await worker.close();
+      console.info('BullMQ Workers stopped');
     }
 
     for (const queue of this.queues.values()) {

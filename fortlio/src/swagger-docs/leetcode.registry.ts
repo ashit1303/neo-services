@@ -20,12 +20,4 @@ export function registerLeetcodeRoutes() {
     responses: { 200: { description: 'Search results fetched' } },
   });
 
-  openApiRegistry.registerPath({
-    method: 'get',
-    tags: ['Leetcode'],
-    path: '/services/leetcode/advanceSearch',
-    security: [{ bearerAuth: [] }],
-    request: { query: SearchValidation },
-    responses: { 200: { description: 'Advanced search results fetched' } },
-  });
 }
