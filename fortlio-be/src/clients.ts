@@ -15,6 +15,7 @@ import { LMStudioClient } from './core/core-clients/lm-studio.client';
 import { ILLMClient } from './interface/llm-client.interface';
 
 import { SESHelper } from './core/core-helper/ses-helper';
+import { OpenRouterClient } from './core/core-clients/open-router.client';
 
 // export const clickHouseClient = new ClickHouseClient(config);
 // export const downloadClient = new ExportHelper(config);
@@ -30,6 +31,7 @@ export const bullMQService = BullMQService.getInstance(config);
 export const sessionManager = new SessionManager(redisClient, config);
 export const ollamaClient = new OllamaClient(config);
 export const lmStudioClient = new LMStudioClient(config);
+export const openRouterClient = new OpenRouterClient(config);
 
-const llmProvider = process.env.LLM_PROVIDER || 'lm-studio';
-export const llmClient: ILLMClient = llmProvider === 'lm-studio' ? lmStudioClient : ollamaClient;
+const llmProvider = process.env.LLM_PROVIDER || 'openRouter';
+export const llmClient: ILLMClient = llmProvider === 'openRouter' ? openRouterClient : ollamaClient;
