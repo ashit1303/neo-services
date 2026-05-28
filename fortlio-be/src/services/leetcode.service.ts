@@ -98,7 +98,7 @@ export class LeetcodeService {
         { $match: { titleSlug: slug } },
         {
           $lookup: {
-            from: 'questsanswers',
+            from: 'dsa-answers',
             let: { qId: '$questionId' },
             pipeline: [{ $match: { $expr: { $and: [{ $eq: ['$questionId', '$$qId'] }, { $eq: ['$codeLang', codeLang] }] } } }],
             as: 'answers',
