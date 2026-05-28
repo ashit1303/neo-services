@@ -3,8 +3,9 @@ import { Config } from '../../interface/common.interface';
 import { get, post } from '../core-utils';
 import { AppError } from '../core-utils/err-util';
 import { SecretManager } from './secret-manager.client';
+import { ILLMClient } from '../../interface/llm-client.interface';
 
-export class LMStudioClient {
+export class LMStudioClient implements ILLMClient {
   private secretManager: SecretManager;
   private baseUrl: string;
   private model: string;
@@ -28,9 +29,9 @@ export class LMStudioClient {
 
   async generateResponse(prompt: string) {
     try {
-      const response = await post(`${this.baseUrl}/v1/chat/completions`, { model: this.model, messages: [{ role: 'user', content: prompt }], stream: false });
-
-      return response;
+      const response: any = await post(`${this.baseUrl}/v1/chat/completions`, { model: this.model, messages: [{ role: 'user', content: prompt }], temperature: 0.2, stream: false });
+      if (!response) { throw new AppError('LM Studio response not available'); }
+      return response?.choices[0]?.message?.content;
     } catch (error: any) {
       throw new AppError(`LM Studio API error: ${(error as Error).message}`);
     }
@@ -52,38 +53,75 @@ export class LMStudioClient {
       throw new AppError(`Chat API error: ${(error as Error).message}`);
     }
   }
-  async chatStream(messages: Array<{ role: string; content: string }>, onToken: (token: string) => void) {
+  // async chatStream(messages: Array<{ role: string; content: string }>, onToken: (token: string) => void) {
+  //   try {
+  //     const response = await fetch(`${this.baseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model: this.model, messages, stream: true }) });
+
+  //     if (!response.ok) { throw new Error(`HTTP ${response.status}`); }
+
+  //     if (!response.body) { throw new Error('No response body'); }
+
+  //     const reader = response.body.getReader();
+  //     const decoder = new TextDecoder('utf-8');
+  //     let buffer = '';
+
+  //     while (true) {
+  //       const { done, value } = await reader.read();
+  //       if (done) { break; }
+  //       buffer += decoder.decode(value, { stream: true });
+  //       const lines = buffer.split('\n');
+  //       buffer = lines.pop() || '';
+  //       for (const line of lines) {
+  //         const trimmed = line.trim();
+  //         if (!trimmed.startsWith('data:')) { continue; }
+  //         const data = trimmed.replace(/^data:\s*/, '');
+  //         if (data === '[DONE]') { return; }
+  //         try {
+  //           const json = JSON.parse(data);
+  //           const token = json.choices?.[0]?.delta?.content || '';
+  //           if (token) { onToken(token); }
+  //         } catch (err) { console.error('Failed to parse SSE chunk:', err); }
+  //       }
+  //     }
+  //   } catch (error: any) {
+  //     throw new AppError(`Streaming chat error: ${(error as Error).message}`);
+  //   }
+  // }
+
+  async *streamChat(messages: Array<{ role: string; content: string }>) {
     try {
-      const response = await fetch(`${this.baseUrl}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model: this.model, messages, stream: true }) });
+      const response = await fetch(
+        `${this.baseUrl}/v1/chat/completions`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ model: this.model, messages, stream: true }),
+        },
+      );
 
-      if (!response.ok) { throw new Error(`HTTP ${response.status}`); }
-
-      if (!response.body) { throw new Error('No response body'); }
-
+      if (!response.body) {
+        throw new AppError('No body OllamaClient.*streamChat');
+      }
       const reader = response.body.getReader();
-      const decoder = new TextDecoder('utf-8');
-      let buffer = '';
+      const decoder = new TextDecoder();
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) { break; }
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || '';
-        for (const line of lines) {
-          const trimmed = line.trim();
-          if (!trimmed.startsWith('data:')) { continue; }
-          const data = trimmed.replace(/^data:\s*/, '');
-          if (data === '[DONE]') { return; }
-          try {
-            const json = JSON.parse(data);
-            const token = json.choices?.[0]?.delta?.content || '';
-            if (token) { onToken(token); }
-          } catch (err) { console.error('Failed to parse SSE chunk:', err); }
-        }
+        const chunk = decoder.decode(value, { stream: true });
+        yield chunk;
       }
     } catch (error: any) {
-      throw new AppError(`Streaming chat error: ${(error as Error).message}`);
+      throw new AppError(`Stream Chat API error: ${(error as Error).message}`);
+    }
+  }
+
+  async healthCheck() {
+    try {
+      const response = await fetch(`${this.baseUrl}/v1/models`);
+      return response.ok;
+    } catch (error: any) {
+      throw new AppError(`Health check failed: ${(error as Error).message}`);
     }
   }
   // await client.chatStream([{ role: "user", content: "Write a poem about AI" }], (token) => { process.stdout.write(token); });

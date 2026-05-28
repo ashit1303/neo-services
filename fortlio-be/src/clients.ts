@@ -11,6 +11,8 @@ import { BullMQService } from './core/core-clients/bullmq.client';
 import { TypesenseService } from './core/core-clients/typesense-search.clients';
 import { SessionManager } from './core/core-clients/session-manager.client';
 import { OllamaClient } from './core/core-clients/ollama.client';
+import { LMStudioClient } from './core/core-clients/lm-studio.client';
+import { ILLMClient } from './interface/llm-client.interface';
 
 import { SESHelper } from './core/core-helper/ses-helper';
 
@@ -27,3 +29,7 @@ export const sensiSearch = new TypesenseService(config);
 export const bullMQService = BullMQService.getInstance(config);
 export const sessionManager = new SessionManager(redisClient, config);
 export const ollamaClient = new OllamaClient(config);
+export const lmStudioClient = new LMStudioClient(config);
+
+const llmProvider = process.env.LLM_PROVIDER || 'lm-studio';
+export const llmClient: ILLMClient = llmProvider === 'lm-studio' ? lmStudioClient : ollamaClient;

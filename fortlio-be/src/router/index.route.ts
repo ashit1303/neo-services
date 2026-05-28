@@ -10,7 +10,7 @@ import { UserController } from '../controller/user.controller';
 import { UserService } from '../services/user.service';
 import { AuthnService } from '../services/authn.services';
 import { RoleService } from '../services/role.service';
-import { mongoDbClient, ollamaClient, redisClient, secretManager, sessionManager, sesHelper } from '../clients';
+import { mongoDbClient, llmClient, redisClient, secretManager, sessionManager, sesHelper } from '../clients';
 import { AuthnController } from '../controller/authn.controller';
 import { FortiLLMController } from '../controller/forti-llm.controller';
 import { FortiLLMService } from '../services/forti-llm.service';
@@ -32,7 +32,7 @@ const authnService = new AuthnService(secretManager, sessionManager, sesHelper);
 const roleService = new RoleService();
 const fortiLLMService = new FortiLLMService();
 const shortenerService = new ShortenerService();
-const leetcodeService = new LeetcodeService(ollamaClient, secretManager);
+const leetcodeService = new LeetcodeService(llmClient, secretManager);
 
 // ==========================================
 // 3. CONTROLLERS (ORCHESTRATION LAYER)

@@ -3,7 +3,7 @@ import DsaQuestions from '../models/dsa-quests.model';
 import DsaAnswer from '../models/dsa-answers.model';
 import { ICodeLang } from '../interface/leetcode.interface';
 import { SecretManager } from '../core/core-clients/secret-manager.client';
-import { OllamaClient } from '../core/core-clients/ollama.client';
+import { ILLMClient } from '../interface/llm-client.interface';
 import { cleanHTML } from '../core/core-utils';
 import { AppError } from '../core/core-utils/err-util';
 import { LEETCODE_MSGS } from '../constants';
@@ -11,7 +11,7 @@ import { post } from '../core/core-utils/fetch.util';
 
 export class LeetcodeService {
 
-  constructor(private ollama: OllamaClient, private secretManager: SecretManager) {
+  constructor(private llmClient: ILLMClient, private secretManager: SecretManager) {
   }
   getSlugFromUrl(url: string): string {
     return url.split('problems/')[1].split('/')[0];
@@ -188,8 +188,8 @@ export class LeetcodeService {
 
   async getExplanation(codeLang: ICodeLang, questionDescription: string, questionId: string) {
     try {
-      const explainPromt = `Give only optimed code, explanation, time and space complexity in ${codeLang}`;
-      const llmRes = await this.ollama.generateResponse(explainPromt + ' ' + questionDescription);
+      const explainPromt = `You are a strict DSA assistant. Respond only with: explanation, optimized code, time and space complexity in ${codeLang} language`;
+      const llmRes = await this.llmClient.generateResponse(explainPromt + ' ' + questionDescription);
       this.storeQuestsAnswer(llmRes, codeLang, questionId);
       return llmRes;
     } catch (error: any) {
