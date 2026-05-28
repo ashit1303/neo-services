@@ -67,7 +67,7 @@ export const initializeBullMQTypesenseSync = async () => {
 };
 
 export async function scheduleTypesenseSync() {
-  const cronEvery2Hours = '* */2 * * *';
+  const cronEvery2Hours = '0 */2 * * *';
   const jobName = 'typesense-leetcode-questions-sync-job';
 
   await bullMQService.addRepeatedJob(
