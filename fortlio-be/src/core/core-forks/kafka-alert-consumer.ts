@@ -1,7 +1,6 @@
 import { Kafka, EachBatchPayload, Consumer, logLevel } from 'kafkajs';
 import { SecretManager } from '../core-clients/secret-manager.client';
 import { KAKFA_TOPICS } from '../core-constants/common.constants';
-import { Config } from '../../interface/common.interface';
 
 type Pending = {
   messages: EachBatchPayload['batch']['messages'];
@@ -19,7 +18,6 @@ interface KafkaSecrets {
 }
 
 export class KafkaWorker {
-  private secretManager: SecretManager;
   private consumer!: Consumer;
 
   private batchCounter = 0;
@@ -29,8 +27,7 @@ export class KafkaWorker {
 
   private workerId: string;
 
-  constructor(private config: Config) {
-    this.secretManager = new SecretManager(config);
+  constructor(private secretManager: SecretManager) {
     this.workerId = process.argv[2] || 'default';
   }
 

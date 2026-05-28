@@ -13,6 +13,15 @@ const batchSize = 50;
 let count = 0;
 const failedCount = 0;
 const failedImei: string[] = [];
+function getFormatedInsertQuery(values: any[]) {
+  let query = '';
+
+  for (const value of values) {
+
+    query += `(${value.i}, '${value.m}', '${value.s}', '${value.t}', '${value.v}'),`;
+  }
+  return query.slice(0, -1);
+}
 
 const clickhouseInsertQuery = 'INSERT INTO data (model, status, type) VALUES ';
 const syncLatestCreatedOrUpdatedData = async (): Promise<String> => {

@@ -10,7 +10,7 @@ import { UserController } from '../controller/user.controller';
 import { UserService } from '../services/user.service';
 import { AuthnService } from '../services/authn.services';
 import { RoleService } from '../services/role.service';
-import { mongoDbClient, ollamaClient, redisClient, secretManager, sessionManager } from '../clients';
+import { mongoDbClient, ollamaClient, redisClient, secretManager, sessionManager, sesHelper } from '../clients';
 import { AuthnController } from '../controller/authn.controller';
 import { FortiLLMController } from '../controller/forti-llm.controller';
 import { FortiLLMService } from '../services/forti-llm.service';
@@ -28,7 +28,7 @@ import { LeetcodeService } from '../services/leetcode.service';
 // 2. SERVICES (BUSINESS LAYER)
 // ==========================================
 const userService = new UserService();
-const authnService = new AuthnService(secretManager, sessionManager);
+const authnService = new AuthnService(secretManager, sessionManager, sesHelper);
 const roleService = new RoleService();
 const fortiLLMService = new FortiLLMService();
 const shortenerService = new ShortenerService();
@@ -54,7 +54,7 @@ const authGuard = new AuthGuard(restAuthMiddleware);
 // ==========================================
 // 4. SUB-ROUTERS (DELIVERY LAYER)
 // ==========================================
-const authnRoutes = new AuthnRoutes(authnController, cacheMiddleware, authGuard);
+const authnRoutes = new AuthnRoutes(authnController, authGuard);
 const userRoutes = new UserRoutes(userController, cacheMiddleware, authGuard);
 const roleRoutes = new RoleRoutes(roleController, cacheMiddleware, authGuard);
 const fortiLLMRoutes = new FortiLLMRoutes(fortiLLMController, cacheMiddleware);

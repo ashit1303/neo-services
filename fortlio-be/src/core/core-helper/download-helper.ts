@@ -8,29 +8,33 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { MongoDBClient } from '../core-clients/mongodb.client';
 import { SecretManager } from '../core-clients/secret-manager.client';
 import { S3ClientClass } from '../core-clients/aws-s3.client';
-import dayjs from 'dayjs';
-import { Config } from '../../interface/common.interface';
 import { AppError } from '../core-utils/err-util';
 import { AWS_MSGS, USER_MSGS } from '../../constants';
 import { ClickHouseClient } from '../core-clients/clickhouse.client';
 
+import { SESHelper } from './ses-helper';
+import { EMAIL_SEND_FROM } from '../core-constants/common.constants';
+
 export class DownloadHelper {
-  private dbType: 'mongodb' | 'clickhouse';
   private mongoDbClient: MongoDBClient;
   private clickHouseClient?: ClickHouseClient;
   private secretManager: SecretManager;
   private sesHelper: SESHelper;
   private s3: Promise<S3Client>;
 
-  constructor(config: Config, dbType: 'mongodb' | 'clickhouse') {
-    this.s3 = new S3ClientClass(config).getS3Client();
-    this.sesHelper = new SESHelper(config);
-    this.secretManager = new SecretManager(config);
-    this.dbType = dbType;
-    this.mongoDbClient = new MongoDBClient(config);
-    if (dbType === 'clickhouse') {
-      this.clickHouseClient = new ClickHouseClient(config);
-    }
+  constructor(
+    _dbType: 'mongodb' | 'clickhouse',
+    mongoDbClient: MongoDBClient,
+    secretManager: SecretManager,
+    sesHelper: SESHelper,
+    s3ClientClass: S3ClientClass,
+    clickHouseClient?: ClickHouseClient,
+  ) {
+    this.mongoDbClient = mongoDbClient;
+    this.secretManager = secretManager;
+    this.sesHelper = sesHelper;
+    this.s3 = s3ClientClass.getS3Client();
+    this.clickHouseClient = clickHouseClient;
   }
 
   private async getUserInfo(userId: string) {
@@ -207,4 +211,33 @@ export class DownloadHelper {
     }
   };
 
+  public async sendLogsMail(url: string, fileContext: string, userId: string, fromDate: string, toDate: string) {
+    try {
+      const userInfo = await this.getUserInfo(userId);
+      if (!userInfo || !userInfo.email) {
+        throw new Error('User not found or user email not configured');
+      }
+
+      const subject = `Your requested logs file: ${fileContext}`;
+      const htmlContent = `
+        <div style="font-family: sans-serif; padding: 20px; color: #333;">
+          <h2>Log File Ready for Download</h2>
+          <p>Hello ${userInfo.fullName || 'User'},</p>
+          <p>Your requested logs for <strong>${fileContext}</strong> from <strong>${fromDate}</strong> to <strong>${toDate}</strong> have been successfully generated.</p>
+          <p>You can download the file using the link below (expires in 7 days):</p>
+          <p style="margin: 20px 0;">
+            <a href="${url}" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">Download Logs</a>
+          </p>
+          <p>If the button doesn't work, copy and paste the following link into your browser:</p>
+          <p style="word-break: break-all; color: #007bff;">${url}</p>
+          <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
+          <p style="font-size: 12px; color: #777;">This is an automated email. Please do not reply.</p>
+        </div>
+      `;
+
+      await this.sesHelper.sendSesEmail(EMAIL_SEND_FROM, userInfo.email, [], [], subject, [], htmlContent, undefined);
+    } catch (error: any) {
+      throw new AppError(error.message, { msg: 'Failed to send logs mail', apiName: 'sendLogsMail', debugValues: { url, fileContext, userId, fromDate, toDate } });
+    }
+  }
 }

@@ -2,18 +2,22 @@ import nodemailer from 'nodemailer';
 import { SESv2Client, SendEmailCommand } from '@aws-sdk/client-sesv2';
 import { AWS_MSGS } from '../../constants';
 import { AppError } from '../core-utils/err-util';
-import { sesClientUtil } from '../../clients';
+import type { SESClientUtil } from '../core-clients/aws-ses.client';
 
-export const sendSesEmail = async (from: string, toEmail: string, cc: string[] = [], bcc: string[] = [], subject: string, attachments: any[] = [], htmlContent: string, text?: string) => {
-  try {
-    const sesClient: SESv2Client = await sesClientUtil.getSESClient();
-    const transporter = nodemailer.createTransport({ SES: { sesClient, SendEmailCommand } } as any);
-    await transporter.sendMail({ from, to: toEmail, cc, bcc, subject, html: htmlContent, text, attachments });
-    console.info('Email sent successfully');
-  } catch (error: any) {
-    throw new AppError(error.message || 'unknown', { msg: AWS_MSGS.ERR.FAILED_TO_SEND_EMAIL, apiName: 'sendSesEmail' });
+export class SESHelper {
+  constructor(private sesClientUtil: SESClientUtil) {}
+
+  public async sendSesEmail(from: string, toEmail: string, cc: string[] = [], bcc: string[] = [], subject: string, attachments: any[] = [], htmlContent: string, text?: string) {
+    try {
+      const sesClient: SESv2Client = await this.sesClientUtil.getSESClient();
+      const transporter = nodemailer.createTransport({ SES: { sesClient, SendEmailCommand } } as any);
+      await transporter.sendMail({ from, to: toEmail, cc, bcc, subject, html: htmlContent, text, attachments });
+      console.info('Email sent successfully');
+    } catch (error: any) {
+      throw new AppError(error.message || 'unknown', { msg: AWS_MSGS.ERR.FAILED_TO_SEND_EMAIL, apiName: 'sendSesEmail' });
+    }
   }
-};
+}
 
 // import nodemailer from 'nodemailer';
 // import { SESClient, SendRawEmailCommand } from '@aws-sdk/client-sesv2';

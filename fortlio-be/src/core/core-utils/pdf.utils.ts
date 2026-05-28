@@ -1,7 +1,8 @@
 import * as playwright from 'playwright';
+import { AppError } from './err-util';
 // const{sendFile}= require('./aws');
 
-async function generateObenPdf(html: string) {
+export async function generatePdf(html: string): Promise<Buffer<ArrayBufferLike>> {
   try {
     // let url;
     // const html = await ejs.render(templateHtml, data);
@@ -13,10 +14,7 @@ async function generateObenPdf(html: string) {
     await browser.close();
     // return url.Location;
     return buffer;
-  } catch (err) {
-    console.error(err);
-  };
+  } catch (err: any) {
+    throw new AppError('Failed to generate PDF', err.message);
+  }
 }
-module.exports = {
-  generateObenPdf,
-};

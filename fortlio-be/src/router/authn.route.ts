@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import { AuthnController } from '../controller/authn.controller';
-import { CachingMiddleware } from '../middleware/cache.middleware';
 import { AuthGuard } from '../middleware/auth.middleware';
 
 export class AuthnRoutes {
@@ -8,7 +7,6 @@ export class AuthnRoutes {
 
   constructor(
     private authnController: AuthnController,
-    private cacheMiddleware: CachingMiddleware,
     private authGuard: AuthGuard,
   ) {
     this.initializeAuthnRoutes();
@@ -16,17 +14,12 @@ export class AuthnRoutes {
 
   private initializeAuthnRoutes() {
     // new routes
-    this.router.get('/sendOtp', this.authnController.sendOtp.bind(this.authnController));
-    this.router.get('/resendOtp', this.authnController.resendOtp.bind(this.authnController));
-    this.router.post('/verifyOtp', this.authnController.verifyOtp.bind(this.authnController));
-    this.router.get('/authenticate', this.authnController.authenticate.bind(this.authnController));
-    this.router.get('/refreshToken', this.authnController.refreshToken.bind(this.authnController));
-    this.router.get('/logout', this.authnController.logout.bind(this.authnController));
-    // this.router.get('/example',
-    //   // checkAccess('example'),
-    //   // (req, res, next) => this.cacheMiddleware.cacheReqRes(req, res, next, 60 * 60),
-    //   this.authnController.example.bind(this.authnController),
-    // );
+    this.router.get('/sendOtp', this.authnController.sendOtp);
+    this.router.get('/resendOtp', this.authnController.resendOtp);
+    this.router.post('/verifyOtp', this.authnController.verifyOtp);
+    this.router.get('/authenticate', this.authnController.authenticate);
+    this.router.get('/refreshToken', this.authGuard.checkAccess('refreshToken'), this.authnController.refreshToken);
+    this.router.get('/logout', this.authnController.logout);
   }
 }
 

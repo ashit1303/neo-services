@@ -12,12 +12,15 @@ import { TypesenseService } from './core/core-clients/typesense-search.clients';
 import { SessionManager } from './core/core-clients/session-manager.client';
 import { OllamaClient } from './core/core-clients/ollama.client';
 
+import { SESHelper } from './core/core-helper/ses-helper';
+
 // export const clickHouseClient = new ClickHouseClient(config);
 // export const downloadClient = new ExportHelper(config);
 export const mongoDbClient = new MongoDBClient(config);
 export const mongooseClient = new MongooseClient(config);
 export const secretManager = new SecretManager(config);
 export const sesClientUtil = new SESClientUtil(config);
+export const sesHelper = new SESHelper(sesClientUtil);
 export const redisClient = new RedisService(config);
 export const openApiRegistry = new OpenAPIRegistry();
 export const sensiSearch = new TypesenseService(config);

@@ -7,7 +7,7 @@ import { AuthRequest } from '../interface/authn.interface';
 import { AppError } from '../core/core-utils/err-util';
 import { AUTHN_MSGS } from '../constants';
 import { loadTemplateHtml } from '../core/core-helper/ejs-template-loader.helper';
-import { sendSesEmail } from '../core/core-helper';
+import type { SESHelper } from '../core/core-helper';
 export class AuthnService {
 
   private jwtExpiryTime = (process.env.APP_ENV || '').toLowerCase() === 'prod' ? ACCESSTOKEN_EXPIRY.prod : ACCESSTOKEN_EXPIRY.dev;
@@ -15,6 +15,7 @@ export class AuthnService {
   constructor(
     private secretManager: SecretManager,
     private sessionManager: SessionManager,
+    private sesHelper: SESHelper,
   ) { }
 
   generateOtp = async (): Promise<string> => {
@@ -75,7 +76,7 @@ export class AuthnService {
     try {
       const templatePayload = { otp, email };
       const templateHtml = await loadTemplateHtml('otp.email.ejs', templatePayload);
-      await sendSesEmail(EMAIL_SEND_FROM, email, [], [], 'Fortlio OTP ', [], templateHtml, undefined);
+      await this.sesHelper.sendSesEmail(EMAIL_SEND_FROM, email, [], [], 'Fortlio OTP ', [], templateHtml, undefined);
       // sendSesEmail(process.env.EMAIL_SEND_FROM, email, [], [], 'Payment Confirmation - Next Steps for Your Oben Motorcycle Purchase', templateHtml, [{ filename: `transact-${transaction._id}.pdf`, content: buffer, contentType: 'application/pdf' }], undefined),
       return;
     } catch (error: any) {
