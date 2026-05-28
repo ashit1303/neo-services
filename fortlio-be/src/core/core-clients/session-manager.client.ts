@@ -1,25 +1,11 @@
-import { config } from '../../../config';
 import { RedisService } from './redis-service.client';
 import { ACCESSTOKEN_EXPIRY } from '../core-constants/common.constants';
 import { Config } from '../../interface/common.interface';
 
-class SessionManager {
-  private static instance: SessionManager;
+export class SessionManager {
   private readonly ExpirationTime = (process.env.APP_ENV || '').toLowerCase() === 'prod' ? ACCESSTOKEN_EXPIRY.prod : ACCESSTOKEN_EXPIRY.dev; // Expiration to 900 seconds (15 minutes)
-  private config: Config;
-  private redisService: RedisService;
 
-  constructor() {
-    this.config = config;
-    this.redisService = new RedisService(config);
-  }
-
-  public static getInstance(): SessionManager {
-    if (!this.instance) {
-      this.instance = new SessionManager();
-    }
-    return this.instance;
-  }
+  constructor(private redisService: RedisService, private config: Config) { }
 
   public async set(userId: string, sessionId: string): Promise<void> {
     try {
@@ -54,5 +40,3 @@ class SessionManager {
     }
   }
 }
-
-export default SessionManager;

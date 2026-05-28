@@ -1,20 +1,14 @@
 import { NextFunction, Request, Response } from 'express';
-import { Config } from '../interface/common.interface';
 import { PipelineStage } from 'mongoose';
-import { MongoDBClient } from '../core/core-clients/mongodb.client';
-import { RedisService } from '../core/core-clients/redis-service.client';
-import { AuthnService } from '../services/authn.services';
+import type { MongoDBClient } from '../core/core-clients/mongodb.client';
+import type { RedisService } from '../core/core-clients/redis-service.client';
+import type { AuthnService } from '../services/authn.services';
 import { AppError } from '../core/core-utils/err-util';
 import { AUTHN_MSGS } from '../constants';
 
 export class RestAuthMiddleware {
-  private redisCache: RedisService;
-  private dbClient;
 
-  constructor(mongodbClient: MongoDBClient, config: Config) {
-    this.redisCache = new RedisService(config);
-    this.dbClient = mongodbClient;
-  }
+  constructor(private dbClient: MongoDBClient, private redisCache: RedisService, private authnService: AuthnService) { }
 
   static checkRoleAccess(allPrivileges: any, apiName: string): boolean {
     if (allPrivileges.includes(apiName)) {
@@ -31,7 +25,7 @@ export class RestAuthMiddleware {
         throw new AppError(AUTHN_MSGS.ERR.FAILED_TO_AUTHENTICATE_USER, { msg: AUTHN_MSGS.ERR.FAILED_TO_AUTHENTICATE_USER, apiName: 'authn', debugValues: {} }, 401);
       }
 
-      const userDetails = await new AuthnService().verifyToken(accesstoken);
+      const userDetails = await this.authnService.verifyToken(accesstoken);
 
       req.headers.userId = userDetails.userId;
       req.headers.name = userDetails.name;

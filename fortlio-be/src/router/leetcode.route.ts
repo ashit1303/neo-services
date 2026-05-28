@@ -1,18 +1,15 @@
 import { Router } from 'express';
 import LeetcodeController from '../controller/leetcode.controller';
-import { checkAccess } from '../middleware/auth.middleware';
-import { CachingMiddleware } from '../middleware/cache.middleware';
-import { config } from '../../config';
+import type { CachingMiddleware } from '../middleware/cache.middleware';
 
-class LeetcodeRoutes {
-  leetcodeController: LeetcodeController;
+export class LeetcodeRoutes {
+
   router: Router = Router();
-  cacheMiddleware: CachingMiddleware;
 
-  constructor() {
-    this.leetcodeController = new LeetcodeController();
-    this.cacheMiddleware = new CachingMiddleware(config);
-
+  constructor(
+    private leetcodeController: LeetcodeController,
+    private cacheMiddleware: CachingMiddleware,
+  ) {
     this.initializeLeetcodeRoutes();
   }
 
@@ -34,4 +31,3 @@ class LeetcodeRoutes {
   }
 }
 
-export const leetcodeRoutes = new LeetcodeRoutes().router;

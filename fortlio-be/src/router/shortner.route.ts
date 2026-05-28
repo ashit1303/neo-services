@@ -1,18 +1,16 @@
 import { Router } from 'express';
-import ShortnerController from '../controller/shortner.controller';
-import { checkAccess } from '../middleware/auth.middleware';
+import { ShortnerController } from '../controller/shortner.controller';
+import { AuthGuard } from '../middleware/auth.middleware';
 import { CachingMiddleware } from '../middleware/cache.middleware';
-import { config } from '../../config';
 
-class ShortnerRoutes {
-  shortUrlController: ShortnerController;
+export class ShortnerRoutes {
   router: Router = Router();
-  cacheMiddleware: CachingMiddleware;
 
-  constructor() {
-    this.shortUrlController = new ShortnerController();
-    this.cacheMiddleware = new CachingMiddleware(config);
-
+  constructor(
+    private shortUrlController: ShortnerController,
+    private cacheMiddleware: CachingMiddleware,
+    private authGuard: AuthGuard,
+  ) {
     this.initializeShortnerRoutes();
   }
 
@@ -21,7 +19,7 @@ class ShortnerRoutes {
 
     this.router.post(
       '/shortIt',
-      checkAccess('createShortUrl'),
+      this.authGuard.checkAccess('createShortUrl'),
       (req, res, next) => this.cacheMiddleware.cacheReqRes(req, res, next, 0),
       this.shortUrlController.createShortUrl.bind(this.shortUrlController),
     );
@@ -40,11 +38,9 @@ class ShortnerRoutes {
 
     this.router.get(
       '/is-available',
-      checkAccess('isAvailable'),
+      this.authGuard.checkAccess('isAvailable'),
       (req, res, next) => this.cacheMiddleware.cacheReqRes(req, res, next, 0),
       this.shortUrlController.isAvailable.bind(this.shortUrlController),
     );
   }
 }
-
-export const shortnerRoutes = new ShortnerRoutes().router;

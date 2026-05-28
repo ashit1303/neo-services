@@ -9,13 +9,10 @@ import { AppError } from '../core/core-utils/err-util';
 import { USER_MSGS } from '../constants';
 import { IFilter } from '../interface/common.interface';
 
-class UserController {
-  userService: UserService;
-  roleService: RoleService;
+export class UserController {
 
-  constructor() {
-    this.userService = new UserService();
-    this.roleService = new RoleService();
+  constructor(private userService: UserService,
+    private roleService: RoleService) {
   }
 
   getUsers = async (req: Request, res: Response) => {
@@ -157,4 +154,3 @@ class UserController {
     }
   };
 }
-export default UserController;

@@ -4,7 +4,7 @@ import express from 'express';
 // eslint-disable-next-line no-duplicate-imports
 import type { NextFunction, Request, Response as ExpressResponse } from 'express';
 // import express, { NextFunction, Request, Response } from 'express';
-import router from './src/router/index.route';
+import appRoutes from './src/router/index.route';
 import { bullMQService, mongoDbClient, mongooseClient } from './src/clients';
 import { corsOptionsDelegate } from './src/core/core-utils/cors.util';
 import { AppError } from './src/core/core-utils/err-util';
@@ -37,7 +37,7 @@ if (process.env.BUN_ENV !== 'prod') {
 }
 
 // Routes initialization
-app.use(router);
+app.use(appRoutes.router);
 
 // Start the server and listen on the specified port
 const PORT = process.env.PORT || 4020;

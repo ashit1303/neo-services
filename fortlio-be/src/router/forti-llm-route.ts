@@ -1,19 +1,13 @@
 import { Router } from 'express';
-import { CachingMiddleware } from '../middleware/cache.middleware';
+import type { CachingMiddleware } from '../middleware/cache.middleware';
 // import { FortiLLMMiddleware } from '../middleware/obi-llm.middleware';
-import FortiLLMController from '../controller/forti-llm.controller';
-import { config } from '../../config';
+import type { FortiLLMController } from '../controller/forti-llm.controller';
 
-class FortiLLMRoutes {
-  FortiLLMController: FortiLLMController;
+export class FortiLLMRoutes {
   router: Router = Router();
-  cacheMiddleware: CachingMiddleware;
-  // obiLLMMiddleware: FortiLLMMiddleware;
 
-  constructor() {
-    this.FortiLLMController = new FortiLLMController();
+  constructor(private fortiLLMController: FortiLLMController, private cacheMiddleware: CachingMiddleware) {
     this.initializeFortiLLMRoutes();
-    this.cacheMiddleware = new CachingMiddleware(config);
     // this.obiLLMMiddleware = new FortiLLMMiddleware(config);
   }
 
@@ -22,13 +16,11 @@ class FortiLLMRoutes {
       // (req, res, next) => this.obiLLMMiddleware.validateSession(req,res,next),
       // (req, res, next) => this.obiLLMMiddleware.rateLimiter(req, res, next),
       // (req, res, next) => this.obiLLMMiddleware.memoryMiddleware(req, res, next),
-      this.FortiLLMController.getAnswerFromQuestion.bind(this.FortiLLMController));
+      this.fortiLLMController.getAnswerFromQuestion.bind(this.fortiLLMController));
 
     this.router.get('/session',
 
       (req, res, next) => this.cacheMiddleware.cacheReqRes(req, res, next, 60 * 60 * 2),
-      this.FortiLLMController.getSession.bind(this.FortiLLMController));
+      this.fortiLLMController.getSession.bind(this.fortiLLMController));
   }
 }
-
-export const fortiLLMRoutes = new FortiLLMRoutes().router;

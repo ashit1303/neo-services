@@ -1,17 +1,16 @@
 import { Router } from 'express';
-import AuthnController from '../controller/authn.controller';
+import { AuthnController } from '../controller/authn.controller';
 import { CachingMiddleware } from '../middleware/cache.middleware';
-// import { checkAccess } from '../middleware/auth.middleware';
-import { config } from '../../config';
+import { AuthGuard } from '../middleware/auth.middleware';
 
-class AuthnRoutes {
-  authnController: AuthnController;
-  cacheMiddleware: CachingMiddleware;
+export class AuthnRoutes {
   router: Router = Router();
 
-  constructor() {
-    this.authnController = new AuthnController();
-    this.cacheMiddleware = new CachingMiddleware(config);
+  constructor(
+    private authnController: AuthnController,
+    private cacheMiddleware: CachingMiddleware,
+    private authGuard: AuthGuard,
+  ) {
     this.initializeAuthnRoutes();
   }
 
@@ -30,6 +29,4 @@ class AuthnRoutes {
     // );
   }
 }
-
-export const authnRoutes = new AuthnRoutes().router;
 

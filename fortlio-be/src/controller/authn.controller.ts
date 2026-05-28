@@ -1,5 +1,5 @@
-import { AuthnService } from '../services/authn.services';
-import SessionManager from '../core/core-clients/session-manager.client';
+import type { AuthnService } from '../services/authn.services';
+import type { SessionManager } from '../core/core-clients/session-manager.client';
 import { generateRandomNumber, generateUUID } from '../core/core-utils';
 import { Request, Response } from 'express';
 import { EmailValidation } from '../validations/common-validation';
@@ -13,18 +13,15 @@ import UserOTP from '../models/user-otp.model';
 import dayjs from 'dayjs';
 import User from '../models/user.model';
 
-const sessionManager = SessionManager.getInstance();
+// const sessionManager = SessionManager.getInstance();
 const internalEmailUsers = [
   { email: 'abc@xyz.com', userId: '67c7d967648aabae1c5745bc', otpDev: '7465', otpProd: '9687' },
   { email: 'xyz@abc.com', userId: '67c7e79f648aabae1c5745c0', otpDev: '7465', otpProd: '9687' },
   { email: 'abc@abc.com', userId: '692ebe5352de7b1f6d122c26', otpDev: '1111', otpProd: '7171' },
 ];
-class AuthnController {
-  authnService: AuthnService;
+export class AuthnController {
 
-  constructor() {
-    this.authnService = new AuthnService();
-  }
+  constructor(private authnService: AuthnService, private sessionManager: SessionManager) { }
 
   sendOtp = async (req: Request, res: Response) => {
     const { email, fullName } = req.query as { email: string; fullName: string };
@@ -106,7 +103,7 @@ class AuthnController {
       const accessToken = await this.authnService.generateAccessToken(userDetails, sessionId);
 
       // Store session in Redis
-      await sessionManager.set(userDetails.userId, sessionId);
+      await this.sessionManager.set(userDetails.userId, sessionId);
 
       return fmtRes(res, { accessToken });
     } catch (error: any) {
@@ -141,10 +138,13 @@ class AuthnController {
 
       const { userId, sessionId, name, email } = payload;
 
+      if (!userId || !sessionId) {
+        throw new AppError(AUTHN_MSGS.ERR.USER_ID_AND_SESSION_ID_REQUIRED, { msg: AUTHN_MSGS.ERR.USER_ID_AND_SESSION_ID_REQUIRED, apiName: 'authenticate', debugValues: { payload } });
+      }
       // Validate session ID in Redis
       if (!['local', 'test'].includes(process.env.BUN_ENV as string)) {
-        const storedSessionIds = await sessionManager.get(userId as string);
-        if (!storedSessionIds || !storedSessionIds.includes(sessionId as string)) {
+        const storedSessionIds = await this.sessionManager.get(userId);
+        if (!storedSessionIds || !storedSessionIds.includes(sessionId)) {
           throw new AppError(AUTHN_MSGS.ERR.INVALID_SESSION, { msg: AUTHN_MSGS.ERR.INVALID_SESSION, apiName: 'authenticate', debugValues: { userId, sessionId } });
         }
       }
@@ -170,9 +170,9 @@ class AuthnController {
       }
       const userDetails: IUserAccesstokenDetails = { userId: userId, name: name, email: email };
 
-      await sessionManager.delete(userId, sessionId);
+      await this.sessionManager.delete(userId, sessionId);
       const newSessionId = generateUUID();
-      await sessionManager.set(userDetails.userId, newSessionId);
+      await this.sessionManager.set(userDetails.userId, newSessionId);
       const newAccessToken = await this.authnService.generateAccessToken(userDetails, newSessionId);
 
       return fmtRes(res, { accessToken: newAccessToken });
@@ -188,14 +188,14 @@ class AuthnController {
       LogoutValidation.parse({ userId, sessionId });
 
       // Validate session before deletion
-      const storedSession = await sessionManager.get(userId);
+      const storedSession = await this.sessionManager.get(userId);
 
       if (!storedSession?.length || !storedSession.includes(sessionId)) {
         throw new AppError(AUTHN_MSGS.ERR.INVALID_SESSION, { msg: AUTHN_MSGS.ERR.INVALID_SESSION, apiName: 'logout', debugValues: { userId, sessionId } });
       }
 
       // Destroy session in Redis
-      await sessionManager.delete(userId, sessionId);
+      await this.sessionManager.delete(userId, sessionId);
 
       return fmtRes(res, { message: AUTHN_MSGS.RES.LOGOUT_SUCCESS });
     } catch (error: any) {
@@ -203,5 +203,3 @@ class AuthnController {
     }
   };
 }
-
-export default AuthnController;

@@ -81,3 +81,12 @@ https://dev.maxmind.com/geoip/importing-databases/postgresql/
 
 
 inversify ioc / dependency injection / vs solid principles
+
+
+login 
+create profile | HR
+create knowledge
+create skills
+
+
+search users  - open | role candidate | hr

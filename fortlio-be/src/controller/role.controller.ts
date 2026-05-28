@@ -1,5 +1,5 @@
 import { FilterQueryValidation } from '../validations/common-validation';
-import { RoleService } from '../services/role.service';
+import type { RoleService } from '../services/role.service';
 import { Request, Response } from 'express';
 import { fmtRes } from '../core/core-utils/res-util';
 import { AppError } from '../core/core-utils/err-util';
@@ -8,10 +8,7 @@ import { IRole } from '../interface/user-interface';
 import { ROLE_MSGS } from '../constants';
 
 export class RoleController {
-  roleService: RoleService;
-  constructor() {
-    this.roleService = new RoleService();
-  }
+  constructor(private roleService: RoleService) { }
 
   getRoles = async (_req: Request, res: Response) => {
     try {

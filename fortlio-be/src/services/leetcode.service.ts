@@ -5,19 +5,13 @@ import { ICodeLang } from '../interface/leetcode.interface';
 import { SecretManager } from '../core/core-clients/secret-manager.client';
 import { OllamaClient } from '../core/core-clients/ollama.client';
 import { cleanHTML } from '../core/core-utils';
-import { Config } from '../interface/common.interface';
 import { AppError } from '../core/core-utils/err-util';
 import { LEETCODE_MSGS } from '../constants';
 import { post } from '../core/core-utils/fetch.util';
 
-export class LeetCodeService {
+export class LeetcodeService {
 
-  private ollama: OllamaClient;
-  private secretManager: SecretManager;
-
-  constructor(config: Config) {
-    this.ollama = new OllamaClient(config);
-    this.secretManager = new SecretManager(config);
+  constructor(private ollama: OllamaClient, private secretManager: SecretManager) {
   }
   getSlugFromUrl(url: string): string {
     return url.split('problems/')[1].split('/')[0];

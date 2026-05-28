@@ -9,6 +9,8 @@ import { RedisService } from './core/core-clients/redis-service.client';
 import { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
 import { BullMQService } from './core/core-clients/bullmq.client';
 import { TypesenseService } from './core/core-clients/typesense-search.clients';
+import { SessionManager } from './core/core-clients/session-manager.client';
+import { OllamaClient } from './core/core-clients/ollama.client';
 
 // export const clickHouseClient = new ClickHouseClient(config);
 // export const downloadClient = new ExportHelper(config);
@@ -20,3 +22,5 @@ export const redisClient = new RedisService(config);
 export const openApiRegistry = new OpenAPIRegistry();
 export const sensiSearch = new TypesenseService(config);
 export const bullMQService = BullMQService.getInstance(config);
+export const sessionManager = new SessionManager(redisClient, config);
+export const ollamaClient = new OllamaClient(config);

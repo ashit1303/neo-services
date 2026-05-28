@@ -5,12 +5,9 @@ import { fmtRes } from '../core/core-utils/res-util';
 import { AppError } from '../core/core-utils/err-util';
 import { SHORTNER_MSGS } from '../constants';
 
-class ShortnerController {
-  shortenerService: ShortenerService;
+export class ShortnerController {
 
-  constructor() {
-    this.shortenerService = new ShortenerService();
-  }
+  constructor(private shortenerService: ShortenerService) { }
 
   redirectToUrl = async (req: Request, res: Response) => {
     try {
@@ -54,5 +51,3 @@ class ShortnerController {
   };
 
 }
-
-export default ShortnerController;

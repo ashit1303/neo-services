@@ -3,7 +3,7 @@ import { config } from '../../config';
 import { secretManager } from '../clients';
 import { AppError } from '../core/core-utils/err-util';
 
-class FortiLLMService {
+export class FortiLLMService {
 
   async getAnswerFromKnowledgeBase(question: string, orchestrationPrompt: string, generationPrompt: string) {
     try {
@@ -34,8 +34,6 @@ class FortiLLMService {
     }
   }
 }
-
-export default FortiLLMService;
 
 // 'KNOWLEDGE_BASE_MODEL_ARN': 'amazon.nova-2-lite-v1:0'
 // obiLLMSecrets = {'KNOWLEDGE_BASE_ID': 'E080LUB4DR','INFERENCE_PROFILE_ARN': 'arn:aws:bedrock:ap-south-1:977098996366:inference-profile/global.amazon.nova-2-lite-v1:0'};

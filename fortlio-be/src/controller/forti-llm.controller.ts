@@ -2,13 +2,10 @@ import crypto from 'crypto';
 import { Request, Response } from 'express';
 import { buildObenPrompts } from '../service-helper/forti-llm.service-helper';
 import { FortiLLMRequest } from '../interface/forti-llm.interface';
-import FortiLLMService from '../services/forti-llm.service';
+import type { FortiLLMService } from '../services/forti-llm.service';
 
-class FortiLLMController {
-  private obiLLMService;
-  constructor() {
-    this.obiLLMService = new FortiLLMService();
-  }
+export class FortiLLMController {
+  constructor(private obiLLMService: FortiLLMService) { }
 
   getAnswerFromQuestion = async (req: FortiLLMRequest, res: Response) => {
     try {
@@ -66,5 +63,3 @@ class FortiLLMController {
     }
   };
 }
-
-export default FortiLLMController;

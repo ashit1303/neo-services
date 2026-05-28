@@ -1,8 +1,7 @@
 import jwt from 'jsonwebtoken';
-import SessionManager from '../core/core-clients/session-manager.client';
+import type { SessionManager } from '../core/core-clients/session-manager.client';
 import { ACCESSTOKEN_EXPIRY, EMAIL_SEND_FROM } from '../core/core-constants/common.constants';
-import { SecretManager } from '../core/core-clients/secret-manager.client';
-import { config } from '../../config';
+import type { SecretManager } from '../core/core-clients/secret-manager.client';
 import { IUserAccesstokenDetails } from '../interface/user-interface';
 import { AuthRequest } from '../interface/authn.interface';
 import { AppError } from '../core/core-utils/err-util';
@@ -11,14 +10,12 @@ import { loadTemplateHtml } from '../core/core-helper/ejs-template-loader.helper
 import { sendSesEmail } from '../core/core-helper';
 export class AuthnService {
 
-  private secretManager;
-  private sessionManager;
   private jwtExpiryTime = (process.env.APP_ENV || '').toLowerCase() === 'prod' ? ACCESSTOKEN_EXPIRY.prod : ACCESSTOKEN_EXPIRY.dev;
 
-  constructor() {
-    this.secretManager = new SecretManager(config);
-    this.sessionManager = SessionManager.getInstance();
-  }
+  constructor(
+    private secretManager: SecretManager,
+    private sessionManager: SessionManager,
+  ) { }
 
   generateOtp = async (): Promise<string> => {
     const otp = Math.floor(1000 + Math.random() * 9000).toString();

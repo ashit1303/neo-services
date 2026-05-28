@@ -1,17 +1,18 @@
 import { Router } from 'express';
-import { checkAccess } from '../middleware/auth.middleware';
-import { CachingMiddleware } from '../middleware/cache.middleware';
-import { config } from '../../config';
-import { RoleController } from '../controller/role.controller';
+import type { AuthGuard } from '../middleware/auth.middleware';
+import type { CachingMiddleware } from '../middleware/cache.middleware';
+import type { RoleController } from '../controller/role.controller';
 
-class RoleRoutes {
-  roleController: RoleController;
+export class RoleRoutes {
   router: Router = Router();
-  cacheMiddleware: CachingMiddleware;
+  ;
+  ;
 
-  constructor() {
-    this.roleController = new RoleController();
-    this.cacheMiddleware = new CachingMiddleware(config);
+  constructor(
+    private roleController: RoleController,
+    private cacheMiddleware: CachingMiddleware,
+    private authGuard: AuthGuard,
+  ) {
     this.initializeRoutes();
   }
 
@@ -20,7 +21,7 @@ class RoleRoutes {
     // GET all roles
     this.router.get(
       '/getRoles',
-      checkAccess('getRoles'),
+      this.authGuard.checkAccess('getRoles'),
       (req, res, next) => this.cacheMiddleware.cacheReqRes(req, res, next, 3600),
       this.roleController.getRoles.bind(this.roleController),
     );
@@ -28,7 +29,7 @@ class RoleRoutes {
     // GET roles with privileges
     this.router.get(
       '/getRolesWithPrivileges',
-      checkAccess('getRolesWithPrivileges'),
+      this.authGuard.checkAccess('getRolesWithPrivileges'),
       (req, res, next) => this.cacheMiddleware.cacheReqRes(req, res, next, 3600),
       this.roleController.getRolesWithPrivileges.bind(this.roleController),
     );
@@ -36,7 +37,7 @@ class RoleRoutes {
     // GET privileges
     this.router.get(
       '/getPrivileges',
-      checkAccess('getPrivileges'),
+      this.authGuard.checkAccess('getPrivileges'),
       (req, res, next) => this.cacheMiddleware.cacheReqRes(req, res, next, 3600),
       this.roleController.getPrivileges.bind(this.roleController),
     );
@@ -44,7 +45,7 @@ class RoleRoutes {
     // GET role by ID
     this.router.get(
       '/getRoleById',
-      checkAccess('getRoleById'),
+      this.authGuard.checkAccess('getRoleById'),
       (req, res, next) => this.cacheMiddleware.cacheReqRes(req, res, next, 3600),
       this.roleController.getRoleById.bind(this.roleController),
     );
@@ -52,24 +53,22 @@ class RoleRoutes {
     // CREATE role
     this.router.post(
       '/createRole',
-      checkAccess('createRole'),
+      this.authGuard.checkAccess('createRole'),
       this.roleController.createRole.bind(this.roleController),
     );
 
     // UPDATE role
     this.router.put(
       '/updateRole',
-      checkAccess('updateRole'),
+      this.authGuard.checkAccess('updateRole'),
       this.roleController.updateRole.bind(this.roleController),
     );
 
     // DELETE role
     this.router.delete(
       '/deleteRole',
-      checkAccess('deleteRole'),
+      this.authGuard.checkAccess('deleteRole'),
       this.roleController.deleteRole.bind(this.roleController),
     );
   }
 }
-
-export const roleRoutes = new RoleRoutes().router;

@@ -1,34 +1,30 @@
 import { Request, Response } from 'express';
-import { LeetCodeService } from '../services/leetcode.service';
+import type { LeetcodeService } from '../services/leetcode.service';
 import { ICodeLang } from '../interface/leetcode.interface';
-import { config } from '../../config';
 import { AppError } from '../core/core-utils/err-util';
 import { fmtRes } from '../core/core-utils/res-util';
 import { sensiSearch } from '../clients';
 import { TYPSENSE_COLLECTION_NAME } from '../core/core-constants/common.constants';
 
 class LeetcodeController {
-  leetCodeService: LeetCodeService;
 
-  constructor() {
-    this.leetCodeService = new LeetCodeService(config);
-  }
+  constructor(private leetcodeService: LeetcodeService) { }
 
   explainLeetQuest = async (req: Request, res: Response) => {
     const { url, codelang } = req.query as { url: string; codelang: ICodeLang };
 
     try {
-      const slug = this.leetCodeService.getSlugFromUrl(url);
-      let dbQuestion = await this.leetCodeService.getQuestFromDB(slug);
+      const slug = this.leetcodeService.getSlugFromUrl(url);
+      let dbQuestion = await this.leetcodeService.getQuestFromDB(slug);
 
       if (!dbQuestion || !dbQuestion.questionId) {
-        dbQuestion = await this.leetCodeService.fetchQuestionDetailsFromLeetCode(slug);
+        dbQuestion = await this.leetcodeService.fetchQuestionDetailsFromLeetCode(slug);
       }
-      const solution = await this.leetCodeService.getQuestAnsFromDB(slug, codelang);
+      const solution = await this.leetcodeService.getQuestAnsFromDB(slug, codelang);
       let explain = solution?.llmRes;
       if (!solution || !solution.llmRes) {
         const question = `Problem Title: ${dbQuestion.questionTitle}\n Problem Statement:\n${dbQuestion.content}`;
-        explain = await this.leetCodeService.getExplanation(codelang, question, dbQuestion.questionId);
+        explain = await this.leetcodeService.getExplanation(codelang, question, dbQuestion.questionId);
       }
       return fmtRes(res, explain);
     } catch (error: any) {
