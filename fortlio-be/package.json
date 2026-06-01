@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "local": "BUN_ENV=local bun --watch --inspect run server.ts",
+    "local-prod": "BUN_ENV=local bun run server.ts",
     "prod": "BUN_ENV=prod bun server.ts",
     "dev": "BUN_ENV=dev bun server.ts",
     "watch": "BUN_ENV=local bun --watch server.ts",
@@ -39,7 +40,6 @@
     "mongoose": "^8.14.0",
     "nodemailer": "^8.0.7",
     "playwright": "^1.60.0",
-    "sonic-channel": "^1.3.1",
     "swagger-ui-express": "^5.0.1",
     "typesense": "^3.0.6",
     "zod": "^4.0.5"

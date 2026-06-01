@@ -1,3 +1,4 @@
+// @TODO run this before using this : bun add sonic-channel
 import * as SonicChannel from 'sonic-channel';
 import { Config } from '../../interface/common.interface';
 import { SecretManager } from './secret-manager.client';
