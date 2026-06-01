@@ -4,7 +4,7 @@ import { Config } from '../src/interface/common.interface';
 const ALLOWED_ENVS = ['dev', 'prod', 'local'] as const;
 const rawEnv = (process.env.BUN_ENV || 'local').toLowerCase();
 const env = ALLOWED_ENVS.includes(rawEnv as any) ? rawEnv : 'local';
-const AWS_SECRET_NAME = `${env}/experiments`;
+const AWS_SECRET_NAME = `${env}/testing`;
 
 export const config: Config = {
   port: Number(process.env.PORT || 4020),

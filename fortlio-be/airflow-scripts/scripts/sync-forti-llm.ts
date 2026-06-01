@@ -1,6 +1,6 @@
 import { config } from '../../config';
 import { SecretManager } from '../../src/core/core-clients/secret-manager.client';
-import { getProductsPipeline, getDbClient, getS3Client, syncKnowledgeBase, syncFolderToS3, updateFileWithPayload } from './helper/sync-obi-llm-helper';
+import { getProductsPipeline, getDbClient, getS3Client, syncKnowledgeBase, syncFolderToS3, updateFileWithPayload } from './helper/sync-forti-llm-helper';
 const secretManager = new SecretManager(config);
 
 // Main backup flow
@@ -14,7 +14,7 @@ const main = async () => {
     // @TODO UPDATE knowledge base files
     updateFileWithPayload(product);
 
-    await syncFolderToS3(s3Client, secrets.AWS_BACKUP_BUCKET, '../obi-markdown-knowledge-base/', 'obi-markdown-knowledge-base/');
+    await syncFolderToS3(s3Client, secrets.AWS_BACKUP_BUCKET, '../forti-markdown-knowledge-base/', 'forti-markdown-knowledge-base/');
     await syncKnowledgeBase(secrets);
     console.info('Successfully sync knowledge base');
   } catch (error: any) {

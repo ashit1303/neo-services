@@ -32,6 +32,7 @@ export const syncKnowledgeBase = async (secrets: any) => {
   });
 
   try {
+
     const response = await client.send(command);
     console.info('Ingestion started:', response);
     return response;

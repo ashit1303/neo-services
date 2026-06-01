@@ -12,7 +12,7 @@ export class FortiLLMRoutes {
   }
 
   private initializeFortiLLMRoutes() {
-    this.router.get('/obi',
+    this.router.get('/forti',
       // (req, res, next) => this.obiLLMMiddleware.validateSession(req,res,next),
       // (req, res, next) => this.obiLLMMiddleware.rateLimiter(req, res, next),
       // (req, res, next) => this.obiLLMMiddleware.memoryMiddleware(req, res, next),
