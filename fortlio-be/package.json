@@ -11,6 +11,7 @@
     "watch": "BUN_ENV=local bun --watch server.ts",
     "build-dev": "bun build server.ts --outdir dist --target=bun --sourcemap",
     "build": "bun build server.ts --outdir dist --target=bun --minify --sourcemap && cp -r src/ejs-templates dist/templates",
+    "start-prod": "pm2 start bun --name \"bun-script\" -- run local-prod",
     "bake": "bun build --compile --minify --bytecode --define \"process.env.BUN_ENV='local'\" ./server.ts --outfile server-local",
     "start": "BUN_ENV=prod bun dist/server.js",
     "lint": "eslint .",
