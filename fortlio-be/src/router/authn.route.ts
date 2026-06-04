@@ -14,12 +14,15 @@ export class AuthnRoutes {
 
   private initializeAuthnRoutes() {
     // new routes
-    this.router.get('/sendOtp', this.authnController.sendOtp);
-    this.router.get('/resendOtp', this.authnController.resendOtp);
-    this.router.post('/verifyOtp', this.authnController.verifyOtp);
-    this.router.get('/authenticate', this.authnController.authenticate);
-    this.router.get('/refreshToken', this.authGuard.checkAccess('refreshToken'), this.authnController.refreshToken);
-    this.router.get('/logout', this.authnController.logout);
+    this.router.post('/register', this.authnController.register);// >>email password <<
+    this.router.post('/login', this.authnController.login);// email password
+
+    this.router.get('/refreshToken', this.authGuard.checkAccess('refreshToken'), this.authnController.refreshToken); //refreshToken 
+
+    this.router.get('/logout', this.authnController.logout);// refresh token 
+
+    this.router.get('/verifyEmail', this.authnController.verifyEmail);
+    this.router.post('/resendVerification', this.authnController.resendVerification);
   }
 }
 

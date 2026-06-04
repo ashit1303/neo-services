@@ -1,38 +1,45 @@
+import z from 'zod';
 import { openApiRegistry } from '../clients';
-import { LogoutValidation, SendOtpValidation, VerifyOtpValidation } from '../validations/authn-validation';
-import { EmailValidation } from '../validations/common-validation';
 
 export function registerAuthnRoutes() {
-  openApiRegistry.register('EmailValidation', EmailValidation);
-  openApiRegistry.registerPath({
-    method: 'get',
-    tags: ['Authn'],
-    path: '/auth/sendOtp',
-    request: { query: SendOtpValidation },
-    responses: { 200: { description: 'Authn fetched' } },
-  });
-
-  openApiRegistry.registerPath({
-    method: 'get',
-    tags: ['Authn'],
-    path: '/auth/resendOtp',
-    request: { query: EmailValidation },
-    responses: { 200: { description: 'Authn: Successfully resent OTP' } },
-  });
   openApiRegistry.registerPath({
     method: 'post',
     tags: ['Authn'],
-    path: '/auth/verifyOtp',
-    request: { body: { content: { 'application/json': { schema: VerifyOtpValidation } } } },
-    responses: { 200: { description: 'Authn: Successfully verified OTP' } },
+    path: '/auth/register',
+    request: {
+      body: { content: { 'application/json': { schema: z.object({ email: z.string().email(), password: z.string(), fullName: z.string() }) } } },
+    },
+    responses: { 200: { description: 'Successfully registered and verification email sent' } },
+  });
+
+  openApiRegistry.registerPath({
+    method: 'post',
+    tags: ['Authn'],
+    path: '/auth/login',
+    request: {
+      body: { content: { 'application/json': { schema: z.object({ email: z.string().email(), password: z.string() }) } } },
+    },
+    responses: { 200: { description: 'Successfully logged in' } },
   });
 
   openApiRegistry.registerPath({
     method: 'get',
     tags: ['Authn'],
-    path: '/auth/authenticate/',
-    security: [{ bearerAuth: [] }],
-    responses: { 200: { description: 'Authn: Successfully authenticated' } },
+    path: '/auth/verifyEmail',
+    request: { query: z.object({ token: z.string() }) },
+    responses: { 200: { description: 'Email verified successfully' } },
+  });
+
+  openApiRegistry.registerPath({
+    method: 'post',
+    tags: ['Authn'],
+    path: '/auth/resendVerification',
+    request: {
+      body: {
+        content: { 'application/json': { schema: z.object({ email: z.string().email() }) } },
+      },
+    },
+    responses: { 200: { description: 'Verification email sent' } },
   });
 
   openApiRegistry.registerPath({
@@ -40,15 +47,18 @@ export function registerAuthnRoutes() {
     tags: ['Authn'],
     path: '/auth/refreshToken',
     security: [{ bearerAuth: [] }],
-    responses: { 200: { description: 'Authn: Successfully refreshed token' } },
+    responses: { 200: { description: 'Successfully refreshed token' } },
   });
 
   openApiRegistry.registerPath({
     method: 'get',
     tags: ['Authn'],
     path: '/auth/logout',
-    request: { query: LogoutValidation },
-    responses: { 200: { description: 'Authn: Successfully logged out' } },
+    request: {
+      query: z.object({
+        userId: z.string(),
+      }),
+    },
+    responses: { 200: { description: 'Successfully logged out' } },
   });
-
 }

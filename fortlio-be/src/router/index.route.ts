@@ -10,7 +10,7 @@ import { UserController } from '../controller/user.controller';
 import { UserService } from '../services/user.service';
 import { AuthnService } from '../services/authn.services';
 import { RoleService } from '../services/role.service';
-import { mongoDbClient, llmClient, redisClient, secretManager, sessionManager, sesHelper } from '../clients';
+import { mongoDbClient, llmClient, redisClient, secretManager, sesHelper } from '../clients';
 import { AuthnController } from '../controller/authn.controller';
 // import { FortiLLMController } from '../controller/forti-llm.controller';
 // import { FortiLLMService } from '../services/forti-llm.service';
@@ -28,7 +28,7 @@ import { LeetcodeService } from '../services/leetcode.service';
 // 2. SERVICES (BUSINESS LAYER)
 // ==========================================
 const userService = new UserService();
-const authnService = new AuthnService(secretManager, sessionManager, sesHelper);
+const authnService = new AuthnService(secretManager, sesHelper);
 const roleService = new RoleService();
 // const fortiLLMService = new FortiLLMService();
 const shortenerService = new ShortenerService();
@@ -38,7 +38,7 @@ const leetcodeService = new LeetcodeService(llmClient, secretManager);
 // 3. CONTROLLERS (ORCHESTRATION LAYER)
 // ==========================================
 const userController = new UserController(userService, roleService);
-const authnController = new AuthnController(authnService, sessionManager);
+const authnController = new AuthnController(authnService);
 // const fortiLLMController = new FortiLLMController(fortiLLMService);
 const roleController = new RoleController(roleService);
 const shortnerController = new ShortnerController(shortenerService);
