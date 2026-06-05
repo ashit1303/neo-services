@@ -54,27 +54,29 @@ export interface IUserDoc extends Document {
   _id: ObjectId;
   fullName: string;
   status: boolean;
-  mobileNumber: string;
   email: string;
-  roleId: ObjectId | IRoleDoc;
+  roleId: ObjectId;
   userPrivileges: string[];
-  createdBy: string;
-  modifiedBy: string;
-  createdDate: Date;
-  modifiedDate: Date;
-  coinBalance: number;
+  isOnboarded: boolean
+  createdAt: Date;
+  modifiedAt: Date;
 }
 
-export interface IUserOTP {
+export interface IUserPrivate {
   userId: string;
-  otp: string;
-  expiryAt: Date;
+  provider: 'EMAIL' | 'GOOGLE' | 'GITHUB' // enum
+  passwordHash: string
+  emailVerified: boolean
+  verificationTokenHash: string | undefined
+  verificationTokenExpiresAt: Date | undefined
+  refreshTokenHash: string | undefined;
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface IUserAccesstokenDetails {
-  userId: string;
+  userId: ObjectId;
   name: string;
   email: string;
+  roleId: ObjectId;
 }

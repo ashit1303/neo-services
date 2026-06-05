@@ -32,6 +32,8 @@ export const sessionManager = new SessionManager(redisClient, config);
 export const ollamaClient = new OllamaClient(config);
 export const lmStudioClient = new LMStudioClient(config);
 export const openRouterClient = new OpenRouterClient(config);
+export const backendBaseURL = process.env.BUN_ENV === 'local' ? 'http://localhost:4020' : 'https://testing-be.dev.argus.obenelectric.com';
+export const frontendBaseURL = process.env.BUN_ENV === 'local' ? 'http://localhost:4010' : 'https://testing-fe.dev.argus.obenelectric.com';
 
 const llmProvider = process.env.LLM_PROVIDER || 'openRouter';
 export const llmClient: ILLMClient = llmProvider === 'openRouter' ? openRouterClient : ollamaClient;

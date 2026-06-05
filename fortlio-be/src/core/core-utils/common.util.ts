@@ -27,7 +27,7 @@ export const replacePlaceholders = (
 
 const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
-function randomString(length: number): string {
+export function randomString(length: number): string {
   const bytes = crypto.getRandomValues(new Uint8Array(length));
   let result = '';
 
@@ -36,17 +36,6 @@ function randomString(length: number): string {
   }
 
   return result;
-}
-
-export function generateRandomString(): string {
-  const raw = randomString(10);
-  return `${raw.slice(0, 3)}-${raw.slice(3, 6)}-${raw.slice(6)}`;
-}
-
-export function generateRandomNumber(num: number): string {
-  // always of given number
-  const raw = randomString(10);
-  return `${raw.slice(0, num)}`;
 }
 
 export function getSkipLimit(page?: number, limit?: number): { skip: number; limit: number } {
