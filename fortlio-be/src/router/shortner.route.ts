@@ -37,6 +37,13 @@ export class ShortnerRoutes {
     );
 
     this.router.get(
+      '/isAvailable',
+      this.authGuard.checkAccess('isAvailable'),
+      (req, res, next) => this.cacheMiddleware.cacheReqRes(req, res, next, 0),
+      this.shortUrlController.isAvailable.bind(this.shortUrlController),
+    );
+
+    this.router.get(
       '/is-available',
       this.authGuard.checkAccess('isAvailable'),
       (req, res, next) => this.cacheMiddleware.cacheReqRes(req, res, next, 0),

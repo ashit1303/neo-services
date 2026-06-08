@@ -1,6 +1,6 @@
 import Role from './models/role.model';
 import { ObjectId } from 'mongodb';
-import { customerDefaultAccess, privilegesAllDefault } from './core/core-helper/default-role-access';
+import { candidateDefaultAccess, hrDefaultAccess, privilegesAllDefault } from './core/core-helper/default-role-access';
 import User from './models/user.model';
 import Privilege from './models/privilege.model';
 import { DB_CONSTANTS } from './core/core-constants/mongodb.constants';
@@ -35,24 +35,24 @@ export async function initializeDefaultRoles() {
         _id: new ObjectId(DB_CONSTANTS.DEFAULT_ROLE_CANDIDATE_ID),
         roleName: DB_CONSTANTS.DEFAULT_ROLE_CANDIDATE,
         description: DB_CONSTANTS.DEFAULT_ROLE_CANDIDATE_DESCRIPTION,
-        rolePrivileges: customerDefaultAccess,
+        rolePrivileges: candidateDefaultAccess,
       });
       console.info(`Default role "${DB_CONSTANTS.DEFAULT_ROLE_CANDIDATE}" added.`);
     } else {
       // TODO : remove this else block once it's in production 
-      await Role.updateOne({ roleName: DB_CONSTANTS.DEFAULT_ROLE_CANDIDATE }, { $set: { rolePrivileges: customerDefaultAccess } });
+      await Role.updateOne({ roleName: DB_CONSTANTS.DEFAULT_ROLE_CANDIDATE }, { $set: { rolePrivileges: candidateDefaultAccess } });
     }
     if (!hrRole) {
       await Role.create({
         _id: new ObjectId(DB_CONSTANTS.DEFAULT_ROLE_HR_ID),
         roleName: DB_CONSTANTS.DEFAULT_ROLE_HR,
         description: DB_CONSTANTS.DEFAULT_ROLE_HR_DESCRIPTION,
-        rolePrivileges: customerDefaultAccess,
+        rolePrivileges: hrDefaultAccess,
       });
       console.info(`Default role "${DB_CONSTANTS.DEFAULT_ROLE_HR}" added.`);
     } else {
       // TODO : remove this else block once it's in production 
-      await Role.updateOne({ roleName: DB_CONSTANTS.DEFAULT_ROLE_HR }, { $set: { rolePrivileges: customerDefaultAccess } });
+      await Role.updateOne({ roleName: DB_CONSTANTS.DEFAULT_ROLE_HR }, { $set: { rolePrivileges: hrDefaultAccess } });
     }
 
     if (!adminRole) {

@@ -57,7 +57,8 @@ export interface IUserDoc extends Document {
   email: string;
   roleId: ObjectId;
   userPrivileges: string[];
-  isOnboarded: boolean
+  isOnboarded: boolean;
+  coins?: number;
   createdAt: Date;
   modifiedAt: Date;
 }

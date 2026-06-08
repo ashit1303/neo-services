@@ -23,10 +23,12 @@ export const BYPASS_USERS = [
 export const BULLMQQUEUES = {
   NOTIFICATION_FALL_DETECTION_QUEUE: 'notification-fall-detection-queue',
   TYPSENSE_LEETCODE_QUESTIONS_SYNC: 'typesense-leetcode-questions-sync',
+  TYPSENSE_CANDIDATES_SYNC: 'typesense-candidates-sync',
 };
 
 export const TYPSENSE_COLLECTION_NAME = {
   DSA_QUESTIONS: 'dsa-questions',
+  CANDIDATES: 'candidates',
 };
 
 export const EMAIL_SEND_FROM = 'noreply@obenelectric.com';

@@ -85,4 +85,41 @@ export class UserService {
       throw new AppError(error.message || 'unknown', { msg: USER_MSGS.ERR.FAILED_TO_DELETE_USER, apiName: 'deleteUserById', debugValues: { userId } });
     }
   }
+
+  async addCoins(userId: string, amount: number) {
+    try {
+      return await User.findByIdAndUpdate(
+        userId,
+        { $inc: { coins: Math.abs(amount) } },
+        { new: true },
+      ).exec();
+    } catch (error: any) {
+      throw new AppError(error.message || 'unknown', { msg: 'Failed to add coins to user', apiName: 'addCoins', debugValues: { userId, amount } });
+    }
+  }
+
+  async deductCoins(userId: string, amount: number) {
+    try {
+      const user = await User.findById(userId).exec();
+      if (!user) {
+        throw new AppError(USER_MSGS.ERR.USER_NOT_FOUND, { msg: USER_MSGS.ERR.USER_NOT_FOUND, apiName: 'deductCoins' });
+      }
+
+      const currentCoins = user.coins || 0;
+      if (currentCoins < amount) {
+        throw new AppError('Insufficient coins', { msg: 'Insufficient coins', apiName: 'deductCoins', debugValues: { userId, currentCoins, amount } }, 402);
+      }
+
+      return await User.findByIdAndUpdate(
+        userId,
+        { $inc: { coins: -(Math.abs(amount)) } },
+        { new: true },
+      ).exec();
+    } catch (error: any) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError(error.message || 'unknown', { msg: 'Failed to deduct coins from user', apiName: 'deductCoins', debugValues: { userId, amount } });
+    }
+  }
 }
