@@ -95,6 +95,7 @@ process.on('SIGINT', async () => {
 // BULL MQ TASKS
 
 console.info(`🚀 WS Server running at ws://localhost:${wsServer.port}`);
+
 // Websocket connection example
 // wsHandler.sendToSubscribers('user_123', { from: 'user_456', message: 'hello', });
 // wsHandler.sendToSubscribers('user_123', { from: 'user_456', message: 'hello', });

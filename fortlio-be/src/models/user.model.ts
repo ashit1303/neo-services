@@ -1,18 +1,16 @@
 import mongoose from 'mongoose';
-import { generateRandomString } from '../core/core-utils';
 import { IUserDoc } from '../interface/user-interface';
 
 const userSchema = new mongoose.Schema(
   {
     fullName: { type: String, required: true },
     status: { type: Boolean, default: true },
-    roleId: { type: mongoose.Schema.Types.ObjectId, ref: 'role', required: true },
+    roleId: { type: mongoose.Schema.Types.ObjectId, ref: 'role' },
     email: { type: String, required: true, unique: true, index: true },
     userPrivileges: { type: [String], required: true, default: [] },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
-    referralCode: { type: String, unique: true, match: /^[A-Z0-9]{3}-[A-Z0-9]{3}-[A-Z0-9]{4}$/, default: generateRandomString },
-    coinBalance: { type: Number, default: 0 },
+    isOnboarded: { type: Boolean, default: false },
   },
   { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } },
 );

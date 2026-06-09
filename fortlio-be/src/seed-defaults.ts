@@ -26,20 +26,33 @@ export async function initializeDefaultRoles() {
     // create all Privilege
     const promises = privilegesAllDefault.map(async (privilege) => Privilege.findOneAndUpdate({ code: privilege.code }, privilege, { upsert: true, new: true }));
     await Promise.all(promises);
-    const customerRole = await Role.findOne({ roleName: DB_CONSTANTS.DEFAULT_ROLE_CUSTOMER });
+    const candidateRole = await Role.findOne({ roleName: DB_CONSTANTS.DEFAULT_ROLE_CANDIDATE });
+    const hrRole = await Role.findOne({ roleName: DB_CONSTANTS.DEFAULT_ROLE_HR });
     const adminRole = await Role.findOne({ roleName: DB_CONSTANTS.DEFAULT_ROLE_ADMIN });
 
-    if (!customerRole) {
+    if (!candidateRole) {
       await Role.create({
-        _id: new ObjectId(DB_CONSTANTS.DEFAULT_ROLE_CUSTOMER_ID),
-        roleName: DB_CONSTANTS.DEFAULT_ROLE_CUSTOMER,
-        description: DB_CONSTANTS.DEFAULT_ROLE_CUSTOMER_DESCRIPTION,
+        _id: new ObjectId(DB_CONSTANTS.DEFAULT_ROLE_CANDIDATE_ID),
+        roleName: DB_CONSTANTS.DEFAULT_ROLE_CANDIDATE,
+        description: DB_CONSTANTS.DEFAULT_ROLE_CANDIDATE_DESCRIPTION,
         rolePrivileges: customerDefaultAccess,
       });
-      console.info(`Default role "${DB_CONSTANTS.DEFAULT_ROLE_CUSTOMER}" added.`);
+      console.info(`Default role "${DB_CONSTANTS.DEFAULT_ROLE_CANDIDATE}" added.`);
     } else {
       // TODO : remove this else block once it's in production 
-      await Role.updateOne({ roleName: DB_CONSTANTS.DEFAULT_ROLE_CUSTOMER }, { $set: { rolePrivileges: customerDefaultAccess } });
+      await Role.updateOne({ roleName: DB_CONSTANTS.DEFAULT_ROLE_CANDIDATE }, { $set: { rolePrivileges: customerDefaultAccess } });
+    }
+    if (!hrRole) {
+      await Role.create({
+        _id: new ObjectId(DB_CONSTANTS.DEFAULT_ROLE_HR_ID),
+        roleName: DB_CONSTANTS.DEFAULT_ROLE_HR,
+        description: DB_CONSTANTS.DEFAULT_ROLE_HR_DESCRIPTION,
+        rolePrivileges: customerDefaultAccess,
+      });
+      console.info(`Default role "${DB_CONSTANTS.DEFAULT_ROLE_HR}" added.`);
+    } else {
+      // TODO : remove this else block once it's in production 
+      await Role.updateOne({ roleName: DB_CONSTANTS.DEFAULT_ROLE_HR }, { $set: { rolePrivileges: customerDefaultAccess } });
     }
 
     if (!adminRole) {
@@ -61,7 +74,7 @@ export async function initializeDefaultRoles() {
 export async function initializeDefaultUsers() {
   try {
     const filter = { _id: DB_CONSTANTS.DEFAULT_SYSTEM_ADMIN_ID };
-    const update = { _id: DB_CONSTANTS.DEFAULT_SYSTEM_ADMIN_ID, email: DB_CONSTANTS.DEFAULT_SYSTEM_ADMIN_EMAIL, fullName: DB_CONSTANTS.DEFAULT_SYSTEM_ADMIN, mobileNumber: DB_CONSTANTS.DEFAULT_SYSTEM_ADMIN_MOBILE, roleId: DB_CONSTANTS.DEFAULT_ROLE_ADMIN_ID };
+    const update = { _id: DB_CONSTANTS.DEFAULT_SYSTEM_ADMIN_ID, email: DB_CONSTANTS.DEFAULT_SYSTEM_ADMIN_EMAIL, fullName: DB_CONSTANTS.DEFAULT_SYSTEM_ADMIN, roleId: DB_CONSTANTS.DEFAULT_ROLE_ADMIN_ID };
     const options = { upsert: true, new: true, setDefaultsOnInsert: true };
 
     await User.findOneAndUpdate(filter, update, options);

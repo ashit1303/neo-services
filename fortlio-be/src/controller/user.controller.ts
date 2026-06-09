@@ -146,9 +146,7 @@ export class UserController {
 
       console.info(response);
 
-      return fmtRes(res, {
-        message: response,
-      });
+      return fmtRes(res, { message: response });
     } catch (error: any) {
       throw new AppError(error.message || 'unknown', { msg: USER_MSGS.ERR.FAILED_TO_DELETE_USER, apiName: 'deleteUserById', error }, 400);
     }
