@@ -1,6 +1,9 @@
 import { bullMQService, sensiSearch } from '../../clients';
 import DsaQuestions from '../../models/dsa-quests.model';
 import { dsaQuestionsTypesenseSchema } from '../../models/typesense-collections/questions.collections';
+import { candidateTypesenseSchema } from '../../models/typesense-collections/candidates.collections';
+import CandidateProfile from '../../models/candidate.model';
+import CandidateBlog from '../../models/candidate-blog.model';
 import { BULLMQQUEUES, TYPSENSE_COLLECTION_NAME } from '../core-constants/common.constants';
 
 export const initializeBullMQSendNotification = async () => {
@@ -77,6 +80,72 @@ export async function scheduleTypesenseSync() {
   );
 
   console.info('Typesense sync job scheduled for every 2 hours.');
+}
+
+export const initializeBullMQCandidatesTypesenseSync = async () => {
+  await bullMQService.createWorker(
+    BULLMQQUEUES.TYPSENSE_CANDIDATES_SYNC,
+    async (job) => {
+      console.info('Starting Candidates Typesense Sync:', job.id);
+      try {
+        try {
+          await sensiSearch.getCollection(TYPSENSE_COLLECTION_NAME.CANDIDATES);
+        } catch (err: any) {
+          if (err.httpStatus === 404) {
+            console.info('Candidates Collection not found, creating schema...');
+            await sensiSearch.createCollection(candidateTypesenseSchema);
+          } else {
+            throw err;
+          }
+        }
+
+        const candidates = await CandidateProfile.find({ userId: { $exists: true } }).populate('userId').lean();
+
+        const documents = await Promise.all(candidates.map(async (c: any) => {
+          const userIdStr = (c.userId?._id || c.userId).toString();
+          const blogs = await CandidateBlog.find({ candidateId: userIdStr, status: 'published' }).lean();
+          const blogKeywords = blogs.map(b => `${b.title} ${b.blogKeywords.join(' ')} ${b.content}`).join(' ');
+
+          return {
+            id: c._id.toString(),
+            userId: userIdStr,
+            fullName: c.userId?.fullName || '',
+            email: c.userId?.email || '',
+            skills: c.skills || [],
+            experience: Number(c.experience || 0),
+            bio: c.bio || '',
+            blogKeywords,
+          };
+        }));
+
+        if (documents.length > 0) {
+          await sensiSearch.importCollection(documents, TYPSENSE_COLLECTION_NAME.CANDIDATES).catch((err: any) => {
+            if (err?.importResults) {
+              const printList = err.importResults.filter((item: any) => item.success !== true);
+              console.error('[BullMQ Candidates] importResults', printList);
+            }
+          });
+          console.info(`Successfully synced ${documents.length} candidates to Typesense.`);
+        }
+      } catch (error) {
+        console.error('Candidates Typesense Sync Failed:', error);
+        throw error;
+      }
+    },
+  );
+};
+
+export async function scheduleCandidatesTypesenseSync() {
+  const cronEvery2Hours = '0 */2 * * *';
+  const jobName = 'typesense-candidates-sync-job';
+
+  await bullMQService.addRepeatedJob(
+    BULLMQQUEUES.TYPSENSE_CANDIDATES_SYNC,
+    jobName,
+    cronEvery2Hours,
+  );
+
+  console.info('Typesense candidates sync job scheduled for every 2 hours.');
 }
 
 // other Usage

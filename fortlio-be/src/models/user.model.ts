@@ -11,6 +11,7 @@ const userSchema = new mongoose.Schema(
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
     isOnboarded: { type: Boolean, default: false },
+    coins: { type: Number, default: 0 },
   },
   { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } },
 );

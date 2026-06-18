@@ -2,7 +2,7 @@ import { ServerWebSocket } from 'bun';
 import { generateUUID } from '../core-utils';
 import { AppError } from '../core-utils/err-util';
 
-export type BunWS = ServerWebSocket<{ clientId: string }>;
+export type BunWS = ServerWebSocket<{ clientId: string; userId?: string }>;
 
 export class WebSocketHandler<T extends { action: string; topic?: string }> {
   private actionHandlers: Record<string, (ws: BunWS, message: T) => Promise<void>>;
@@ -53,8 +53,10 @@ export class WebSocketHandler<T extends { action: string; topic?: string }> {
       }
 
       if (parsed.action === 'unsubscribe') {
-        this.subscriptions.get(clientId)?.delete(parsed.topic!);
-        ws.send(JSON.stringify({ status: 'success', message: `Unsubscribed from ${parsed.topic}` }));
+        if (parsed.topic) {
+          this.subscriptions.get(clientId)?.delete(parsed.topic);
+        }
+        ws.send(JSON.stringify({ status: 'success', message: `Unsubscribed from ${parsed.topic || ''}` }));
         return;
       }
 

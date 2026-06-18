@@ -43,4 +43,37 @@ export class ChecksumVerifyMiddleware {
     next();
   }
 
+  public verifyGeneralChecksum = async (req: Request, _res: Response, next: NextFunction) => {
+    try {
+      const raw = req.headers['x-checksum'];
+      if (!raw) {
+        throw new AppError('CHECKSUM_MISSING: Checksum header is missing', { apiName: 'verifyGeneralChecksum' }, 400);
+      }
+      const receivedChecksum = Array.isArray(raw) ? raw[0] : raw;
+
+      let payloadString = '';
+      if (req.method === 'GET') {
+        payloadString = JSON.stringify(req.query);
+      } else {
+        payloadString = JSON.stringify(req.body);
+      }
+
+      const expectedChecksum = await this.generateChecksum(payloadString);
+
+      const receivedBuffer = Buffer.from(receivedChecksum, 'hex');
+      const expectedBuffer = Buffer.from(expectedChecksum, 'hex');
+
+      if (receivedBuffer.length !== expectedBuffer.length) {
+        throw new AppError('CHECKSUM_INVALID: Checksum verification failed', { apiName: 'verifyGeneralChecksum' }, 400);
+      }
+
+      const isValid = crypto.timingSafeEqual(receivedBuffer, expectedBuffer);
+      if (!isValid) {
+        throw new AppError('CHECKSUM_INVALID: Checksum verification failed', { apiName: 'verifyGeneralChecksum' }, 400);
+      }
+      next();
+    } catch (error) {
+      next(error);
+    }
+  };
 }

@@ -10,6 +10,6 @@ const shortendLinkSchema = new mongoose.Schema(
   { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } },
 );
 
-const ShortendLink = mongoose.model('shortend-links', shortendLinkSchema);
+const ShortendLink = mongoose.model('shortend_links', shortendLinkSchema);
 
 export default ShortendLink;

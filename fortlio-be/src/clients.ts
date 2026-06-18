@@ -37,3 +37,54 @@ export const frontendBaseURL = process.env.BUN_ENV === 'local' ? 'http://localho
 
 const llmProvider = process.env.LLM_PROVIDER || 'openRouter';
 export const llmClient: ILLMClient = llmProvider === 'openRouter' ? openRouterClient : ollamaClient;
+
+import { WebSocketHandler } from './core/core-clients/web-socket.client';
+
+export const wsHandler = new WebSocketHandler<any>({
+  authenticate: async (ws, parsed: any) => {
+    try {
+      const { token } = parsed;
+      if (!token) {
+        ws.send(JSON.stringify({ status: 'error', message: 'Token required' }));
+        return;
+      }
+      const { AuthnService } = require('./services/authn.services');
+      const authnService = new AuthnService(secretManager, sesHelper);
+      const userDetails = await authnService.verifyToken(token);
+      
+      ws.data.userId = userDetails.userId.toString();
+      
+      // Auto-subscribe the user to their own topic: user_<userId>
+      const topics = (wsHandler as any).subscriptions.get(ws.data.clientId) || new Set();
+      topics.add(`user_${ws.data.userId}`);
+      (wsHandler as any).subscriptions.set(ws.data.clientId, topics);
+
+      ws.send(JSON.stringify({ status: 'success', message: 'Authenticated successfully', userId: ws.data.userId }));
+    } catch (err: any) {
+      ws.send(JSON.stringify({ status: 'error', message: err.message || 'Authentication failed' }));
+    }
+  },
+  send_message: async (ws, parsed: any) => {
+    try {
+      const { connectionId, message } = parsed;
+      const userId = ws.data.userId;
+      if (!userId) {
+        ws.send(JSON.stringify({ status: 'error', message: 'Unauthorized. Please authenticate first.' }));
+        return;
+      }
+      if (!connectionId || !message) {
+        ws.send(JSON.stringify({ status: 'error', message: 'connectionId and message are required' }));
+        return;
+      }
+
+      const { ConnectionService } = require('./services/connection.service');
+      const connectionService = new ConnectionService();
+      
+      const chatMessage = await connectionService.sendMessage(userId, connectionId, message);
+
+      ws.send(JSON.stringify({ status: 'success', event: 'message_sent', data: chatMessage }));
+    } catch (err: any) {
+      ws.send(JSON.stringify({ status: 'error', message: err.message || 'Failed to send message' }));
+    }
+  },
+}, 1000);

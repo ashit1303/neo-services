@@ -5,13 +5,13 @@ import express from 'express';
 import type { NextFunction, Request, Response as ExpressResponse } from 'express';
 // import express, { NextFunction, Request, Response } from 'express';
 import appRoutes from './src/router/index.route';
-import { bullMQService, mongoDbClient, mongooseClient } from './src/clients';
+import { bullMQService, mongoDbClient, mongooseClient, wsHandler } from './src/clients';
 import { corsOptionsDelegate } from './src/core/core-utils/cors.util';
 import { AppError } from './src/core/core-utils/err-util';
 import swaggerUi from 'swagger-ui-express';
 import { generateOpenApiDocs } from './src/swagger-docs/swagger.client';
-import { WebSocketHandler, BunWS } from './src/core/core-clients/web-socket.client';
-import { initializeBullMQTypesenseSync, scheduleTypesenseSync } from './src/core/core-workers/bullmq.workers';
+import { BunWS } from './src/core/core-clients/web-socket.client';
+import { initializeBullMQTypesenseSync, scheduleTypesenseSync, initializeBullMQCandidatesTypesenseSync, scheduleCandidatesTypesenseSync } from './src/core/core-workers/bullmq.workers';
 
 const app = express();
 
@@ -46,6 +46,7 @@ app.listen(PORT, async () => {
     await mongoDbClient.connect();
     await mongooseClient.connect();
     await initializeBullMQTypesenseSync().then(scheduleTypesenseSync);
+    await initializeBullMQCandidatesTypesenseSync().then(scheduleCandidatesTypesenseSync);
 
     console.info(`🚀 Server ready at port ${PORT}`);
   } catch (error: any) {
@@ -67,7 +68,6 @@ app.use((err: any, _req: Request, res: ExpressResponse, _next: NextFunction) => 
     stackPath: err,
   });
 });
-const wsHandler = new WebSocketHandler({ message: async (_ws: BunWS, msg) => { console.info('message:', msg); } }, 1000);
 
 const wsServer = Bun.serve<{ clientId: string }>({
   port: Number(PORT) + 1,
