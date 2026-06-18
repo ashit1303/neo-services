@@ -6,3 +6,6 @@ export * as LEETCODE_MSGS from './leetcode-msg.constants';
 export * as SHORTNER_MSGS from './shortner-msg.constants';
 export * as AWS_MSGS from './aws-msg.constants';
 export * as COMMON_MSGS from './common-msg.constants';
+export * as CANDIDATE_MSGS from './candidate-msg.constants';
+export * as HR_MSGS from './hr-msg.constants';
+export * as CONNECTION_MSGS from './connection-msg.constants';
