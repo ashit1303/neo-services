@@ -215,3 +215,126 @@ export default function CandidateDetail() {
     </div>
   );
 }
+
+
+
+
+
+// import {
+//   Eye,
+//   Settings,
+//   HelpCircle,
+//   Upload,
+//   Image as ImageIcon,
+//   Download,
+//   ExternalLink,
+//   Pencil,
+// } from "lucide-react";
+
+// const actions = [
+//   { icon: Upload, label: "Import" },
+//   { icon: ImageIcon, label: "Image" },
+//   { icon: Download, label: "Export" },
+//   { icon: Eye, label: "Preview" },
+//   { icon: ExternalLink, label: "Open" },
+//   { icon: Settings, label: "Settings" },
+//   { icon: HelpCircle, label: "Help" },
+// ];
+
+// export default function EditorPage() {
+//   return (
+//     <div className="min-h-screen bg-gray-50">
+//       {/* Header */}
+//       <header className="border-b bg-white">
+//         {/* Desktop + iPad */}
+//         <div className="hidden md:flex items-center justify-between px-6 py-4 lg:px-8">
+//           <h1 className="text-2xl font-bold tracking-wide text-gray-900">
+//             DILLINGER
+//           </h1>
+
+//           <div className="flex items-center gap-3 lg:gap-4">
+//             {/* Actions */}
+//             <div className="flex items-center gap-1 text-gray-700 lg:gap-3">
+//               {actions.map(({ icon: Icon, label }) => (
+//                 <button
+//                   key={label}
+//                   className="flex items-center gap-2 rounded-lg p-2 transition hover:bg-indigo-50 hover:text-indigo-600"
+//                 >
+//                   <Icon size={20} />
+//                   <span className="hidden lg:block">{label}</span>
+//                 </button>
+//               ))}
+//             </div>
+
+//             {/* New Document */}
+//             <button className="rounded-xl bg-indigo-600 text-white transition hover:bg-indigo-700">
+//               <span className="hidden px-5 py-3 lg:block">
+//                 + New Document
+//               </span>
+
+//               <span className="block px-4 py-3 text-lg font-bold lg:hidden">
+//                 +
+//               </span>
+//             </button>
+
+//             {/* Avatar */}
+//             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-600 font-semibold text-white">
+//               A
+//             </div>
+//           </div>
+//         </div>
+
+//         {/* Mobile */}
+//         <div className="md:hidden">
+//           {/* Top Row */}
+//           <div className="flex items-center justify-between px-4 py-3">
+//             <h1 className="text-lg font-bold tracking-wide text-gray-900">
+//               DILLINGER
+//             </h1>
+
+//             <div className="flex items-center gap-2">
+//               <button className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 text-lg font-bold text-white">
+//                 +
+//               </button>
+
+//               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-600 text-sm font-semibold text-white">
+//                 A
+//               </div>
+//             </div>
+//           </div>
+
+//           {/* Actions Row */}
+//           <div className="flex items-center justify-between border-t px-3 py-2">
+//             {actions.map(({ icon: Icon, label }) => (
+//               <button
+//                 key={label}
+//                 className="p-2 text-gray-700 transition hover:text-indigo-600"
+//               >
+//                 <Icon size={18} />
+//               </button>
+//             ))}
+//           </div>
+//         </div>
+//       </header>
+
+//       {/* Document Bar */}
+//       <div className="border-b border-gray-200 bg-gray-50 px-4 py-3 md:px-6 lg:px-8">
+//         <div className="flex items-center gap-3">
+//           <h2 className="truncate text-base font-semibold text-gray-900 md:text-xl">
+//             Untitled Document.md
+//           </h2>
+
+//           <div className="flex items-center gap-1 text-xs font-medium text-green-600">
+//             <span>Saved</span>
+//             <Pencil size={12} />
+//           </div>
+//         </div>
+//       </div>
+
+//       {/* Editor Area */}
+//       <main className="h-[calc(100vh-125px)] bg-gray-100">
+//         {/* Editor Content */}
+//       </main>
+//     </div>
+//   );
+// }
