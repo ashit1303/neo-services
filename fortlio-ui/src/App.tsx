@@ -5,6 +5,7 @@ import VerifyEmail from "./pages/VerifyEmail";
 
 import CandidateProfile from "./pages/CandidateProfile";
 import EditorPage from "./pages/EditorPage";
+import CandidateBlogs from "./pages/CandidateBlogs";
 
 import ConnectionsList from "./pages/ConnectionsList";
 import ConnectionsChat from "./pages/ConnectionsChat";
@@ -12,6 +13,8 @@ import ConnectionsNotification from "./pages/ConnectionsNotifications";
 
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
+import CreateCandidateProfile from "./pages/CreateCandidateProfile";
+import CandidateEditProfile from "./pages/CandidateEditProfile";
 
 function App() {
   return (
@@ -31,13 +34,17 @@ function App() {
           }
         >
           <Route path="/candidate-profile" element={<CandidateProfile />}/>
-          <Route path="/editor" element={<EditorPage />}/>
+          <Route path="/create-profile" element={<CreateCandidateProfile />}/>
+          <Route path="/edit-profile" element={<CandidateEditProfile />}/>
+          <Route path="/candidate-blogs" element={<CandidateBlogs />}/>
 
           <Route path="/connections" element={<ConnectionsList />}/>
           <Route path="/chat" element={<ConnectionsChat />}/>
           <Route path="/notifications" element={<ConnectionsNotification />}/>
 
         </Route>
+
+        <Route path="/editor" element={<EditorPage />}/>
 
         <Route path="*" element={<Navigate to="/login" replace />}/>
 

@@ -21,6 +21,20 @@ export default function EditorPage() {
   const [widthMargin, setWidthMargin] = useState(10);
   const previewRef = useRef<HTMLDivElement>(null);
 
+  const [title, setTitle] = useState("Untitled Document");
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [saved, setSaved] = useState(true);
+
+  useEffect(() => {
+    const savedTitle = localStorage.getItem("documentTitle");
+
+    if (savedTitle) {
+      setTitle(savedTitle);
+    }
+  }, []);
+
+
+
   useEffect(() => {
     const saved = localStorage.getItem("markdown");
     if (saved) {
@@ -179,8 +193,6 @@ export default function EditorPage() {
                 <Settings size={20} />
               </button>
 
-
-
               <button className="p-2 text-gray-700">
                 <HelpCircle size={18} />
               </button>
@@ -194,16 +206,16 @@ export default function EditorPage() {
 
         {showSetting && (
 
-          <div className="absolute right-5 top-16 z-50 w-[320px] bg-white rounded-2xl shadow-xl border border-gray-200">
+          <div className="absolute right-5 top-16 z-50 w-[320px] bg-[#1E3A5F] rounded-2xl shadow-xl border border-gray-200">
 
-            <div className="flex items-center justify-between px-5 py-4 border-b">
-              <h2 className="text-lg font-semibold text-gray-900">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-400">
+              <h2 className="text-lg font-semibold text-gray-100">
                 Settings
               </h2>
 
               <X
                 size={20}
-                className="cursor-pointer text-gray-500"
+                className="cursor-pointer text-gray-100"
                 onClick={() => setShowSetting(false)}
               />
             </div>
@@ -211,7 +223,7 @@ export default function EditorPage() {
             <div className="p-5 space-y-6">
               <div className="flex items-center justify-between">
 
-                <span className="text-gray-700 font-medium">
+                <span className="text-gray-100 font-medium">
                   Auto Save
                 </span>
 
@@ -225,23 +237,23 @@ export default function EditorPage() {
                     }
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-gray-300 rounded-full peer-checked:bg-indigo-600 after:absolute after:top-[2px] after:left-[2px] after:w-5 after:h-5 after:bg-white after:rounded-full after:transition-all peer-checked:after:translate-x-5" />
+                  <div className="w-11 h-6 bg-gray-300 rounded-full peer-checked:bg-indigo-700 after:absolute after:top-[2px] after:left-[2px] after:w-5 after:h-5 after:bg-white after:rounded-full after:transition-all peer-checked:after:translate-x-5" />
                 </label>
               </div>
 
               <div>
-                <label className="text-sm text-gray-600">
+                <label className="text-sm text-gray-100">
                   Height Margin
                 </label>
 
-                <div className="flex items-center border rounded-lg mt-2 overflow-hidden">
+                <div className="flex items-center border border-gray-400 rounded-lg mt-2 overflow-hidden">
                   <button
                     onClick={() =>
                       setHeightMargin(
                         Math.max(0, heightMargin - 1)
                       )
                     }
-                    className="px-3 py-2 hover:bg-gray-100">
+                    className="px-3 py-2 hover:bg-gray-100 text-gray-200">
                     -
                   </button>
 
@@ -253,30 +265,30 @@ export default function EditorPage() {
                         Number(e.target.value)
                       )
                     }
-                    className="w-full text-center outline-none" />
+                    className="w-full text-center outline-none text-gray-200" />
                   <button
                     onClick={() =>
                       setHeightMargin(heightMargin + 1)
                     }
-                    className="px-3 py-2 hover:bg-gray-100">
+                    className="px-3 py-2 hover:bg-gray-100 text-gray-200">
                     +
                   </button>
                 </div>
               </div>
 
               <div>
-                <label className="text-sm text-gray-600">
+                <label className="text-sm text-gray-100">
                   Width Margin
                 </label>
 
-                <div className="flex items-center border rounded-lg mt-2 overflow-hidden">
+                <div className="flex items-center border border-gray-400 rounded-lg mt-2 overflow-hidden">
                   <button
                     onClick={() =>
                       setWidthMargin(
                         Math.max(0, widthMargin - 1)
                       )
                     }
-                    className="px-3 py-2 hover:bg-gray-100">
+                    className="px-3 py-2 hover:bg-gray-100 text-gray-200">
                     -
                   </button>
 
@@ -288,12 +300,12 @@ export default function EditorPage() {
                         Number(e.target.value)
                       )
                     }
-                    className="w-full text-center outline-none"
+                    className="w-full text-center outline-none text-gray-200"
                   />
                   <button onClick={() =>
                     setWidthMargin(widthMargin + 1)
                   }
-                    className="px-3 py-2 hover:bg-gray-100">
+                    className="px-3 py-2 hover:bg-gray-100 text-gray-200">
                     +
                   </button>
                 </div>
@@ -304,7 +316,53 @@ export default function EditorPage() {
 
       </header>
 
+
       <div className="border-b bg-gray-50 border-gray-300 px-4 py-3 md:px-6 lg:px-8">
+        <div className="flex items-center gap-3 flex-wrap">
+
+          {/* Title */}
+          {isEditingTitle ? (
+            <input
+              autoFocus
+              value={title}
+              onChange={(e) => {
+                setTitle(e.target.value);
+                setSaved(false);
+              }}
+              onBlur={() => setIsEditingTitle(false)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  setIsEditingTitle(false);
+                }
+              }}
+              className="border-b-2 border-indigo-600 bg-transparent text-base md:text-xl font-semibold text-gray-900 outline-none"
+            />
+          ) : (
+            <h2 className="truncate text-base md:text-xl font-semibold text-gray-900">
+              {title}.md
+            </h2>
+          )}
+
+          {/* Saved Status */}
+          <span
+            className={`text-xs font-medium ${saved ? "text-green-600" : "text-gray-400"
+              }`}
+          >
+            {saved ? "Saved" : "Draft"}
+          </span>
+
+          {/* Pencil */}
+          <button
+            onClick={() => setIsEditingTitle(true)}
+            className="rounded p-1 text-gray-500 transition hover:bg-gray-200 hover:text-indigo-600"
+          >
+            <Pencil size={14} />
+          </button>
+
+        </div>
+      </div>
+
+      {/* <div className="border-b bg-gray-50 border-gray-300 px-4 py-3 md:px-6 lg:px-8">
         <div className="flex items-center gap-3">
           <h2 className="truncate text-base md:text-xl font-semibold text-gray-900">
             Untitled Document.md
@@ -316,7 +374,9 @@ export default function EditorPage() {
             <Pencil size={12} />
           </div>
         </div>
-      </div>
+      </div> */}
+
+      {/* full detail  code on write blog */}
 
       <div className="flex h-[calc(100vh-125px)] overflow-hidden bg-gray-50">
         <section className="relative w-full border-r bg-white md:w-1/2 lg:w-[43%]">
@@ -351,6 +411,8 @@ export default function EditorPage() {
             </ReactMarkdown>
           </div>
         </section>
+
+
 
         {/* Right Sidebar */}
         <aside className="hidden xl:block w-[280px] border-l border-gray-200 bg-gray-50 p-4">

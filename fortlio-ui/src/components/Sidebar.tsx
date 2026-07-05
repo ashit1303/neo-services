@@ -15,7 +15,10 @@ const menu = [
   { name: "Dashboard", path: "/", icon: Home },
   { name: "HR Profile", path: "/profile", icon: User },
   { name: "Candidate Profile", path: "/candidate-profile", icon: Search },
-  { name: "Candidate Blog", path: "/editor", icon: Newspaper },
+  { name: "Create Candidate Profile", path: "/create-profile", icon: Search },
+  { name: "Candidate Edit Profile", path: "/edit-profile", icon: Search },
+  { name: "Candidate Blogs", path: "/candidate-blogs", icon: Newspaper },
+  { name: "Markdown Editor", path: "/editor", icon: Newspaper },
   { name: "Connections", path: "/connections", icon: Users },
   // {name:"Messages", path:"/chat", icon:MessageCircle},
   // {name:"Notifications", path:"/notifications", icon:Bell},
@@ -34,7 +37,7 @@ export default function Sidebar() {
 
   return (
 
-    <div className="w-[240px] h-screen bg-[#07142f] text-white flex flex-col fixed left-0 top-0">
+    <div className="w-[240px] h-screen overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 bg-[#07142f] text-white flex flex-col fixed left-0 top-0">
       <div className="p-6">
         <h1 className="text-2xl font-bold">
           Neo Services
@@ -83,7 +86,7 @@ export default function Sidebar() {
         </div>
       </div>
 
-      <div className="mx-6 mb-5 border-t border-white/20 pt-5">
+      <div className="mx-6 mb-5 pt-12">
 
         <div className="flex items-center gap-3">
 
@@ -99,7 +102,7 @@ export default function Sidebar() {
               {user?.fullName}
             </p>
 
-            <p className="text-xs text-gray-400 truncate">
+            <p className="text-sm text-gray-400 truncate">
               {user?.email}
             </p>
 
