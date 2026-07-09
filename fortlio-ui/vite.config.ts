@@ -9,6 +9,10 @@ export default defineConfig({
     tailwindcss(),
   ],
   server: {
+    host: '0.0.0.0', // Allow external connections
     port: 4010,
+    allowedHosts: [
+      'fortlio.duckdns.org',
+    ],
   },
 })
