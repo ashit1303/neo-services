@@ -6,11 +6,11 @@ export const corsOptionsDelegate = (req: any, callback: (err: Error | null, opti
 
   let domainMatch: RegExp;
   if (env.toLowerCase() === 'local') {
-    domainMatch = /^https:\/\/fortlio\.duckdns\.com$/;
+    domainMatch = /^https:\/\/fortlio\.duckdns\.org$/;
   } else if (env.toLowerCase() === 'stage') {
-    domainMatch = /^https:\/\/fortlio\.duckdns\.com$/;
+    domainMatch = /^https:\/\/fortlio\.duckdns\.org$/;
   } else {
-    domainMatch = new RegExp(`^https://fortlio\\.${env.toLowerCase()}\\.duckdns\\.com$`);
+    domainMatch = new RegExp(`^https://fortlio\\.${env.toLowerCase()}\\.duckdns\\.org$`);
   }
   const localhostMatch = /^http:\/\/localhost:\d+$/;
 
