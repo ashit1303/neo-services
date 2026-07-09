@@ -2,7 +2,7 @@ import cors from 'cors';
 
 export const corsOptionsDelegate = (req: any, callback: (err: Error | null, options?: cors.CorsOptions) => void) => {
   const origin = req.header('Origin') || '';
-  const env = process.env.APP_ENV || 'DEV';
+  const env = process.env.BUN_ENV || 'DEV';
 
   let domainMatch: RegExp;
   if (env.toLowerCase() === 'local') {
