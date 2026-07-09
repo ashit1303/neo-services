@@ -32,8 +32,8 @@ export const sessionManager = new SessionManager(redisClient, config);
 export const ollamaClient = new OllamaClient(config);
 export const lmStudioClient = new LMStudioClient(config);
 export const openRouterClient = new OpenRouterClient(config);
-export const backendBaseURL = process.env.BUN_ENV === 'local' ? 'http://localhost:4020' : 'https://testing-be.dev.argus.obenelectric.com';
-export const frontendBaseURL = process.env.BUN_ENV === 'local' ? 'http://localhost:4010' : 'https://testing-fe.dev.argus.obenelectric.com';
+export const backendBaseURL = process.env.BUN_ENV === 'local' ? 'http://localhost:4020' : 'https://fortlio-be.duckdns.org/';
+export const frontendBaseURL = process.env.BUN_ENV === 'local' ? 'http://localhost:4010' : 'https://fortlio.duckdns.org/';
 
 const llmProvider = process.env.LLM_PROVIDER || 'openRouter';
 export const llmClient: ILLMClient = llmProvider === 'openRouter' ? openRouterClient : ollamaClient;
@@ -51,9 +51,9 @@ export const wsHandler = new WebSocketHandler<any>({
       const { AuthnService } = require('./services/authn.services');
       const authnService = new AuthnService(secretManager, sesHelper);
       const userDetails = await authnService.verifyToken(token);
-      
+
       ws.data.userId = userDetails.userId.toString();
-      
+
       // Auto-subscribe the user to their own topic: user_<userId>
       const topics = (wsHandler as any).subscriptions.get(ws.data.clientId) || new Set();
       topics.add(`user_${ws.data.userId}`);
@@ -79,7 +79,7 @@ export const wsHandler = new WebSocketHandler<any>({
 
       const { ConnectionService } = require('./services/connection.service');
       const connectionService = new ConnectionService();
-      
+
       const chatMessage = await connectionService.sendMessage(userId, connectionId, message);
 
       ws.send(JSON.stringify({ status: 'success', event: 'message_sent', data: chatMessage }));
