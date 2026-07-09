@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://testing-be.dev.argus.obenelectric.com",
+  baseURL: "https://fortlio-be.duckdns.com",
   headers: {
     "Content-Type": "application/json",
   },
