@@ -5,7 +5,7 @@ export const corsOptionsDelegate = (req: any, callback: (err: Error | null, opti
   const env = process.env.APP_ENV || 'DEV';
 
   let domainMatch: RegExp;
-  if (env.toLowerCase() === 'prod') {
+  if (env.toLowerCase() === 'local') {
     domainMatch = /^https:\/\/fortlio\.duckdns\.com$/;
   } else if (env.toLowerCase() === 'stage') {
     domainMatch = /^https:\/\/fortlio\.duckdns\.com$/;
