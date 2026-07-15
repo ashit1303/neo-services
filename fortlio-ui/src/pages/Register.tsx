@@ -10,6 +10,7 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   const handleSubmit = async (
     e: React.FormEvent<HTMLFormElement>
@@ -19,23 +20,30 @@ export default function Register() {
     try {
       setLoading(true);
       setError("");
+      setSuccessMessage("");
 
-      await api.post("/auth/register", {
+      const response = await api.post("/auth/register", {
         fullName,
         email,
         password,
       });
 
-      alert(
-        "Registration successful. Please check your email for verification."
-      );
+      const message = response?.data?.data?.message || 
+                     response?.data?.message || 
+                     "Registration successful. Please check your email for verification.";
+      
+      setSuccessMessage(message);
 
-      navigate("/login");
+      setTimeout(() => {
+        navigate("/login");
+      }, 3000);
+
     } catch (err: any) {
       setError(
         err?.response?.data?.message ||
           "Registration failed"
       );
+      setSuccessMessage("");
     } finally {
       setLoading(false);
     }
@@ -48,8 +56,16 @@ export default function Register() {
           Register
         </h1>
 
+        {/* Success Message */}
+        {successMessage && (
+          <div className="mb-4 p-3 bg-green-100 text-green-700 border border-green-300 rounded-lg">
+            {successMessage}
+          </div>
+        )}
+
+        {/* Error Message */}
         {error && (
-          <div className="mb-4 p-3 bg-red-100 text-red-600 rounded-lg">
+          <div className="mb-4 p-3 bg-red-100 text-red-600 border border-red-300 rounded-lg">
             {error}
           </div>
         )}

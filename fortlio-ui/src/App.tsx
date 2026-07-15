@@ -15,13 +15,14 @@ import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import CreateCandidateProfile from "./pages/CreateCandidateProfile";
 import CandidateEditProfile from "./pages/CandidateEditProfile";
+import LandingPage from "./pages/LandingPage";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
 
-        <Route path="/" element={<Navigate to="/login" replace />}/>
+        <Route path="/" element={<LandingPage />}/>
 
         <Route path="/login" element={<Login />}/>
         <Route path="/register" element={<Register />}/>
@@ -41,6 +42,7 @@ function App() {
           <Route path="/connections" element={<ConnectionsList />}/>
           <Route path="/chat" element={<ConnectionsChat />}/>
           <Route path="/notifications" element={<ConnectionsNotification />}/>
+          
 
         </Route>
 
