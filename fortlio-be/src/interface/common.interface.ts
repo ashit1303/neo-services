@@ -1,4 +1,4 @@
-import { APP_ENVIRONMENTS } from '../core/core-constants/enum.constants';
+import { BUN_ENVIRONMENTS } from '../core/core-constants/enum.constants';
 
 export interface Error {
     message: string
@@ -35,7 +35,7 @@ export interface Config {
     awsSecretName: string;
     awsRegion: string;
     env: string;
-    appEnv: APP_ENVIRONMENTS;
+    appEnv: BUN_ENVIRONMENTS;
     port: number;
     checksumSecret?: string;
 }

@@ -1,4 +1,4 @@
-export enum APP_ENVIRONMENTS {
+export enum BUN_ENVIRONMENTS {
     DEVELOPMENT = 'DEV',
     PRODUCTION = 'PROD',
     LOCAL = 'LOCAL',

@@ -61,7 +61,7 @@ export class KafkaWorker {
       logLevel: logLevel.ERROR,
     };
 
-    if (process.env.APP_ENV === 'LOCAL') {
+    if (process.env.BUN_ENV === 'LOCAL') {
       delete kafkaConfigObj.sasl;
       delete kafkaConfigObj.ssl;
     }

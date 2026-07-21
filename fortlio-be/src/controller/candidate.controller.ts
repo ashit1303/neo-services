@@ -2,12 +2,13 @@ import { Request, Response } from 'express';
 import { CandidateService } from '../services/candidate.service';
 import { AuthnService } from '../services/authn.services';
 import { UserService } from '../services/user.service';
-import { CandidateProfileUpsertValidation, CandidateBlogCreateValidation } from '../validations/candidate-validation';
+import { CandidateProfileUpsertValidation, CandidateBlogCreateValidation, mdToPdfValidation } from '../validations/candidate-validation';
 import { FilterQueryValidation } from '../validations/common-validation';
 import { fmtRes } from '../core/core-utils/res-util';
 import { AppError } from '../core/core-utils/err-util';
 import User from '../models/user.model';
 import { CANDIDATE_MSGS } from '../constants';
+import { convertMdToPdf } from '../core/core-utils/md-to-pdf';
 
 export class CandidateController {
   constructor(
@@ -171,4 +172,29 @@ export class CandidateController {
       throw new AppError(error.message || 'unknown', { msg: CANDIDATE_MSGS.ERR.FAILED_TO_LIST_BLOGS, apiName: 'listBlogs' }, 400);
     }
   };
+
+  convertMdToPdf = async (req: Request, res: Response) => {
+    try {
+      const body = req.body;
+      mdToPdfValidation.parse(body);
+
+      const { content, settings, s3Options } = body;
+      const { pdfBuffer, s3Url } = await convertMdToPdf(content, settings, s3Options);
+
+      if (s3Options?.storeInS3 && s3Url) {
+        return fmtRes(res, { url: s3Url });
+      } else {
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'inline; filename="document.pdf"');
+        return res.send(pdfBuffer);
+      }
+    } catch (error: any) {
+      throw new AppError(
+        error.message || 'Failed to generate PDF',
+        { msg: 'Failed to convert markdown to PDF', apiName: 'convertMdToPdf', error },
+        error.statusCode || 400,
+      );
+    }
+  };
 }
+

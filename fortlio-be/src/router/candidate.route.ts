@@ -17,5 +17,6 @@ export class CandidateRoutes {
     this.router.get('/profile/:userId', this.authGuard.checkAccess('getCandidateProfile'), this.candidateController.getProfile);
     this.router.post('/blog', this.authGuard.checkAccess('createCandidateBlog'), this.candidateController.createBlog);
     this.router.get('/blogs', this.candidateController.listBlogs);
+    this.router.post('/md-to-pdf', this.candidateController.convertMdToPdf.bind(this.candidateController));
   }
 }
