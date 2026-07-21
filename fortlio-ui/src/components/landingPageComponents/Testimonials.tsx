@@ -1,6 +1,7 @@
 // sections/Testimonials.tsx
 import { motion } from "framer-motion";
 import { Star, Quote } from "lucide-react";
+import { APP_NAME } from "../../constants/appName";
 
 const testimonials = [
   {
@@ -8,7 +9,7 @@ const testimonials = [
     role: "Software Engineer",
     company: "Google",
     image: "https://i.pravatar.cc/150?img=1",
-    text: "JobHub helped me find my dream job at Google. The platform is intuitive and the job recommendations were spot on!",
+    text: `${APP_NAME} helped me find my dream job at Google. The platform is intuitive and the job recommendations were spot on!`,
     rating: 5
   },
   {
@@ -16,7 +17,7 @@ const testimonials = [
     role: "HR Director",
     company: "Microsoft",
     image: "https://i.pravatar.cc/150?img=2",
-    text: "We've hired 50+ amazing candidates through JobHub. The quality of applicants is outstanding and the process is seamless.",
+    text: `We've hired 50+ amazing candidates through ${APP_NAME}. The quality of applicants is outstanding and the process is seamless.`,
     rating: 5
   },
   {
@@ -24,7 +25,7 @@ const testimonials = [
     role: "Product Manager",
     company: "Amazon",
     image: "https://i.pravatar.cc/150?img=3",
-    text: "The networking opportunities on JobHub are incredible. I've connected with industry leaders and landed my dream role.",
+    text: `The networking opportunities on ${APP_NAME} are incredible. I've connected with industry leaders and landed my dream role.`,
     rating: 5
   }
 ];
@@ -47,7 +48,7 @@ export default function Testimonials() {
             </span>
           </h2>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Real stories from real people who transformed their careers with JobHub.
+            Real stories from real people who transformed their careers with {APP_NAME}.
           </p>
         </motion.div>
 

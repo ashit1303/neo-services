@@ -3,7 +3,7 @@ import { ACCESSTOKEN_EXPIRY } from '../core-constants/common.constants';
 import { Config } from '../../interface/common.interface';
 
 export class SessionManager {
-  private readonly ExpirationTime = (process.env.APP_ENV || '').toLowerCase() === 'prod' ? ACCESSTOKEN_EXPIRY.prod : ACCESSTOKEN_EXPIRY.dev; // Expiration to 900 seconds (15 minutes)
+  private readonly ExpirationTime = (process.env.BUN_ENV || '').toLowerCase() === 'prod' ? ACCESSTOKEN_EXPIRY.prod : ACCESSTOKEN_EXPIRY.dev; // Expiration to 900 seconds (15 minutes)
 
   constructor(private redisService: RedisService, private config: Config) { }
 

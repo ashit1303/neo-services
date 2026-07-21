@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Menu, X, Briefcase, Sun, Moon, Monitor } from "lucide-react";
+import { APP_NAME } from "../../constants/appName";
 
 type Theme = "light" | "dark" | "system";
 
@@ -91,7 +92,7 @@ export default function Navbar() {
           >
             <Briefcase className="h-8 w-8 text-purple-600 dark:text-purple-400" />
             <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-              fortlio
+              {APP_NAME}
             </span>
           </motion.div>
 

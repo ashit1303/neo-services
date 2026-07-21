@@ -1,135 +1,595 @@
-  <!DOCTYPE html>
-  <html lang="en">
-  <head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
   <meta charset="UTF-8" />
-  <title>Email Verification</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Email Verification - Fortlio</title>
 
   <style>
-/* ===== PAGE SETUP ===== */
-/* @page removed because email clients ignore it */
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #1a1a1a;
-  color: #111;
-}
-.page {
-  width: 210mm;
-  margin: auto;
-  background: #fff9f9;
-  padding: 20mm;
-  box-sizing: border-box;
-  position: relative;
-}
+    /* Reset styles */
+    body, p, h1, h2, h3, div, span, a, table, td {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-/* ===== HEADER ===== */
-.header {
-  text-align: center;
-  background: #000; /* was var(--bg-header) */
-  padding: 12px 0;
-  border-bottom: 4px solid #e53935; /* was var(--accent-red) */
-}
-.header img {
-  max-height: 60px;
-}
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: linear-gradient(135deg, #f5f3ff 0%, #ffffff 50%, #fce7f3 100%);
+      color: #1f2937;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      padding: 40px 16px;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-/* ===== MAIN TITLE ===== */
-h1 {
-  text-align: center;
-  font-size: 32px;
-  margin: 18px 0;
-  color: #111; /* was var(--text-light) */
-}
+    .email-container {
+      max-width: 580px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px -10px rgba(124, 58, 237, 0.15), 0 10px 20px -8px rgba(0, 0, 0, 0.05);
+      border: 1px solid rgba(124, 58, 237, 0.08);
+    }
 
-/* ===== SECTION TITLES ===== */
-.section-title {
-  font-size: 18px;
-  color: #e53935; /* was var(--accent-red) */
-  font-weight: bold;
-  margin-top: 20px;
-  margin-bottom: 8px;
-  border-bottom: 2px solid #e53935; /* was var(--accent-red) */
-  display: block;
-  text-align: center;
-  padding-bottom: 3px;
-}
+    /* Top accent gradient bar - matches landing page */
+    .top-bar {
+      height: 6px;
+      background: linear-gradient(90deg, #7c3aed 0%, #4f46e5 50%, #7c3aed 100%);
+      background-size: 200% 100%;
+      animation: shimmer 3s ease-in-out infinite;
+    }
 
-/* ===== DETAILS GRID ===== */
-/* grid removed for email; fallback to block with spacing */
-.details-grid > div {
-  margin-bottom: 8px;
-  font-size: 14px;
-}
-.details-grid .label {
-  font-weight: bold;
-  color: #e53935; /* was var(--accent-red) */
-}
+    @keyframes shimmer {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
 
-/* ===== TABLE ===== */
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 12px;
-  font-size: 14px;
-}
-th, td {
-  border: 1px solid #e53935; /* was var(--accent-red) */
-  padding: 8px;
-  text-align: center;
-}
-th {
-  background: #e53935; /* was var(--accent-red) */
-  color: #111; /* was var(--text-light) */
-}
+    /* Header - matches landing page navbar */
+    .header {
+      text-align: center;
+      padding: 32px 24px 16px 24px;
+      background: #ffffff;
+      border-bottom: 1px solid rgba(124, 58, 237, 0.08);
+    }
 
-/* ===== NOTES ===== */
-.notes {
-  margin-top: 14px;
-  font-size: 12px;
-  color: #111; /* was var(--text-light) */
-}
+    .header .logo-container {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
 
-/* ===== FOOTER ===== */
-.footer {
-  text-align: center;
-  font-size: 12px;
-  border-top: 2px solid #e53935; /* was var(--accent-red) */
-  padding-top: 10px;
-  margin-top: 20px;
-  color: #111; /* was var(--text-light) */
-}
-</style>
-  </head>
+    .header .logo-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #7c3aed, #4f46e5);
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 24px;
+      font-weight: bold;
+      box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+    }
 
-  <body>
-  <div class="page">
+    .header .logo-text {
+      font-size: 32px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.5px;
+    }
 
-    <!-- HEADER -->
+    /* Content section */
+    .content {
+      padding: 24px 40px 32px 40px;
+      background: #ffffff;
+    }
+
+    /* Badge - matches landing page "Find Your Dream Job Today" */
+    .badge {
+      display: inline-block;
+      padding: 6px 16px;
+      background: #ede9fe;
+      color: #7c3aed;
+      border-radius: 9999px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      text-align: center;
+      width: 100%;
+    }
+
+    /* Main title - matches landing page gradient */
+    .main-title {
+      text-align: center;
+      font-size: 32px;
+      font-weight: 700;
+      margin: 0 0 8px 0;
+      line-height: 1.2;
+    }
+
+    .main-title .gradient-text {
+      background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .main-title .normal-text {
+      color: #1f2937;
+    }
+
+    .main-subtitle {
+      text-align: center;
+      color: #6b7280;
+      font-size: 16px;
+      margin-bottom: 28px;
+      font-weight: 400;
+    }
+
+    /* Divider - matches landing page design */
+    .divider {
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #7c3aed, #4f46e5, transparent);
+      margin: 24px 0;
+      opacity: 0.3;
+    }
+
+    /* Verification Button - matches landing page CTA */
+    .verify-btn {
+      display: inline-block;
+      width: 100%;
+      padding: 16px 32px;
+      background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+      color: #ffffff !important;
+      text-align: center;
+      text-decoration: none;
+      font-size: 18px;
+      font-weight: 600;
+      border-radius: 9999px;
+      box-shadow: 0 8px 24px rgba(124, 58, 237, 0.3);
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+    }
+
+    .verify-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(124, 58, 237, 0.4);
+      background: linear-gradient(135deg, #6d28d9 0%, #4338ca 100%);
+    }
+
+    /* Or text */
+    .or-text {
+      text-align: center;
+      color: #9ca3af;
+      font-size: 14px;
+      margin: 16px 0;
+      position: relative;
+    }
+
+    .or-text::before,
+    .or-text::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 30%;
+      height: 1px;
+      background: #e5e7eb;
+    }
+
+    .or-text::before {
+      left: 0;
+    }
+
+    .or-text::after {
+      right: 0;
+    }
+
+    /* Details Card - matches landing page card style */
+    .details-card {
+      background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+      border-radius: 16px;
+      padding: 20px 24px;
+      border: 1px solid rgba(124, 58, 237, 0.1);
+      margin-bottom: 24px;
+    }
+
+    .details-card .label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #7c3aed;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .details-card .value {
+      font-size: 14px;
+      color: #1f2937;
+      word-break: break-all;
+      font-weight: 500;
+    }
+
+    .details-card .value a {
+      color: #7c3aed;
+      text-decoration: underline;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+
+    .details-card .value a:hover {
+      color: #4f46e5;
+    }
+
+    .link-text {
+      text-align: center;
+      font-size: 13px;
+      color: #6b7280;
+      margin-top: 12px;
+    }
+
+    .link-text strong {
+      color: #7c3aed;
+    }
+
+    /* Notes - matches landing page trust section */
+    .notes {
+      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+      border-radius: 12px;
+      padding: 16px 20px;
+      font-size: 13px;
+      color: #065f46;
+      border-left: 4px solid #10b981;
+      margin-top: 24px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .notes .icon {
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .notes .text {
+      line-height: 1.5;
+    }
+
+    .notes .text strong {
+      color: #047857;
+    }
+
+    /* Stats - matches landing page stats */
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      margin: 24px 0 0 0;
+      padding: 16px 0 0 0;
+      border-top: 1px solid rgba(124, 58, 237, 0.08);
+    }
+
+    .stats .stat-item {
+      text-align: center;
+    }
+
+    .stats .stat-number {
+      font-size: 24px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #7c3aed, #4f46e5);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stats .stat-label {
+      font-size: 12px;
+      color: #6b7280;
+      font-weight: 500;
+      -webkit-text-fill-color: #6b7280;
+    }
+
+    /* Footer - matches landing page footer */
+    .footer {
+      background: #f9fafb;
+      padding: 20px 40px;
+      text-align: center;
+      border-top: 1px solid #f3f4f6;
+    }
+
+    .footer p {
+      color: #9ca3af;
+      font-size: 13px;
+      font-weight: 400;
+    }
+
+    .footer .social-links {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+
+    .footer .social-links a {
+      color: #9ca3af;
+      text-decoration: none;
+      font-size: 13px;
+      transition: color 0.2s;
+    }
+
+    .footer .social-links a:hover {
+      color: #7c3aed;
+    }
+
+    .footer .footer-divider {
+      width: 40px;
+      height: 2px;
+      background: linear-gradient(90deg, #7c3aed, #4f46e5);
+      margin: 12px auto;
+      border-radius: 2px;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      body {
+        padding: 20px 12px;
+      }
+
+      .content {
+        padding: 8px 24px 32px 24px;
+      }
+
+      .header {
+        padding: 24px 20px 12px 20px;
+      }
+
+      .header .logo-text {
+        font-size: 26px;
+      }
+
+      .header .logo-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+      }
+
+      .main-title {
+        font-size: 26px;
+      }
+
+      .badge {
+        font-size: 12px;
+        padding: 4px 14px;
+      }
+
+      .details-card {
+        padding: 16px 18px;
+      }
+
+      .verify-btn {
+        font-size: 16px;
+        padding: 14px 24px;
+      }
+
+      .footer {
+        padding: 16px 24px;
+      }
+
+      .or-text::before,
+      .or-text::after {
+        width: 20%;
+      }
+
+      .stats {
+        gap: 20px;
+      }
+
+      .stats .stat-number {
+        font-size: 20px;
+      }
+    }
+
+    /* Dark mode support */
+    @media (prefers-color-scheme: dark) {
+      body {
+        background: linear-gradient(135deg, #1f2937 0%, #111827 50%, #1a1035 100%);
+      }
+
+      .email-container {
+        background-color: #1f2937;
+        border-color: rgba(124, 58, 237, 0.15);
+      }
+
+      .header {
+        background: #1f2937;
+        border-bottom-color: rgba(124, 58, 237, 0.1);
+      }
+
+      .content {
+        background: #1f2937;
+      }
+
+      .main-title .normal-text {
+        color: #f3f4f6;
+      }
+
+      .main-subtitle {
+        color: #9ca3af;
+      }
+
+      .badge {
+        background: #2d1b69;
+        color: #a78bfa;
+      }
+
+      .details-card {
+        background: linear-gradient(135deg, #2d1b69 0%, #1a1035 100%);
+        border-color: rgba(124, 58, 237, 0.2);
+      }
+
+      .details-card .value {
+        color: #f3f4f6;
+      }
+
+      .details-card .value a {
+        color: #a78bfa;
+      }
+
+      .link-text {
+        color: #9ca3af;
+      }
+
+      .link-text strong {
+        color: #a78bfa;
+      }
+
+      .notes {
+        background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
+        color: #6ee7b7;
+        border-left-color: #10b981;
+      }
+
+      .notes .text strong {
+        color: #34d399;
+      }
+
+      .footer {
+        background: #111827;
+        border-top-color: #374151;
+      }
+
+      .footer p {
+        color: #6b7280;
+      }
+
+      .footer .social-links a {
+        color: #6b7280;
+      }
+
+      .footer .social-links a:hover {
+        color: #a78bfa;
+      }
+
+      .or-text {
+        color: #6b7280;
+      }
+
+      .or-text::before,
+      .or-text::after {
+        background: #374151;
+      }
+
+      .stats {
+        border-top-color: rgba(124, 58, 237, 0.1);
+      }
+
+      .stats .stat-label {
+        color: #9ca3af;
+        -webkit-text-fill-color: #9ca3af;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="email-container">
+    <!-- Top accent gradient bar -->
+    <div class="top-bar"></div>
+
+    <!-- HEADER - matches landing page -->
     <div class="header">
-      <!-- Using your logo file directly from the Oben storage -->
-      <img src="https://oben-website-content.s3.ap-south-1.amazonaws.com/email-template-images/Obenlogo.png" alt="Fortlio Logo" />
+      <div class="logo-container">
+        <div class="logo-icon">F</div>
+        <div>
+          <span class="logo-text">fortlio</span>
+        </div>
+      </div>
     </div>
 
-    <!-- MAIN TITLE -->
-    <h1>Email Verification: Fortlio</h1>
+    <!-- CONTENT -->
+    <div class="content">
+      <!-- Badge - matches "Find Your Dream Job Today" -->
+      <div class="badge">🚀 Verify Your Email Address</div>
 
-    <!-- CUSTOMER DETAILS -->
-    <div class="section-title">Link Details</div>
-    <div class="details-grid">
-      <div><span class="label">Link:</span> <%= verificationUrl %></div>
+      <!-- Main Title - matches landing page gradient -->
+      <h1 class="main-title">
+        <span class="gradient-text">Your Next Career</span><br />
+        <span class="normal-text">Starts Here</span>
+      </h1>
+
+      <p class="main-subtitle">
+        Please confirm your email address to get started with Fortlio
+      </p>
+
+      <div class="divider"></div>
+
+      <!-- Verification Button - matches landing page CTA -->
+      <a href="<%= verificationUrl %>" class="verify-btn">
+        Verify Email Address →
+      </a>
+
+      <div class="or-text">or</div>
+
+      <!-- Details Card -->
+      <div class="details-card">
+        <span class="label">🔗 Verification Link</span>
+        <div class="value">
+          <a href="<%= verificationUrl %>"><%= verificationUrl %></a>
+        </div>
+      </div>
+
+      <div class="link-text">
+        This link will expire in <strong>24 hours</strong>
+      </div>
+
+      <!-- Notes - matches landing page trust section -->
+      <div class="notes">
+        <span class="icon">🔒</span>
+        <div class="text">
+          <strong>Your privacy matters to us.</strong> We will never sell or share your data. 
+          Your information is completely safe with Fortlio.
+        </div>
+      </div>
+
+      <!-- Stats - matches landing page stats -->
+      <div class="stats">
+        <div class="stat-item">
+          <div class="stat-number">10K+</div>
+          <div class="stat-label">Active Jobs</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">5K+</div>
+          <div class="stat-label">Companies</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">95%</div>
+          <div class="stat-label">Success Rate</div>
+        </div>
+      </div>
     </div>
 
-
-    <!-- NOTES -->
-    <div class="notes">
-      We will not sell your data, It's completely safe with us.<br><br>
-    </div>
-
-    <!-- FOOTER -->
+    <!-- FOOTER - matches landing page footer -->
     <div class="footer">
-      <p>&copy; 2026 Fortlio. All rights reserved.</p>
+      <!-- <div class="social-links">
+        <a href="#">Twitter</a>
+        <a href="#">LinkedIn</a>
+        <a href="#">GitHub</a>
+      </div> -->
+      <div class="footer-divider"></div>
+      <p>&copy; 2026 Fortlio. All rights reserved. Made with ❤️ for your career success.</p>
     </div>
-
   </div>
-  </body>
-  </html>
+</body>
+</html>

@@ -2,6 +2,7 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight, Sparkles } from "lucide-react";
+import { APP_NAME } from "../../constants/appName";
 
 export default function CTA() {
   return (
@@ -20,7 +21,7 @@ export default function CTA() {
             Ready to Transform Your Career?
           </h2>
           <p className="text-xl text-purple-100 mb-8 max-w-2xl mx-auto">
-            Join thousands of professionals who found their dream jobs or hired the perfect candidates through JobHub.
+            Join thousands of professionals who found their dream jobs or hired the perfect candidates through {APP_NAME}.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link to="/register">

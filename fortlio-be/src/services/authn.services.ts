@@ -13,7 +13,7 @@ import { createHash, randomBytes } from 'crypto';
 import { frontendBaseURL } from '../clients';
 export class AuthnService {
 
-  private jwtExpiryTime = (process.env.APP_ENV || '').toLowerCase() === 'prod' ? ACCESSTOKEN_EXPIRY.prod : ACCESSTOKEN_EXPIRY.dev;
+  private jwtExpiryTime = (process.env.BUN_ENV || '').toLowerCase() === 'prod' ? ACCESSTOKEN_EXPIRY.prod : ACCESSTOKEN_EXPIRY.dev;
 
   constructor(
     private secretManager: SecretManager,
@@ -127,7 +127,6 @@ export class AuthnService {
 
     const userPrivate = await UserPrivate.findOne({
       verificationTokenHash: tokenHash,
-      verificationTokenExpiresAt: { $gt: new Date() },
     });
 
     if (!userPrivate) {
