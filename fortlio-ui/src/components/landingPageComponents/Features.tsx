@@ -1,6 +1,7 @@
 // sections/Features.tsx
 import { motion } from "framer-motion";
 import { Search, FileText, Users, MessageSquare, Award, Clock } from "lucide-react";
+import { APP_NAME } from "../../constants/appName";
 
 const features = [
   {
@@ -55,11 +56,11 @@ export default function Features() {
           <h2 className="text-3xl md:text-5xl font-bold mb-4">
             Why Choose{" "}
             <span className="bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-              JobHub
+              {APP_NAME}
             </span>
           </h2>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Discover the features that make JobHub the ultimate platform for your career journey.
+            Discover the features that make {APP_NAME} the ultimate platform for your career journey.
           </p>
         </motion.div>
 

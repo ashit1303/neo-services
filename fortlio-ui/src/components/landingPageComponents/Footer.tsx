@@ -1,6 +1,7 @@
 // sections/Footer.tsx
 import { motion } from "framer-motion";
 import { Briefcase, Mail, Phone, MapPin } from "lucide-react";
+import { APP_NAME } from "../../constants/appName";
 
 export default function Footer() {
   return (
@@ -11,7 +12,7 @@ export default function Footer() {
             <div className="flex items-center gap-2 mb-4">
               <Briefcase className="h-8 w-8 text-purple-400" />
               <span className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">
-                fortlio
+                {APP_NAME}
               </span>
             </div>
             <p className="text-gray-400 text-sm">
@@ -44,7 +45,7 @@ export default function Footer() {
             <ul className="space-y-2 text-gray-400">
               <li className="flex items-center gap-2">
                 <Mail className="w-4 h-4" />
-                <span>support@jobhub.com</span>
+                <span>support@{APP_NAME.toLowerCase()}.com</span>
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="w-4 h-4" />
@@ -63,7 +64,7 @@ export default function Footer() {
           whileInView={{ opacity: 1 }}
           className="border-t border-gray-800 pt-8 text-center text-gray-400 text-sm"
         >
-          <p>&copy; 2026 fortlio. All rights reserved. Made with ❤️ for your career success.</p>
+          <p>&copy; 2026 {APP_NAME}. All rights reserved. Made with ❤️ for your career success.</p>
         </motion.div>
       </div>
     </footer>
