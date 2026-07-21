@@ -21,7 +21,6 @@ export class RoleRoutes {
     // GET all roles
     this.router.get(
       '/getRoles',
-      this.authGuard.checkAccess('getRoles'),
       (req, res, next) => this.cacheMiddleware.cacheReqRes(req, res, next, 3600),
       this.roleController.getRoles.bind(this.roleController),
     );

@@ -36,3 +36,14 @@ export const CandidateBlogUpdateValidation = z.object({
 export const CandidateSearchValidation = z.object({
   searchKey: z.string().trim().min(1, { message: 'Search key is required' }).max(100, { message: 'Search key must be less than 100 characters' }),
 });
+
+export const mdToPdfValidation = z.object({
+  content: z.string({ message: 'Content is required' }).min(1, 'Content cannot be empty'),
+  settings: z.object({}).passthrough().optional(),
+  s3Options: z.object({
+    storeInS3: z.boolean().default(false),
+    bucketName: z.string().optional(),
+    fileName: z.string().optional(),
+    expiresIn: z.number().int().positive().optional(),
+  }).optional(),
+});

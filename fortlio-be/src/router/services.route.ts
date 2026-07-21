@@ -6,7 +6,11 @@ import type { ShortnerRoutes } from './shortner.route';
 export class ServicesRoutes {
   router: Router = Router();
 
-  constructor(private cacheMiddleware: CachingMiddleware, private leetcodeRoutes: LeetcodeRoutes, private shortnerRoutes: ShortnerRoutes) {
+  constructor(
+    private cacheMiddleware: CachingMiddleware,
+    private leetcodeRoutes: LeetcodeRoutes,
+    private shortnerRoutes: ShortnerRoutes,
+  ) {
     this.itializeDervicesRoutes();
   }
 
